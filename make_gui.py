@@ -8,45 +8,89 @@ from urllib.request import urlretrieve
 import time
 import os
 
-root = Tk()
-root.title('Web Crawler')
-root.geometry('480x320')
-root.resizable(False, False)
-URL = ''
-className = ''
-keyword = '장미'
-download_path = ''
-folder_selected = ''
+
 
 def btn_download() :
-    global keyword
-    global URL
-    global className
-    folder_dataset = folder_selected + '/Dataset'
-    folder_keyword = folder_dataset + '/{}'.format(keyword)
-    download_path = folder_selected + '/' + folder_keyword
-    if not os.path.isdir(folder_dataset) :
-        os.mkdir(folder_dataset)
-    if not os.path.isdir(folder_keyword) :
-        os.mkdir(folder_keyword)
-    status_message.insert(0, '[폴더 생성] ' + download_path)
 
-    URL = getURL(website_value.get()).format(keyword)
-    className = getClassName(website_value.get())
+    # ListBox 초기화
+    status_message.delete(0, status_message.size())
+
     # Option 설정
+    status_message.insert(END, '웹 브라우저 설정...')
+    root.update()
     options = webdriver.ChromeOptions()
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     options.add_argument('headless')
 
     # Chrome Driver 설정
     drivers = webdriver.Chrome('chromedriver_win32\chromedriver.exe', options=options)
-    drivers.implicitly_wait(1)
 
-    drivers.get(url=URL)
+    print('start')
+
+    keyword = download_keyword.get()
+    website = website_value.get()
+    URL = getURL(website).format(keyword)
+    className = getClassName(website)
+
+    folder_dataset = folder_selected + '/Dataset'
+    download_path = folder_dataset + '/{}'.format(keyword)
+
+    if not os.path.isdir(folder_dataset) :
+        os.mkdir(folder_dataset)
+    if not os.path.isdir(download_path) :
+        os.mkdir(download_path)
+
+    status_message.insert(END, '[폴더 생성] ' + download_path)
+    time.sleep(0.2)
+    root.update()
+    status_message.insert(END, '[검색어] ' + keyword)
+    root.update()
+    status_message.insert(END, '[검색 엔진] ' + website)
+    root.update()
+
+    
+    drivers.get(URL)
+    # 전체화면이 아닐 경우에 elements가 찾아지지 않는 이벤트 발생
     drivers.maximize_window()
 
-    time.sleep(3)
+    # 웹 브라우저에서 Page Down Key를 눌러서 크롤링 할 데이터 개수 설정
+    body = drivers.find_element_by_css_selector('body')
+    for i in range(10) :
+        body.send_keys(Keys.PAGE_DOWN)
+        time.sleep(0.3)
+
+    elements = drivers.find_elements_by_css_selector(className)
+
+    links = []
+
+    for e in elements :
+        link = e.get_attribute('src')
+        if 'http' in link :
+            links.append(link)
+
+
+    for index, link in enumerate(links) :
+        filename = '{0}/{1}{2:03d}{3}'.format(download_path, keyword, index, '.jpg')
+        urlretrieve(url=link, filename=filename)
+        if index == 0 :
+            status_message.insert(END, '[' + str(index+1)+' / '+str(len(links)) + ']' + ' 다운로드 완료')
+            root.update()
+            time.sleep(0.05)
+        else :
+            status_message.delete(END, END)
+            status_message.insert(END, '[' + str(index+1)+' / '+str(len(links)) + ']' + ' 다운로드 완료')
+            root.update()
+            time.sleep(0.05)
+
+    
+    status_message.insert(END, '[모든 이미지 다운로드 완료]')
+    root.update()
+    time.sleep(0.2)
+    status_message.insert(END, '웹 브라우저 종료...')
+    root.update()
     drivers.quit()
+
+
 
 def getURL(browser_name) :
     return {
@@ -70,13 +114,19 @@ def set_download_path() :
     txt_path.delete(0, END)
     txt_path.insert(0, folder_selected)
 
+root = Tk()
+root.title('Web Crawler')
+root.geometry('480x320')
+root.resizable(False, False)
+URL = ''
+className = ''
+folder_selected = ''
 
 # image label 생성
 icon_naver = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\\naver.jpg').subsample(26)
 icon_google = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\google.jpg').subsample(25)
 icon_daum = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\daum.jpg').subsample(18)
 icon_download = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\download.jpg').subsample(12)
-
 
 # text label 생성
 website_font = tkinter.font.Font(family = "맑은 고딕", size = 15)
@@ -125,9 +175,11 @@ website_naver.select()
 download_frame = LabelFrame(root, text = '다운로드')
 download_frame.pack(side = 'right', fill = 'both', expand = True, padx = 2, pady = 2)
 
-download = Button(download_frame, image = icon_download, command = btn_download)
-download.pack()
+download_keyword = Entry(download_frame)
+download_keyword.pack(side = 'left', fill = 'x', expand = True, ipady = 2, padx = 10)
 
+download = Button(download_frame, image = icon_download, command = btn_download)
+download.pack(side = 'right', expand = True)
 
 
 root.mainloop()
