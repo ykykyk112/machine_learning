@@ -50,12 +50,13 @@ def btn_download() :
 
     
     drivers.get(URL)
+
     # 전체화면이 아닐 경우에 elements가 찾아지지 않는 이벤트 발생
     drivers.maximize_window()
 
     # 웹 브라우저에서 Page Down Key를 눌러서 크롤링 할 데이터 개수 설정
     body = drivers.find_element_by_css_selector('body')
-    for i in range(10) :
+    for i in range(13) :
         body.send_keys(Keys.PAGE_DOWN)
         time.sleep(0.3)
 
