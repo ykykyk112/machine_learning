@@ -66,13 +66,16 @@ def btn_download() :
 
     for e in elements :
         link = e.get_attribute('src')
-        if 'http' in link :
+        if 'http' or 'data' in link :
             links.append(link)
 
 
     for index, link in enumerate(links) :
         filename = '{0}/{1}{2:03d}{3}'.format(download_path, keyword, index, '.jpg')
-        urlretrieve(url=link, filename=filename)
+        try : 
+            urlretrieve(url=link, filename=filename)
+        except TypeError : 
+            print(link)
         if index == 0 :
             status_message.insert(END, '[' + str(index+1)+' / '+str(len(links)) + ']' + ' 다운로드 완료')
             root.update()
@@ -124,10 +127,10 @@ className = ''
 folder_selected = ''
 
 # image label 생성
-icon_naver = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\\naver.jpg').subsample(26)
-icon_google = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\google.jpg').subsample(25)
-icon_daum = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\daum.jpg').subsample(18)
-icon_download = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\download.jpg').subsample(12)
+icon_naver = PhotoImage(file = 'img_src\\naver.jpg').subsample(26)
+icon_google = PhotoImage(file = 'img_src\google.jpg').subsample(25)
+icon_daum = PhotoImage(file = 'img_src\daum.jpg').subsample(18)
+icon_download = PhotoImage(file = 'img_src\download.jpg').subsample(12)
 
 # text label 생성
 website_font = tkinter.font.Font(family = "맑은 고딕", size = 15)
