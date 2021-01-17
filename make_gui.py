@@ -23,9 +23,8 @@ def btn_download() :
     options.add_argument('headless')
 
     # Chrome Driver 설정
-    drivers = webdriver.Chrome('chromedriver_win32\chromedriver.exe', options=options)
+    drivers = webdriver.Chrome('C:\\Users\ykyky\python_code\ML\chromedriver_win32\chromedriver.exe', options=options)
 
-    print('start')
 
     keyword = download_keyword.get()
     website = website_value.get()
@@ -54,6 +53,9 @@ def btn_download() :
     # 전체화면이 아닐 경우에 elements가 찾아지지 않는 이벤트 발생
     drivers.maximize_window()
 
+    status_message.insert(END, '다운로드 목록 생성중...')
+    root.update()
+
     # 웹 브라우저에서 Page Down Key를 눌러서 크롤링 할 데이터 개수 설정
     body = drivers.find_element_by_css_selector('body')
     for i in range(13) :
@@ -66,28 +68,30 @@ def btn_download() :
 
     for e in elements :
         link = e.get_attribute('src')
-        if 'http' or 'data' in link :
+        if 'http' or 'data' in link and 'png' or 'PNG' not in link :
             links.append(link)
 
-
+    total_links_len = len(links)
+    num_download_image = 0
     for index, link in enumerate(links) :
-        filename = '{0}/{1}{2:03d}{3}'.format(download_path, keyword, index, '.jpg')
+        filename = '{0}/{1}{2:03d}{3}'.format(download_path, keyword, index+1, '.jpg')
         try : 
             urlretrieve(url=link, filename=filename)
-        except TypeError : 
-            print(link)
+            num_download_image += 1
+        except :
+            pass
         if index == 0 :
-            status_message.insert(END, '[' + str(index+1)+' / '+str(len(links)) + ']' + ' 다운로드 완료')
+            status_message.insert(END, '[' + '{:.1f}%'.format((index+1)/total_links_len*100) + ']' + ' 다운로드 진행 중')
             root.update()
             time.sleep(0.05)
         else :
             status_message.delete(END, END)
-            status_message.insert(END, '[' + str(index+1)+' / '+str(len(links)) + ']' + ' 다운로드 완료')
+            status_message.insert(END, '[' + '{:.1f}%'.format((index+1)/total_links_len*100) + ']' + ' 다운로드 진행 중')
             root.update()
             time.sleep(0.05)
 
     
-    status_message.insert(END, '[모든 이미지 다운로드 완료]')
+    status_message.insert(END, '[모든 이미지 다운로드 완료] {}장'.format(num_download_image))
     root.update()
     time.sleep(0.2)
     status_message.insert(END, '웹 브라우저 종료...')
@@ -127,10 +131,10 @@ className = ''
 folder_selected = ''
 
 # image label 생성
-icon_naver = PhotoImage(file = 'img_src\\naver.jpg').subsample(26)
-icon_google = PhotoImage(file = 'img_src\google.jpg').subsample(25)
-icon_daum = PhotoImage(file = 'img_src\daum.jpg').subsample(18)
-icon_download = PhotoImage(file = 'img_src\download.jpg').subsample(12)
+icon_naver = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\\naver.jpg').subsample(26)
+icon_google = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\google.jpg').subsample(25)
+icon_daum = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\daum.jpg').subsample(18)
+icon_download = PhotoImage(file = 'C:\\Users\ykyky\python_code\ML\img_src\download.jpg').subsample(12)
 
 # text label 생성
 website_font = tkinter.font.Font(family = "맑은 고딕", size = 15)

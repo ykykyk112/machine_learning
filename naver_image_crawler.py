@@ -23,12 +23,13 @@ def getClassName(browser_name) :
     }.get(browser_name, 'img._image')
 
 
-keyword = input("검색어를 입력하세요 : ")
+keyword = '장미'
+# keyword = input("검색어를 입력하세요 : ")
 
 
-browserURL = getURL('asdf')
+browserURL = getURL('google')
 URL = browserURL.format(keyword)
-className = getClassName('asdf')
+className = getClassName('google')
 
 # Option 설정
 options = webdriver.ChromeOptions()
@@ -43,7 +44,7 @@ drivers.maximize_window()
 
 # 웹 브라우저에서 Page Down Key를 눌러서 크롤링 할 데이터 개수 설정
 body = drivers.find_element_by_css_selector('body')
-for i in range(5) :
+for i in range(10) :
     body.send_keys(Keys.PAGE_DOWN)
     time.sleep(0.5)
 
@@ -58,7 +59,9 @@ if not os.path.isdir('Dataset\{}'.format(keyword)) :
 links = []
 for e in elements :
     link = e.get_attribute('src')
-    if 'http' in link :
+    if link is None :
+        continue
+    if 'data' in link :
         links.append(link)
 
 print('[다운로드 시작]')
