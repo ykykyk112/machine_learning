@@ -3,18 +3,18 @@ import numpy as np
 
 rose_shape = np.empty((100, 2))
 
+# for i in range(100) :
+#     path = 'Image_preprocessing\Dataset\\rose\\rose{:03d}.jpg'.format(i+1)
+#     rose = cv.imread(path, cv.IMREAD_GRAYSCALE)
+#     rose_shape[i] = rose.shape
+
+# width_mean = int(np.mean(rose_shape[:, :1]))
+# height_mean = int(np.mean(rose_shape[:, 1:]))
+
 for i in range(100) :
     path = 'Image_preprocessing\Dataset\\rose\\rose{:03d}.jpg'.format(i+1)
     rose = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    rose_shape[i] = rose.shape
-
-width_mean = int(np.mean(rose_shape[:, :1]))
-height_mean = int(np.mean(rose_shape[:, 1:]))
-
-for i in range(100) :
-    path = 'Image_preprocessing\Dataset\\rose\\rose{:03d}.jpg'.format(i+1)
-    rose = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    rose_reshape = cv.resize(rose, (width_mean, height_mean))
+    rose_reshape = cv.resize(rose, (64, 64))
     cv.imshow('original', rose)
     cv.imshow('resized', rose_reshape)
     key = cv.waitKey(0)
