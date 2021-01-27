@@ -211,3 +211,4 @@ class Crawler() :
 
 
 root = Crawler_GUI()
+
