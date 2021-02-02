@@ -7,16 +7,19 @@
 
 ## 데이터셋
 - 총 12개 Class의 컬러 이미지 데이터셋 이용
+- ![Fruit Class](https://user-images.githubusercontent.com/59644868/106613129-3356b480-65ad-11eb-8e52-484d13ee73d2.png)
 - 학습용 데이터셋 1904장, 테스트용 데이터셋 5682장
 - 이미지 출처 : https://www.kaggle.com/moltean/fruits
 
 ## 성능
 - 2021.01.28 기준 약 94%
 - ![모델 성능](https://user-images.githubusercontent.com/59644868/106130635-efc30b80-61a4-11eb-8c06-2814c03b8297.JPG)
+- Sample Prediction
+- ![Sample Prediction](https://user-images.githubusercontent.com/59644868/106613242-52eddd00-65ad-11eb-8861-9b14634e52e7.png)
 
 ## 개선사항
 - 외부 이미지 전처리 과정 추가
-- kernel SVC에 대한 Gridsearch 수행으로 최적의 C와 gamma값 찾기
+- 오분류를 줄이기 위한 특성 추가 고려
 
 ### Contributors
 - Seokjun Lee (ykykyk112)<br/>
