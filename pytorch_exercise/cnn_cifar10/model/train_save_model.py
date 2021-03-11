@@ -1,0 +1,157 @@
+import torch
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader
+
+def train_eval_model(model, epoch, train_loader, test_loader) :
+
+    train_loss_history = []
+    valid_loss_history = []
+    train_acc_history = []
+    valid_acc_history = []
+    
+    scheduler = ReduceLROnPlateau(model.optimizer, 'min', patience = 1, factor = 0.9)
+
+    for i in range(epoch) :
+
+        train_loss, valid_loss = 0.0, 0.0
+        train_acc, valid_acc = 0.0, 0.0
+
+        for train_data, train_target in train_loader :
+
+            model.train()
+
+            model.optimizer.zero_grad()
+
+            train_output = model.forward(train_data)
+            t_loss = model.loss(train_output, train_target)
+            t_loss.backward()
+            model.optimizer.step()
+
+            _, pred = torch.max(train_output, dim = 1)
+
+            train_loss += t_loss.item()
+            train_acc += torch.sum(pred == train_target.data)
+
+        with torch.no_grad() :
+
+            for valid_data, valid_target in test_loader :
+
+                model.eval()
+
+                valid_output = model.forward(valid_data)
+
+                v_loss = model.loss(valid_output, valid_target)
+
+                _, v_pred = torch.max(valid_output, dim = 1)
+
+                valid_loss += v_loss.item()
+                valid_acc += torch.sum(v_pred == valid_target.data)
+
+        curr_lr = model.optimizer.param_groups[0]['lr']
+        scheduler.step(float(valid_loss))
+
+        avg_train_loss = train_loss/len(train_loader)
+        train_loss_history.append(float(avg_train_loss))
+
+        avg_valid_loss = valid_loss/len(test_loader)
+        valid_loss_history.append(float(avg_valid_loss))
+
+        avg_train_acc = train_acc/len(train_loader)
+        train_acc_history.append(float(avg_train_acc))
+
+        avg_valid_acc = valid_acc/len(test_loader)
+        valid_acc_history.append(float(avg_valid_acc))
+
+        if i%2==0:
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr))
+            
+    return train_loss_history, valid_loss_history, train_acc_history, valid_acc_history
+
+
+def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
+
+    train_loss_history = []
+    valid_loss_history = []
+    train_acc_history = []
+    valid_acc_history = []
+    
+    scheduler = ReduceLROnPlateau(model.optimizer, 'min', patience = 1, factor = 0.9)
+
+    for i in range(epoch) :
+
+        train_loss, valid_loss = 0.0, 0.0
+        train_acc, valid_acc = 0.0, 0.0
+
+        for train_data, train_target in train_loader :
+            train_data, train_target = train_data.to(device), train_target.to(device)
+
+            model.train()
+
+            model.optimizer.zero_grad()
+
+            train_output = model.forward(train_data)
+            t_loss = model.loss(train_output, train_target)
+            t_loss.backward()
+            model.optimizer.step()
+
+            _, pred = torch.max(train_output, dim = 1)
+
+            train_loss += t_loss.item()
+            train_acc += torch.sum(pred == train_target.data)
+
+        with torch.no_grad() :
+
+            for valid_data, valid_target in test_loader :
+                valid_data, valid_target = valid_data.to(device), valid_target.to(device)
+
+                model.eval()
+
+                valid_output = model.forward(valid_data)
+
+                v_loss = model.loss(valid_output, valid_target)
+
+                _, v_pred = torch.max(valid_output, dim = 1)
+
+                valid_loss += v_loss.item()
+                valid_acc += torch.sum(v_pred == valid_target.data)
+
+        train_acc = train_acc*(100/train_data.size()[0])
+        valid_acc = valid_acc*(100/valid_data.size()[0])
+
+        curr_lr = model.optimizer.param_groups[0]['lr']
+        scheduler.step(float(valid_loss))
+
+        avg_train_loss = train_loss/len(train_loader)
+        train_loss_history.append(float(avg_train_loss))
+
+        avg_valid_loss = valid_loss/len(test_loader)
+        valid_loss_history.append(float(avg_valid_loss))
+
+        avg_train_acc = train_acc/len(train_loader)
+        train_acc_history.append(float(avg_train_acc))
+
+        avg_valid_acc = valid_acc/len(test_loader)
+        valid_acc_history.append(float(avg_valid_acc))
+
+        if i%2==0:
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr))        
+    ret = []
+    ret.append(train_loss_history)
+    ret.append(valid_loss_history)
+    ret.append(train_acc_history)
+    ret.append(valid_acc_history)
+    return ret
+
+
+def save_model(model, epoch, train_loader, test_loader, path) :
+
+    is_cuda = torch.cuda.is_available()
+    if is_cuda :
+        device = torch.device('cuda')
+        model = model.to(device)
+        _ = train_eval_model_gpu(model, epoch, device, train_loader, test_loader)
+    else :
+        _ = train_eval_model(model, epoch, train_loader, test_loader)
+
+    torch.save(model.state_dict(), path)
+    print('save complete. saving path : {}'.format(path))
