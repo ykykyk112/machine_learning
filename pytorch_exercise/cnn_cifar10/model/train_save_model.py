@@ -9,8 +9,6 @@ def train_eval_model(model, epoch, train_loader, test_loader) :
     train_acc_history = []
     valid_acc_history = []
     
-    scheduler = ReduceLROnPlateau(model.optimizer, 'min', patience = 1, factor = 0.9)
-
     for i in range(epoch) :
 
         train_loss, valid_loss = 0.0, 0.0
@@ -48,7 +46,7 @@ def train_eval_model(model, epoch, train_loader, test_loader) :
                 valid_acc += torch.sum(v_pred == valid_target.data)
 
         curr_lr = model.optimizer.param_groups[0]['lr']
-        scheduler.step(float(valid_loss))
+        model.scheduler.step(float(valid_loss))
 
         avg_train_loss = train_loss/len(train_loader)
         train_loss_history.append(float(avg_train_loss))
@@ -75,8 +73,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
     train_acc_history = []
     valid_acc_history = []
     
-    scheduler = ReduceLROnPlateau(model.optimizer, 'min', patience = 1, factor = 0.9)
-
     for i in range(epoch) :
 
         train_loss, valid_loss = 0.0, 0.0
@@ -119,7 +115,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
         valid_acc = valid_acc*(100/valid_data.size()[0])
 
         curr_lr = model.optimizer.param_groups[0]['lr']
-        scheduler.step(float(valid_loss))
+        model.scheduler.step(float(valid_loss))
 
         avg_train_loss = train_loss/len(train_loader)
         train_loss_history.append(float(avg_train_loss))

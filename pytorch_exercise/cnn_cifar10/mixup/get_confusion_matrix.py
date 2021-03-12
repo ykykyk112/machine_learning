@@ -26,10 +26,11 @@ def get_all_pred(model, loader) :
     return all_pred, all_label
 
 def remove_diag(x):
-    x_no_diag = np.ndarray.flatten(x)
-    x_no_diag = np.delete(x_no_diag, range(0, len(x_no_diag), len(x) + 1), 0)
-    x_no_diag = x_no_diag.reshape(len(x), len(x) - 1)
-    return x_no_diag
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]) :
+            if i == j :
+                x[i][j] == 0
+    return x
 
 def get_cf_matrix(model, loader):
     pred, label = get_all_pred(model, loader)

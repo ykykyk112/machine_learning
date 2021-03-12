@@ -13,48 +13,68 @@ from mixup import mixup_dataset
 
 # Apply random seed to all randomness
 
+n_training = 2
+
 def drive() :
     print('Training.')
     random_seed.make_random(42)
     transform = transforms.Compose([    transforms.ToTensor(),
                                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  ])
+
     # Download test dataset, load data
     train_data = torchvision.datasets.CIFAR10(root= './data', download = True, train = True, transform=transform)
     test_data = torchvision.datasets.CIFAR10(root = './data', download = True, train = False, transform = transform)
 
-    #train_data_mixup, _ = mixup_dataset.get_dataset(train_data, 0.2, 0.7, ((2, 3), (3, 4), (5, 3)), True)
-    print('mixup dataset constructed!')
-    #train_loader = DataLoader(train_data_mixup, batch_size=50, shuffle = True, num_workers = 4)
-    #test_loader = DataLoader(test_data, batch_size=50, shuffle = False, num_workers = 4)
+    recon_ratio = 0.5
+    src_ratio = 0.75
+    mixup_list = ((3, 5), (5, 3), (2, 4))
 
-    load_path = './model_saved/0311_4.pth'
-    save_path = './model_saved/0311_5.pth'
+    if n_training > 1 :
 
-    model = cnn.conv_net()
-    #model.load_state_dict(torch.load(load_path))
+        train_data_mixup, _ = mixup_dataset.get_dataset(train_data, recon_ratio, src_ratio, mixup_list, True)
+        train_loader = DataLoader(train_data_mixup, batch_size=50, shuffle = True, num_workers = 4)
+        print('mixup dataset constructed!')
 
-    #train_save_model.save_model(model, 20, train_loader, test_loader, save_path)
+        with open('pytorch_exercise/cnn_cifar10/model_saved/tracking.txt', 'a') as f:
+            f.write('Training_{0} \nrecon_ratio : {1} \nsrc_ratio : {2} \nmixup_list : {3}\n\n\n'.format(n_training, recon_ratio, src_ratio, mixup_list))
+    else :
+        train_loader = DataLoader(train_data, batch_size=50, shuffle = True, num_workers = 4)
 
+        with open('pytorch_exercise/cnn_cifar10/model_saved/tracking.txt', 'a') as f:
+            f.write('Training_{0} \nrecon_ratio : {1} \nsrc_ratio : {1} \nmixup_list : {1}\n\n\n'.format(n_training, 'None'))
 
-def evaluation() :
+    test_loader = DataLoader(test_data, batch_size=50, shuffle = False, num_workers = 4)
+
+        
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0312_{}.pth'.format(n_training-1)
+    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0312_{}.pth'.format(n_training)
+
+    model = cnn.conv_net(0.00014)
+    if n_training > 1 :
+        model.load_state_dict(torch.load(load_path))
+
+    train_save_model.save_model(model, 20, train_loader, test_loader, save_path)
+    print('Training Complete.')
+
+    return test_loader
+
+def evaluation(test_loader) :
     print('Evaluation.')
     random_seed.make_random(42)
     transform = transforms.Compose([    transforms.ToTensor(),
                                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  ])
-    # Download test dataset, load data
-    test_data = torchvision.datasets.CIFAR10(root = './data', train = False, transform = transform)
 
-    test_loader = DataLoader(test_data, batch_size=50, shuffle = False, num_workers = 4)
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0312_{}.pth'.format(n_training)
 
-    load_path = './model_saved/0311_4.pth'
-
-    model = cnn.conv_net()
+    model = cnn.conv_net(0.00014)
     model.load_state_dict(torch.load(load_path))
 
-    cf = get_confusion_matrix.get_cf_removed(model, test_loader)
+    cf = get_confusion_matrix.get_cf_matrix(model, test_loader)
     plt.matshow(cf, cmap = 'binary')
+    plt.savefig('pytorch_exercise/cnn_cifar10/model_saved/0312_{}.jpg'.format(n_training))
     plt.show()
 
 if __name__ == '__main__':
-    drive()
-    #evaluation()
+    test_loader = drive()
+    evaluation(test_loader = test_loader)
+
