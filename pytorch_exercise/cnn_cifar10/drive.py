@@ -7,31 +7,47 @@ from torch.utils.data import DataLoader
 import random
 import random_seed
 from model import train_save_model
-from model import cnn
+from model import cnn, vgg16
 from mixup import get_confusion_matrix
 from mixup import mixup_dataset
 
 # Apply random seed to all randomness
 
-n_training = 2
+n_training = 7
 
 def drive() :
     print('Training.')
     random_seed.make_random(42)
-    transform = transforms.Compose([    transforms.ToTensor(),
-                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  ])
+
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+
+    train_transform = transforms.Compose([
+            transforms.ToTensor(),
+            normalize,
+        ])
+
+    valid_transform = transforms.Compose([
+            transforms.ToTensor(),
+            normalize,
+        ])
+
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+    # ])
 
     # Download test dataset, load data
-    train_data = torchvision.datasets.CIFAR10(root= './data', download = True, train = True, transform=transform)
-    test_data = torchvision.datasets.CIFAR10(root = './data', download = True, train = False, transform = transform)
+    train_data = torchvision.datasets.CIFAR10(root= './data', download = True, train = True, transform = train_transform)
+    test_data = torchvision.datasets.CIFAR10(root = './data', download = True, train = False, transform = valid_transform)
 
-    recon_ratio = 0.5
+    recon_ratio = 0.3
     src_ratio = 0.75
-    mixup_list = ((3, 5), (5, 3), (2, 4))
+    mixup_list = ((3, 5), (5, 3), (3, 6))
 
-    if n_training > 1 :
+    if n_training > 100 :
 
-        train_data_mixup, _ = mixup_dataset.get_dataset(train_data, recon_ratio, src_ratio, mixup_list, True)
+        train_data_mixup, _ = mixup_dataset.get_dataset(train_data, recon_ratio, src_ratio, mixup_list, ((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
         train_loader = DataLoader(train_data_mixup, batch_size=50, shuffle = True, num_workers = 4)
         print('mixup dataset constructed!')
 
@@ -46,14 +62,21 @@ def drive() :
     test_loader = DataLoader(test_data, batch_size=50, shuffle = False, num_workers = 4)
 
         
-    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0312_{}.pth'.format(n_training-1)
-    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0312_{}.pth'.format(n_training)
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0315_{}.pth'.format(n_training-1)
+    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0315_{}.pth'.format(n_training)
 
-    model = cnn.conv_net(0.00014)
-    if n_training > 1 :
+    # parameter is learning rate
+    model = vgg16.vgg_net()
+
+    if n_training > 100 :
         model.load_state_dict(torch.load(load_path))
 
-    train_save_model.save_model(model, 20, train_loader, test_loader, save_path)
+    # training and save model
+    train_eval_history = train_save_model.save_model(model, 50, train_loader, test_loader, save_path)
+    
+    # plot training, evaluation plot
+    plot_save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0315_plot_{}.jpg'.format(n_training)
+    train_save_model.save_plot(train_eval_history, plot_save_path)
     print('Training Complete.')
 
     return test_loader
@@ -61,20 +84,19 @@ def drive() :
 def evaluation(test_loader) :
     print('Evaluation.')
     random_seed.make_random(42)
-    transform = transforms.Compose([    transforms.ToTensor(),
-                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  ])
 
-    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0312_{}.pth'.format(n_training)
 
-    model = cnn.conv_net(0.00014)
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0315_{}.pth'.format(n_training)
+
+    model = vgg16.vgg_net()
     model.load_state_dict(torch.load(load_path))
 
     cf = get_confusion_matrix.get_cf_matrix(model, test_loader)
     plt.matshow(cf, cmap = 'binary')
-    plt.savefig('pytorch_exercise/cnn_cifar10/model_saved/0312_{}.jpg'.format(n_training))
+    plt.savefig('pytorch_exercise/cnn_cifar10/model_saved/0315_cf_{}.jpg'.format(n_training))
     plt.show()
+    
 
 if __name__ == '__main__':
     test_loader = drive()
     evaluation(test_loader = test_loader)
-

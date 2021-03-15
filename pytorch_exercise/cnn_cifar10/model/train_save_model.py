@@ -1,6 +1,8 @@
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+import numpy as np
 
 def train_eval_model(model, epoch, train_loader, test_loader) :
 
@@ -8,6 +10,9 @@ def train_eval_model(model, epoch, train_loader, test_loader) :
     valid_loss_history = []
     train_acc_history = []
     valid_acc_history = []
+    best_valid_loss = 0.0
+    best_valid_acc = 0.0
+    converge_count = 0
     
     for i in range(epoch) :
 
@@ -63,7 +68,25 @@ def train_eval_model(model, epoch, train_loader, test_loader) :
         if i%2==0:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr))
             
-    return train_loss_history, valid_loss_history, train_acc_history, valid_acc_history
+    ret = np.empty((4, len(avg_train_loss)))
+    ret[0] = np.asarray(train_loss_history)
+    ret[1] = np.asarray(valid_loss_history)
+    ret[2] = np.asarray(train_acc_history)
+    ret[3] = np.asarray(valid_acc_history)
+
+    if best_valid_acc < avg_valid_acc :
+        best_valid_acc = avg_valid_acc
+
+    if (best_valid_loss > avg_valid_loss) or (best_valid_avg - avg_valid_avg) < 0.5 :
+        best_valid_loss = avg_valid_loss
+        converge_count = 0
+    else :
+        converge_count += 1
+        if converge_count == 7:
+            return ret
+
+
+    return ret
 
 
 def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
@@ -72,6 +95,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
     valid_loss_history = []
     train_acc_history = []
     valid_acc_history = []
+    best_valid_loss = 0.0
+    best_valid_acc = 0.0
+    converge_count = 0
     
     for i in range(epoch) :
 
@@ -129,13 +155,33 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
         avg_valid_acc = valid_acc/len(test_loader)
         valid_acc_history.append(float(avg_valid_acc))
 
+        if avg_valid_acc - best_valid_acc < 0.5 :
+            best_valid_acc = avg_valid_acc
+            converge_count = 0
+
+        if (best_valid_loss > avg_valid_loss) :
+            best_valid_loss = avg_valid_loss
+            converge_count = 0
+        elif (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) >= 0.5 :
+            converge_count += 1
+            if converge_count == 5:
+                ret = np.empty((4, len(train_loss_history)))
+                ret[0] = np.asarray(train_loss_history)
+                ret[1] = np.asarray(valid_loss_history)
+                ret[2] = np.asarray(train_acc_history)
+                ret[3] = np.asarray(valid_acc_history)
+                return ret
+
         if i%2==0:
-            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr))        
-    ret = []
-    ret.append(train_loss_history)
-    ret.append(valid_loss_history)
-    ret.append(train_acc_history)
-    ret.append(valid_acc_history)
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.6f} \t converge : {6}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, converge_count))        
+
+
+    ret = np.empty((4, len(train_loss_history)))
+    ret[0] = np.asarray(train_loss_history)
+    ret[1] = np.asarray(valid_loss_history)
+    ret[2] = np.asarray(train_acc_history)
+    ret[3] = np.asarray(valid_acc_history)
+
     return ret
 
 
@@ -143,11 +189,37 @@ def save_model(model, epoch, train_loader, test_loader, path) :
 
     is_cuda = torch.cuda.is_available()
     if is_cuda :
+        print('GPU is available')
         device = torch.device('cuda')
         model = model.to(device)
-        _ = train_eval_model_gpu(model, epoch, device, train_loader, test_loader)
+        history = train_eval_model_gpu(model, epoch, device, train_loader, test_loader)
     else :
-        _ = train_eval_model(model, epoch, train_loader, test_loader)
+        history = train_eval_model(model, epoch, train_loader, test_loader)
 
     torch.save(model.state_dict(), path)
     print('save complete. saving path : {}'.format(path))
+    return history
+
+def save_plot(history, save_path, show = False) :
+    
+    fig = plt.figure(figsize = (15, 6))
+
+    ax1 = fig.add_subplot(1,2,1)
+    ax2 = fig.add_subplot(1,2,2)
+
+    ax1.plot(history[0], label = "training loss")
+    ax1.plot(history[1], label = "validation loss")
+    ax1.legend()
+    ax1.set_title('Loss')
+    
+    ax2.plot(history[2], label = "training accuracy")
+    ax2.plot(history[3], label = "validation accuracy")
+    ax2.axvline(np.where(history[3]==np.max(history[3]))[0][0], color = 'b', linestyle = '--', linewidth = 2)
+    ax2.text(np.where(history[3]==np.max(history[3]))[0][0]+3, np.max(history[3]), '{:.2f}'.format(np.max(history[3]))+'%', color='k', fontsize = 'large', horizontalalignment = 'left',verticalalignment='bottom')
+    ax2.legend()
+    ax2.set_title('Score')
+    
+    plt.savefig(save_path)
+
+    if show :
+        plt.show()
