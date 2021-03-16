@@ -95,9 +95,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
     valid_loss_history = []
     train_acc_history = []
     valid_acc_history = []
-    best_valid_loss = 0.0
+    best_valid_loss = 100.0
     best_valid_acc = 0.0
     converge_count = 0
+
     
     for i in range(epoch) :
 
@@ -155,14 +156,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
         avg_valid_acc = valid_acc/len(test_loader)
         valid_acc_history.append(float(avg_valid_acc))
 
-        if avg_valid_acc - best_valid_acc < 0.5 :
-            best_valid_acc = avg_valid_acc
-            converge_count = 0
 
         if (best_valid_loss > avg_valid_loss) :
             best_valid_loss = avg_valid_loss
             converge_count = 0
-        elif (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) >= 0.5 :
+        elif (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) <= 0.5 :
             converge_count += 1
             if converge_count == 5:
                 ret = np.empty((4, len(train_loss_history)))
