@@ -30,25 +30,19 @@ class vgg_net(nn.Module):
             nn.Conv2d(512, 512, 3, padding=1), nn.BatchNorm2d(512), nn.ReLU(True), # Conv11
             nn.Conv2d(512, 512, 3, padding=1), nn.BatchNorm2d(512), nn.ReLU(True), # Conv12
             nn.Conv2d(512, 512, 3, padding=1), nn.BatchNorm2d(512), nn.ReLU(True), # Conv13
-            # nn.MaxPool2d(2, 2)  # Pool5
         )
-
         self.classifier = nn.Sequential(
-            #nn.Dropout(0.5),
-            #nn.BatchNorm1d(2 * 2 * 512),
             nn.Linear(2 * 2 * 512, 1024), 
             nn.ReLU(True),
-            #nn.Dropout(0.5),
-            #nn.BatchNorm1d(512),
             nn.Linear(1024, 512),
             nn.ReLU(True),
-            #nn.Dropout(0.5),
-            #nn.BatchNorm1d(256),
             nn.Linear(512, 100),
         )
+
         self._initialize_weights()
 
         # add weight decay(L2), 
+        
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience = 1, factor = 0.1)
