@@ -11,6 +11,7 @@ from model import train_save_model
 from model import cnn, vgg16, resnet
 from mixup import get_confusion_matrix
 from mixup import mixup_dataset
+from SaveResult import save_confusion_matrix
 
 # Apply random seed to all randomness
 
@@ -62,8 +63,8 @@ def drive() :
     test_loader = DataLoader(test_data, batch_size=50, shuffle = False, num_workers = 4)
 
         
-    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0317_{}.pth'.format(n_training-1)
-    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0317_{}.pth'.format(n_training)
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0319_{}.pth'.format(n_training-1)
+    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0319_{}.pth'.format(n_training)
 
     # parameter is learning rate
     model = resnet.ResNet(resnet.BasicBlock, [2, 2, 2, 2])
@@ -75,27 +76,25 @@ def drive() :
     train_eval_history = train_save_model.save_model(model, 50, train_loader, test_loader, save_path)
     
     # plot training, evaluation plot
-    plot_save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0317_plot_{}.jpg'.format(n_training)
+    plot_save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0319_plot_{}.jpg'.format(n_training)
     train_save_model.save_plot(train_eval_history, plot_save_path)
     print('Training Complete.')
 
     return test_loader
+
 
 def evaluation(test_loader) :
     print('Evaluation.')
     random_seed.make_random(42)
     
 
-    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0317_{}.pth'.format(n_training)
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0319_{}.pth'.format(n_training)
 
     model = resnet.ResNet(resnet.BasicBlock, [2, 2, 2, 2])
     model.load_state_dict(torch.load(load_path))
 
     cf = get_confusion_matrix.get_cf_matrix(model, test_loader)
-    plt.matshow(cf, cmap = matplotlib.cm.Spectral_r)
-    plt.colorbar()
-    plt.savefig('pytorch_exercise/cnn_cifar10/model_saved/0317_cf_{}.jpg'.format(n_training))
-    plt.show()
+    save_confusion_matrix.plot_confusion_matrix(cf, ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'])
     
 
 if __name__ == '__main__':
