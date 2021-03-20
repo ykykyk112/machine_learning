@@ -89,7 +89,7 @@ def train_eval_model(model, epoch, train_loader, test_loader) :
     return ret
 
 
-def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
+def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mode) :
 
     train_loss_history = []
     valid_loss_history = []
@@ -112,7 +112,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
 
             model.optimizer.zero_grad()
 
-            train_output = model.forward(train_data)
+            if cam_mode :
+                train_output, _ = model.forward(train_data)
+            else :
+                train_output = model.forward(train_data)
+
             t_loss = model.loss(train_output, train_target)
             t_loss.backward()
             model.optimizer.step()
@@ -129,7 +133,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
 
                 model.eval()
 
-                valid_output = model.forward(valid_data)
+                if cam_mode :
+                    valid_output, _ = model.forward(valid_data)
+                else :
+                    valid_output = model.forward(valid_data)
 
                 v_loss = model.loss(valid_output, valid_target)
 
@@ -157,10 +164,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
         valid_acc_history.append(float(avg_valid_acc))
 
 
-        if (best_valid_loss > avg_valid_loss) :
-            best_valid_loss = avg_valid_loss
-            converge_count = 0
-        elif (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) <= 0.5 :
+        if (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) <= 0.3 :
             converge_count += 1
             if converge_count == 5:
                 ret = np.empty((4, len(train_loss_history)))
@@ -169,8 +173,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
                 ret[2] = np.asarray(train_acc_history)
                 ret[3] = np.asarray(valid_acc_history)
                 return ret
+        elif (best_valid_loss > avg_valid_loss) :
+            best_valid_loss = avg_valid_loss
+            converge_count = 0
 
-        if i%2==0:
+        if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.6f} \t converge : {6}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, converge_count))        
 
 
@@ -183,14 +190,14 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader) :
     return ret
 
 
-def save_model(model, epoch, train_loader, test_loader, path) :
+def save_model(model, epoch, train_loader, test_loader, path, cam_mode = False) :
 
     is_cuda = torch.cuda.is_available()
     if is_cuda :
         print('GPU is available')
         device = torch.device('cuda')
         model = model.to(device)
-        history = train_eval_model_gpu(model, epoch, device, train_loader, test_loader)
+        history = train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mode)
     else :
         history = train_eval_model(model, epoch, train_loader, test_loader)
 
