@@ -25,15 +25,15 @@ def train_model() :
                                      std=[0.229, 0.224, 0.225])
 
     train_transform = transforms.Compose([
-            transforms.Resize(112),
+            transforms.Resize(56),
             transforms.RandomHorizontalFlip(0.5),
-            transforms.RandomCrop(112, padding=4),
+            transforms.RandomCrop(56, padding=4),
             transforms.ToTensor(),
             normalize,
         ])
 
     valid_transform = transforms.Compose([
-            transforms.Resize(112),
+            transforms.Resize(56),
             transforms.ToTensor(),
             normalize,
         ])
@@ -49,20 +49,20 @@ def train_model() :
     test_loader = DataLoader(test_data, batch_size=50, shuffle = False, num_workers = 4)
 
         
-    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0320_{}.pth'.format(n_training-1)
-    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0320_{}.pth'.format(n_training)
+    load_path = 'pytorch_exercise/cnn_cifar10/model_saved/0323_{}.pth'.format(n_training-1)
+    save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0323_{}.pth'.format(n_training)
 
     # parameter is learning rate
-    model = vgg16.vgg_cam()
+    model = vgg16.vgg_gradcam()
 
     if n_training > 100 :
         model.load_state_dict(torch.load(load_path))
 
     # training and save model
-    train_eval_history = train_save_model.save_model(model, 40, train_loader, test_loader, save_path, cam_mode = True)
+    train_eval_history = train_save_model.save_model(model, 25, train_loader, test_loader, save_path, cam_mode = False)
     
     # plot training, evaluation plot
-    plot_save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0320_plot_{}.jpg'.format(n_training)
+    plot_save_path = 'pytorch_exercise/cnn_cifar10/model_saved/0323_plot_{}.jpg'.format(n_training)
     train_save_model.save_plot(train_eval_history, plot_save_path)
     print('Training Complete.')
 
