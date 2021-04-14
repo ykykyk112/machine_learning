@@ -2,9 +2,21 @@ import pydicom
 import numpy as np
 
 '''
-    - Implementation : Function that extract CT image from DICOM file, by reference Window Center and Window Width
-    - Input : Dicom file, Window Center value, Window Width value
-    - Output : Image file of numpy array
+      Function Implementation
+        
+        
+
+      About Input
+
+        - dicom_file : . (type : numpy.ndarray)
+
+        - window_center : . (type : numpy.ndarray)
+
+        - window_width : . (type : bool)
+
+      About Output
+
+        - image_w : . (type : numpy.ndarray)
 '''
 
 def get_ct_image(dicom_file, window_center, window_width):
