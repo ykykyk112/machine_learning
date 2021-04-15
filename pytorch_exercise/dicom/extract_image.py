@@ -8,15 +8,15 @@ import numpy as np
 
       About Input
 
-        - dicom_file : . (type : numpy.ndarray)
+        - dicom_file : File contains ct image array, imformation of ct scan and patient and tomography equipment specification. (type : pydicom.dataset.FileDataset)
 
-        - window_center : . (type : numpy.ndarray)
+        - window_center : Median value of housefield unit range we want to reference on ct image. (type : int)
 
-        - window_width : . (type : bool)
+        - window_width : Length of range of housefield unit we want to reference on ct image. (type : int)
 
       About Output
 
-        - image_w : . (type : numpy.ndarray)
+        - image_w : Extracted ct image in dicom_file. (type : numpy.ndarray)
 '''
 
 def get_ct_image(dicom_file, window_center, window_width):
