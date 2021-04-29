@@ -111,7 +111,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             model.train()
 
             model.optimizer.zero_grad()
-
             if cam_mode :
                 train_output, _ = model.forward(train_data)
             else :
@@ -149,7 +148,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         valid_acc = valid_acc*(100/valid_data.size()[0])
 
         curr_lr = model.optimizer.param_groups[0]['lr']
-        model.scheduler.step(float(valid_loss))
+        model.scheduler.step()
 
         avg_train_loss = train_loss/len(train_loader)
         train_loss_history.append(float(avg_train_loss))
@@ -163,19 +162,20 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_acc = valid_acc/len(test_loader)
         valid_acc_history.append(float(avg_valid_acc))
 
+        # Code about early_stopping
 
-        if (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) <= 0.3 :
-            converge_count += 1
-            if converge_count == 5:
-                ret = np.empty((4, len(train_loss_history)))
-                ret[0] = np.asarray(train_loss_history)
-                ret[1] = np.asarray(valid_loss_history)
-                ret[2] = np.asarray(train_acc_history)
-                ret[3] = np.asarray(valid_acc_history)
-                return ret
-        elif (best_valid_loss > avg_valid_loss) :
-            best_valid_loss = avg_valid_loss
-            converge_count = 0
+        # if (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) <= 0.3 :
+        #     converge_count += 1
+        #     if converge_count == 5:
+        #         ret = np.empty((4, len(train_loss_history)))
+        #         ret[0] = np.asarray(train_loss_history)
+        #         ret[1] = np.asarray(valid_loss_history)
+        #         ret[2] = np.asarray(train_acc_history)
+        #         ret[3] = np.asarray(valid_acc_history)
+        #         return ret
+        # elif (best_valid_loss > avg_valid_loss) :
+        #     best_valid_loss = avg_valid_loss
+        #     converge_count = 0
 
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.6f} \t converge : {6}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, converge_count))        
