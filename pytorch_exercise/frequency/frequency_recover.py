@@ -9,15 +9,24 @@ from vgg_recover import recovered_net
 from torchsummary import summary
 from machine_learning.pytorch_exercise.cnn_cifar10.random_seed import fix_randomness
 from machine_learning.pytorch_exercise.cnn_cifar10.model import train_save_model
+import argparse
 
 def drive():
 
+
     fix_randomness(1)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', type=str, default='W')
+    parser.add_argument('--upsample', default=True, type = lambda s : s == 'True')
+    parser.add_argument('--device', type=int)
+    args = parser.parse_args()
+
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
-    device = torch.device(0)
+    device = torch.device(args.device)
 
-    recover_model = recovered_net(conv_layers, 'W', True).to(device)
+    recover_model = recovered_net(conv_layers, args.mode, args.upsample).to(device)
 
     train_transform = transforms.Compose([
         transforms.Resize(64),

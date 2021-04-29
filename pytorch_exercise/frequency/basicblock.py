@@ -64,7 +64,7 @@ class RecoverConv2d(nn.Module):
             ret_second_forward = self.feed_forward(torch.abs(ret_substract))
         ret_second_forward = self.second_batch_relu(ret_second_forward)
         ret_second_forward = self.second_max_pooling(ret_second_forward)
-
+        
 
         if self.comp_mode == 'C' or self.comp_mode == 'c':
             ret_concat = torch.cat([ret_pooling, ret_second_forward], dim = 1)

@@ -8,6 +8,7 @@ from basicblock import RecoverConv2d
 class recovered_net(nn.Module):
     def __init__(self, conv_layers, recover_mode = 'W', interpolation = True):
         super(recovered_net, self).__init__()
+        print(f'recover_mode = {recover_mode}, interpolation = {interpolation}')
         self.features = self._make_layer_conv(conv_layers = conv_layers, recover_mode = recover_mode, upsample_mode = interpolation)
         self.classifier = nn.Sequential(
             nn.Linear(2 * 2 * 512, 1024),
@@ -29,12 +30,13 @@ class recovered_net(nn.Module):
 
     def _make_layer_conv(self, conv_layers, recover_mode, upsample_mode):
         
+        deconv_mode = upsample_mode
         model = []
         input_size = 3
 
         for conv in conv_layers:
             if conv == 'R':
-                model += [RecoverConv2d(input_size, input_size, kernel_size=3, stride=1, padding = 1, comp_mode = recover_mode, upsample_mode = upsample_mode)]
+                model += [RecoverConv2d(input_size, input_size, kernel_size=3, stride=1, padding = 1, comp_mode = recover_mode, upsample_mode = deconv_mode)]
             elif conv == 'M':
                 model += [nn.MaxPool2d(2, 2)]
             else:

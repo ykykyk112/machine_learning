@@ -105,10 +105,13 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         train_loss, valid_loss = 0.0, 0.0
         train_acc, valid_acc = 0.0, 0.0
 
-        for train_data, train_target in train_loader :
+        model.train()
+
+        for idx, (train_data, train_target) in enumerate(train_loader) :
+            if (idx+1)%100==0:
+                print(f'{(idx+1)}/{len(train_loader)} is trained\r', end = '')
             train_data, train_target = train_data.to(device), train_target.to(device)
 
-            model.train()
 
             model.optimizer.zero_grad()
             if cam_mode :
@@ -127,10 +130,12 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         with torch.no_grad() :
 
+            model.eval()
+
             for valid_data, valid_target in test_loader :
+                
                 valid_data, valid_target = valid_data.to(device), valid_target.to(device)
 
-                model.eval()
 
                 if cam_mode :
                     valid_output, _ = model.forward(valid_data)
@@ -178,7 +183,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         #     converge_count = 0
 
         if i%2==0 or i%2==1:
-            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.6f} \t converge : {6}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, converge_count))        
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.6f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr))        
 
 
     ret = np.empty((4, len(train_loss_history)))
