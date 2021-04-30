@@ -29,7 +29,7 @@ def drive():
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     device = torch.device(args.device)
 
-    if args.baseline:
+    if not args.baseline:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, args.mode, args.upsample).to(device)
     else :
