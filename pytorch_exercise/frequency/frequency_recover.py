@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from vgg_recover import recovered_net
 from torchsummary import summary
-from machine_learning.pytorch_exercise.cnn_cifar10.random_seed import fix_randomness
-from machine_learning.pytorch_exercise.cnn_cifar10.model import train_save_model
 import argparse
+import sys, os
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+from random_seed import fix_randomness
+from model import train_save_model
 
 def drive():
 
@@ -24,6 +26,7 @@ def drive():
 
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     device = torch.device(args.device)
 
     recover_model = recovered_net(conv_layers, args.mode, args.upsample).to(device)
@@ -41,8 +44,8 @@ def drive():
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    train_set = torchvision.datasets.CIFAR10('data', train = True, transform=train_transform)
-    test_set = torchvision.datasets.CIFAR10('data', train = False, transform=test_transform)
+    train_set = torchvision.datasets.CIFAR10('./data', train = True, download = True,  transform=train_transform)
+    test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True,  transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
