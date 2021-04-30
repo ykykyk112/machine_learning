@@ -16,7 +16,7 @@ from model import train_save_model
 def drive():
 
 
-    fix_randomness(111)
+    fix_randomness(123)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', type=str, default='W')
