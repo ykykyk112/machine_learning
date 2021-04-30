@@ -27,7 +27,7 @@ def drive():
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
-    device = torch.device(parser.device)
+    device = torch.device(args.device)
 
     if not args.baseline:
         print('Run baseline model...')
