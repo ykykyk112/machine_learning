@@ -182,8 +182,12 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         #     best_valid_loss = avg_valid_loss
         #     converge_count = 0
 
+        params = list(model.parameters())
+        first_weight = params[4].item()
+        second_weight = params[15].item()
+
         if i%2==0 or i%2==1:
-            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.6f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr))        
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
 
 
     ret = np.empty((4, len(train_loss_history)))
