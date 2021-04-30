@@ -10,8 +10,8 @@ from torchsummary import summary
 import argparse
 import sys, os
 sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-from machine_learning.pytorch_exercise.cnn_cifar10.random_seed import fix_randomness
-from machine_learning.pytorch_exercise.cnn_cifar10.model import train_save_model
+from random_seed import fix_randomness
+from model import train_save_model
 
 def drive():
 
