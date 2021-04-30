@@ -11,7 +11,8 @@ class RecoverConv2d(nn.Module):
         self.stride, self.padding = stride, padding
         self.comp_mode = comp_mode
         self.upsample_mode = upsample_mode
-        
+        self.sum_factor = torch.tensor((1,))
+        self.sum_factor.requires_grad(True)
 
         self.pooling_kernel_size = 2
                 
@@ -74,7 +75,8 @@ class RecoverConv2d(nn.Module):
         elif self.comp_mode == 'W' or self.comp_mode == 'w':
             with torch.no_grad():
                 ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
-            return ret_pooling + (0.2)*(ret_rescaled)
+            print('sum_factor : ', self.sum_factor.item())
+            return ret_pooling + self.sum_factor.item()*(ret_rescaled)
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
             ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
