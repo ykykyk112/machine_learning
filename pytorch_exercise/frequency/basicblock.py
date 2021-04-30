@@ -57,10 +57,10 @@ class RecoverConv2d(nn.Module):
         
         # get boundary feature map
         ret_upsample = self.up_sampling(ret_pooling)
-        ret_substract = ret_first_forward - ret_upsample
         
         # second conv_block
         with torch.no_grad():
+            ret_substract = ret_first_forward - ret_upsample
             ret_second_forward = self.feed_forward(torch.abs(ret_substract))
         ret_second_forward = self.second_batch_relu(ret_second_forward)
         ret_second_forward = self.second_max_pooling(ret_second_forward)
@@ -72,7 +72,8 @@ class RecoverConv2d(nn.Module):
             return ret_reduction
 
         elif self.comp_mode == 'W' or self.comp_mode == 'w':
-            ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
+            with torch.no_grad():
+                ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
             return ret_pooling + (0.2)*(ret_rescaled)
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
