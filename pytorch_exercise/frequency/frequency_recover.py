@@ -27,7 +27,7 @@ def drive():
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
-    device = torch.device(args.device)
+    device = torch.device(parser.device)
 
     if not args.baseline:
         print('Run baseline model...')
@@ -35,6 +35,7 @@ def drive():
     else :
         print('Run target model...')
         recover_model = recovered_net(conv_layers, args.mode, args.upsample).to(device)
+
 
     train_transform = transforms.Compose([
         transforms.Resize(64),
@@ -56,6 +57,7 @@ def drive():
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
     train_save_model.train_eval_model_gpu(recover_model, 25, device, train_loader, test_loader, False)
+
 
 if __name__ == '__main__':
     drive()
