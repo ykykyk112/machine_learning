@@ -25,9 +25,13 @@ Function Implemantation :
 class grad_cam() :
     def __init__(self, model):
         # hook on last conv-layer (model.features[40])
-        model.features[40].register_forward_hook(self.forward_hook)
-        model.features[40].register_backward_hook(self.backward_hook)
         self.model = model
+        for m in reversed(list(self.model.modules())):
+            if isinstance(m, nn.Conv2d):
+                m.register_forward_hook(self.forward_hook)
+                m.register_full_backward_hook(self.backward_hook)
+                break
+        
         
     # forward_result는 forward시 해당 conv_layer의 출력 결과인 feature-map이다.
     def forward_hook(self, _, input_image, output):
@@ -38,7 +42,7 @@ class grad_cam() :
         
     def get_cam(self, image_batch, label_batch):
         # heatmap을 저장할 empty tensor
-        ret = torch.empty((image_batch.size(0), 7, 7))
+        ret = torch.empty((image_batch.size(0), 4, 4))
         ret_pred = torch.empty((image_batch.size(0)))
         self.model.eval()
         for idx, (image, label) in enumerate(zip(image_batch, label_batch)):
