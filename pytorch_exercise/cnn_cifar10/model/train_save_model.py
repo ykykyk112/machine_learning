@@ -89,7 +89,7 @@ def train_eval_model(model, epoch, train_loader, test_loader) :
     return ret
 
 
-def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mode) :
+def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mode, save_path = None) :
 
     train_loss_history = []
     valid_loss_history = []
@@ -197,6 +197,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     ret[1] = np.asarray(valid_loss_history)
     ret[2] = np.asarray(train_acc_history)
     ret[3] = np.asarray(valid_acc_history)
+
+    if save_path != None:
+        model = model.to('cpu')
+        torch.save(model.state_dict(), save_path)
 
     return ret
 
