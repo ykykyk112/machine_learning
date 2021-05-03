@@ -38,14 +38,14 @@ def drive():
 
 
     train_transform = transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
@@ -56,7 +56,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 25, device, train_loader, test_loader, False)
+    train_save_model.train_eval_model_gpu(recover_model, 25, device, train_loader, test_loader, False, './data/baseline_123.pth')
 
 
 if __name__ == '__main__':
