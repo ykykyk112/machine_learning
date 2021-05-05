@@ -16,7 +16,7 @@ from model import train_save_model
 def drive():
 
 
-    fix_randomness(123)
+    fix_randomness(42)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', type=str, default='W')
@@ -56,7 +56,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 25, device, train_loader, test_loader, False, './data/adaptive_0_123.pth')
+    train_save_model.train_eval_model_gpu(recover_model, 25, device, train_loader, test_loader, False, './data/upsample_1_42.pth')
 
 
 if __name__ == '__main__':
