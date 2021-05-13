@@ -190,19 +190,25 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
-
-
-    ret = np.empty((4, len(train_loss_history)))
-    ret[0] = np.asarray(train_loss_history)
-    ret[1] = np.asarray(valid_loss_history)
-    ret[2] = np.asarray(train_acc_history)
-    ret[3] = np.asarray(valid_acc_history)
-
-    if save_path != None:
+        
+        p = './recover_cam_{}.pth'.format(i+1)
         model = model.to('cpu')
-        torch.save(model.state_dict(), save_path)
+        torch.save(model.state_dict(), p)
+        model = model.to(device)
 
-    return ret
+    return
+
+    # ret = np.empty((4, len(train_loss_history)))
+    # ret[0] = np.asarray(train_loss_history)
+    # ret[1] = np.asarray(valid_loss_history)
+    # ret[2] = np.asarray(train_acc_history)
+    # ret[3] = np.asarray(valid_acc_history)
+
+    # if save_path != None:
+    #     model = model.to('cpu')
+    #     torch.save(model.state_dict(), save_path)
+
+    # return ret
 
 
 def save_model(model, epoch, train_loader, test_loader, path, cam_mode = False) :

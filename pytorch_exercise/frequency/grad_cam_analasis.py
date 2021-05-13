@@ -14,6 +14,8 @@ from machine_learning.pytorch_exercise.cnn_cifar10.about_image import tensor_to_
 from machine_learning.pytorch_exercise.cnn_cifar10.about_image import inverse_normalize
 import time
 from PIL import Image
+from sklearn.metrics import confusion_matrix
+from machine_learning.pytorch_exercise.cnn_cifar10.SaveResult.save_confusion_matrix import plot_confusion_matrix
 
 def drive():
 
@@ -287,9 +289,47 @@ def find():
     np.save(path + 'tf.npy', tf)
     np.save(path + 'ff.npy', ff)
 
+def get_confusion_matrix():
+
+    fix_randomness(123)
+
+    device = torch.device(0)
+
+    test_transform = transforms.Compose([
+            transforms.Resize(224),
+            transforms.ToTensor(),
+            #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+
+    test_set = torchvision.datasets.CIFAR10('./data', train = False, download=True, transform=test_transform)
+    test_loader = DataLoader(test_set, batch_size=10000, shuffle = False, num_workers=0)
+
+    sample, label = iter(test_loader).next()
+
+    image = sample[17]
+    image_np = np.transpose(image.numpy(), (1, 2, 0))
+
+    red = image_np[:, :, 0].reshape(224, 224, 1)
+    green = image_np[:, :, 1].reshape(224, 224, 1)
+    blue = image_np[:, :, 2].reshape(224, 224, 1)
+
+    fig = plt.figure(figsize = (16, 4))
+    ax0 = fig.add_subplot(1, 4, 1)
+    ax0.imshow(image_np)
+    ax1 = fig.add_subplot(1, 4, 2)
+    ax1.imshow(red, cmap = 'binary')
+    ax1.set_title('red')
+    ax2 = fig.add_subplot(1, 4, 3)
+    ax2.imshow(green, cmap = 'binary')
+    ax2.set_title('green')
+    ax3 = fig.add_subplot(1, 4, 4)
+    ax3.imshow(blue, cmap = 'binary')
+    ax3.set_title('blue')
+    plt.show()
 
 if __name__ == '__main__':
-    drive()
+    #drive()
     #find()
     #make_dataset()
     #test2()
+    get_confusion_matrix()
