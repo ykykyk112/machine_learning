@@ -37,7 +37,7 @@ def drive():
 
     conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
 
-    device = torch.device(0)
+    device = torch.device(2)
 
     print('Run target model...')
     recover_model = recovered_net(conv_layers, 'W', True).to(device)
