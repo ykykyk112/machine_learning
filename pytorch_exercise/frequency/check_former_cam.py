@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset, dataloader
 import sys, os
 sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-from train_save_model import train_eval_model_gpu
+from model.train_save_model import train_eval_model_gpu
 from random_seed import fix_randomness
 from basicblock import RecoverConv2d
 from vgg_recover import recovered_net
@@ -32,8 +32,8 @@ def drive():
     train_set = torchvision.datasets.CIFAR10('./data', train = True, download = True, transform = train_transform)
     test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True, transform = test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 8, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 8, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)
 
     conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
 
