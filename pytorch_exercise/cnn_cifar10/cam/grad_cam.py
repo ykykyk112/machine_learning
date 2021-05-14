@@ -40,6 +40,7 @@ class grad_cam() :
     # forward_result는 forward시 해당 conv_layer의 출력 결과인 feature-map이다.
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
+        
     # backward_result는 backpropagation에서 구한 y_c를 feature-map의 각 elem으로 편미분한 gradient이다.
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
@@ -86,3 +87,22 @@ class grad_cam() :
         upsampling = nn.Upsample(size = image_batch.size(2), mode = 'bilinear', align_corners=False)
         ret_upsampled = upsampling(ret.unsqueeze(0)).squeeze()
         return ret_upsampled, ret_pred
+
+    def get_downsample_label_cam(self, image_batch, label_batch):
+        # heatmap을 저장할 empty tensor
+        ret = torch.empty((image_batch.size(0), 14, 14))
+        ret_pred = torch.empty((image_batch.size(0)))
+        self.model.eval()
+        for idx, (image, label) in enumerate(zip(image_batch, label_batch)):
+            # forward의 input은 batch 형태여야 하므로, batch_dim을 추가해주고, output의 batch_dim은 제거해준다.
+            pred = self.model.forward(image.unsqueeze(0)).squeeze()
+            pred[int(label)].backward()
+            # predict image에 대한 forward_result, backward_result 생성 완료
+            a_k = torch.mean(self.backward_result, dim=(1, 2), keepdim=True)
+            # a_k-(512, 1, 1) * feature_map-(512, 7, 7) 이후 sum을 통해 S_k=(7, 7)로 만들어준다.
+            cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=0)
+            cam_relu = torch.nn.functional.relu(cam)
+            ret_pred[idx] = label
+            ret[idx] = cam_relu
+        # upsampling input은 4-dimension이다.
+        return ret, ret_pred
