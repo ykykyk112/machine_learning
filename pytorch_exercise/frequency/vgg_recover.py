@@ -71,8 +71,9 @@ class recovered_net(nn.Module):
                             
     def register_hook(self):
         self.feature_maps = []
+        self.hook_history = []
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, nn.MaxPool2d):
                 self.hook_history.append(m.register_forward_hook(self.forward_hook))
     
     def remove_hook(self):
