@@ -108,7 +108,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         model.train()
 
         for idx, (train_data, train_target) in enumerate(train_loader) :
-            if (idx+1)%100==0:
+            if (idx+1)%50==0:
                 print(f'{(idx+1)}/{len(train_loader)} is trained\r', end = '')
             train_data, train_target = train_data.to(device), train_target.to(device)
 
@@ -117,7 +117,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             if cam_mode :
                 train_output, _ = model.forward(train_data)
             else :
-                train_output = model.forward(train_data)
+                #train_output = model.forward_cam(train_data, train_target)
+                train_output = model.forward_cam(train_data, train_target)
+
 
             t_loss = model.loss(train_output, train_target)
             t_loss.backward()
@@ -138,9 +140,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
 
                 if cam_mode :
-                    valid_output, _ = model.forward(valid_data)
+                    valid_output, _ = model(valid_data)
                 else :
-                    valid_output = model.forward(valid_data)
+                    #valid_output = model.forward_cam(valid_data, valid_target)
+                    valid_output = model.forward_cam_eval(valid_data, valid_target)
+
 
                 v_loss = model.loss(valid_output, valid_target)
 
@@ -190,11 +194,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
-        
-        p = './recover_cam_{}.pth'.format(i+1)
-        model = model.to('cpu')
-        torch.save(model.state_dict(), p)
-        model = model.to(device)
 
     return
 

@@ -1,9 +1,12 @@
 import torch
+from torch._C import device
 import torch.nn as nn
 import math
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 from machine_learning.pytorch_exercise.frequency.basicblock import RecoverConv2d
+from machine_learning.pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
+from machine_learning.pytorch_exercise.cnn_cifar10.model import mysequential
 
 class recovered_net(nn.Module):
     def __init__(self, conv_layers, recover_mode = 'W', interpolation = True):
@@ -20,13 +23,14 @@ class recovered_net(nn.Module):
 
         self._initialize_weights()
         
-        self.basicblock = RecoverConv2d
-
         # add weight decay(L2), 
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
         self.scheduler = StepLR(self.optimizer, step_size=10, gamma=0.1)
+
+        self.device = torch.device(0)
+        self.cam = grad_cam(self)
 
     def _make_layer_conv(self, conv_layers, recover_mode, upsample_mode):
         
@@ -45,7 +49,7 @@ class recovered_net(nn.Module):
                           nn.ReLU(inplace=True)]
                 input_size= conv
         
-        return nn.Sequential(*model)
+        return mysequential.MySequential(*model)
 
 
     def _initialize_weights(self):
@@ -82,7 +86,46 @@ class recovered_net(nn.Module):
 
     def forward(self, x):
         self.feature_maps = []
-        x = self.features(x)
+        x = self.features.forward(x)
         x = x.view(x.size(0), -1)
-        x = self.classifier(x)
+        x = self.classifier.forward(x)
         return x
+
+    def forward_cam(self, x, y):
+        '''
+            get heatmap,
+            heritage nn.Sequential and modified forward(x, y) -> only apply y to 'R' layer
+
+        '''
+        #cam_ret = self.cam.get_batch_label_cam(x, y)
+        cam_ret = self.cam.get_batch_label_cam(x, y)
+        cam_ret = cam_ret.to(self.device)
+
+        # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
+        self.optimizer.zero_grad()
+
+        x = self.features.forward_cam(x, cam_ret)
+        x = x.view(x.size(0), -1)
+        x = self.classifier.forward(x)
+        return x
+
+    def forward_cam_eval(self, x, y):
+        '''
+            get heatmap,
+            heritage nn.Sequential and modified forward(x, y) -> only apply y to 'R' layer
+
+        '''
+        #cam_ret = self.cam.get_batch_label_cam(x, y)
+        # cam_ret = self.cam.get_cam(x, y)
+        cam_ret = torch.zeros((50, 4, 4))
+        cam_ret = cam_ret.to(self.device)
+
+
+        # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
+        #self.optimizer.zero_grad()
+
+        x = self.features.forward_cam(x, cam_ret)
+        x = x.view(x.size(0), -1)
+        x = self.classifier.forward(x)
+        return x
+

@@ -46,26 +46,24 @@ class grad_cam() :
         self.backward_result = torch.squeeze(grad_output[0])
         
     def get_cam(self, image_batch, label_batch):
-        # heatmap을 저장할 empty tensor
-        ret = torch.empty((image_batch.size(0), 14, 14))
-        ret_pred = torch.empty((image_batch.size(0)))
+        
         self.model.eval()
-        for idx, (image, label) in enumerate(zip(image_batch, label_batch)):
-            # forward의 input은 batch 형태여야 하므로, batch_dim을 추가해주고, output의 batch_dim은 제거해준다.
-            pred = self.model.forward(image.unsqueeze(0)).squeeze()
-            _, pred_max = torch.max(pred, dim = 0)
-            pred[int(pred_max)].backward()
-            # predict image에 대한 forward_result, backward_result 생성 완료
-            a_k = torch.mean(self.backward_result, dim=(1, 2), keepdim=True)
-            # a_k-(512, 1, 1) * feature_map-(512, 7, 7) 이후 sum을 통해 S_k=(7, 7)로 만들어준다.
-            cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=0)
-            cam_relu = torch.nn.functional.relu(cam)
-            ret_pred[idx] = pred_max
-            ret[idx] = cam_relu
-        # upsampling input은 4-dimension이다.
-        upsampling = nn.Upsample(size = image_batch.size(2), mode = 'bilinear', align_corners=False)
-        ret_upsampled = upsampling(ret.unsqueeze(0)).squeeze()
-        return ret_upsampled, ret_pred
+        
+        output = self.model(image_batch)
+        
+        loss = 0.
+        for idx in range(len(label_batch)):
+            with torch.no_grad():
+                _, pred = torch.max(output[idx], dim = 0)
+            loss += output[idx, pred]
+        
+        loss.backward()
+
+        a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
+        cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
+        cam_relu = torch.nn.functional.relu(cam)
+
+        return cam_relu
 
     def get_label_cam(self, image_batch, label_batch):
         # heatmap을 저장할 empty tensor
@@ -86,11 +84,12 @@ class grad_cam() :
         # upsampling input은 4-dimension이다.
         upsampling = nn.Upsample(size = image_batch.size(2), mode = 'bilinear', align_corners=False)
         ret_upsampled = upsampling(ret.unsqueeze(0)).squeeze()
+
         return ret_upsampled, ret_pred
 
     def get_downsample_label_cam(self, image_batch, label_batch):
         # heatmap을 저장할 empty tensor
-        ret = torch.empty((image_batch.size(0), 14, 14))
+        ret = torch.empty((image_batch.size(0), 4, 4))
         ret_pred = torch.empty((image_batch.size(0)))
         self.model.eval()
         for idx, (image, label) in enumerate(zip(image_batch, label_batch)):
@@ -105,4 +104,22 @@ class grad_cam() :
             ret_pred[idx] = label
             ret[idx] = cam_relu
         # upsampling input은 4-dimension이다.
-        return ret, ret_pred
+        return ret
+
+    def get_batch_label_cam(self, image_batch, label_batch):
+        
+        self.model.eval()
+        
+        output = self.model(image_batch)
+        
+        loss = 0.
+        for idx in range(len(label_batch)):
+            loss += output[idx, label_batch[idx]]
+        
+        loss.backward()
+
+        a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
+        cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
+        cam_relu = torch.nn.functional.relu(cam)
+
+        return cam_relu
