@@ -1,4 +1,4 @@
-from machine_learning.pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
+from pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
 import torch
 import torch.nn as nn
 
@@ -82,8 +82,8 @@ class RecoverConv2d(nn.Module):
                 heatmap_upsample = self.upsample(heatmap.unsqueeze(1))
             #heatmap_dropout = self.dropout(heatmap_upsample)
             ret_dot = ret_second_forward * heatmap_upsample
-            return ret_pooling + self.sum_factor*(ret_dot)
-            #return ret_pooling + 0.1*(ret_rescaled)
+            #return ret_pooling + self.sum_factor*(ret_dot)
+            return ret_pooling + 0.2*(ret_dot)
 
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
@@ -117,8 +117,8 @@ class RecoverConv2d(nn.Module):
             with torch.no_grad():
                 ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
             #ret_dropout = self.dropout(ret_rescaled)
-            return ret_pooling + self.sum_factor*(ret_rescaled)
-            #return ret_pooling + 0.1*(ret_rescaled)
+            #return ret_pooling + self.sum_factor*(ret_rescaled)
+            return ret_pooling + 0.1*(ret_rescaled)
 
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
