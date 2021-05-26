@@ -38,7 +38,19 @@ class parallel_net(nn.Module):
     def _get_grad_cam(self, x, y):
         self.recover_gradcam.eval()
 
+        output = self.model(x)
         
+        loss = 0.
+        for idx in range(len(y)):
+            loss += output[idx, y[idx]]
+        
+        loss.backward()
+
+        a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
+        cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
+        cam_relu = torch.nn.functional.relu(cam)
+
+        return cam_relu
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
