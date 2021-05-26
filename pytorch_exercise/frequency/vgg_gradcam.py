@@ -100,7 +100,7 @@ class recovered_net(nn.Module):
         #cam_ret = self.cam.get_batch_label_cam(x, y)
         cam_ret = self.cam.get_batch_label_cam(x, y)
         cam_ret = cam_ret.to(self.device)
-        cam_ret.requires_grad = False
+        cam_ret = cam_ret.detach()
         print(cam_ret.max(), cam_ret.min())
         
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
