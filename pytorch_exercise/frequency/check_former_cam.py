@@ -9,7 +9,7 @@ import sys, os
 sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
 from machine_learning.pytorch_exercise.cnn_cifar10.random_seed import fix_randomness
 from machine_learning.pytorch_exercise.cnn_cifar10.model import custom_dataset
-from machine_learning.pytorch_exercise.cnn_cifar10.cam import grad_cam
+from machine_learning.pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
 from machine_learning.pytorch_exercise.cnn_cifar10.about_image import tensor_to_numpy
 from machine_learning.pytorch_exercise.cnn_cifar10.about_image import inverse_normalize
 from machine_learning.pytorch_exercise.frequency.vgg_recover import recovered_net
@@ -262,8 +262,121 @@ def plot_activation_cam():
             plt.close()
 
 
+def check_derivative():
     
+    path = 'C:\\anaconda3\\envs\\torch\\machine_learning\\pytorch_exercise\\frequency\\frequency_cam\\5th_epoch\\'
+
+    image = np.load(path + 'sample_image.npy')
+    feature_map = np.transpose(np.load(path + 'first_map.npy'), (0, 2, 3, 1))
+
+    feature_map_left = np.zeros((50, 112, 112, 64))
+    feature_map_up = np.zeros((50, 112, 112, 64))
+
+    feature_map_left[:, :111, :, :] = feature_map[:, 1: ,:, :]
+    feature_map_up[:, :, :111, :] = feature_map[:, :, 1:, :]
+
+    idx = 12
+    sample = 15
+
+    feature_map_x_diff = np.abs(feature_map[sample, :, :, idx].reshape(112, 112, 1)-feature_map_left[sample, :, :, idx].reshape(112, 112, 1))
+    feature_map_y_diff = np.abs(feature_map[sample, :, :, idx].reshape(112, 112, 1)-feature_map_up[sample, :, :, idx].reshape(112, 112, 1))
+
+    diff_sqrt = np.sqrt(feature_map_x_diff*feature_map_x_diff + feature_map_y_diff*feature_map_y_diff)
+
+    fig = plt.figure(figsize=(18, 6))
+    ax1 = fig.add_subplot(1, 4, 1)
+    ax1.imshow(feature_map[sample, :, :, idx].reshape(112, 112, 1), cmap = 'Reds')
+    ax1.set_title('Feature map')
+    ax1.axis('off')
+    ax3 = fig.add_subplot(1, 4, 2)
+    ax3.imshow(feature_map_x_diff, cmap = 'Reds')
+    ax3.set_title('x_derivative')
+    ax3.axis('off')
+    ax4 = fig.add_subplot(1, 4, 3)
+    ax4.imshow(feature_map_y_diff, cmap = 'Reds')
+    ax4.set_title('y_derivative')
+    ax4.axis('off')
+    ax2 = fig.add_subplot(1, 4, 4)
+    ax2.imshow(diff_sqrt, cmap = 'Reds')
+    ax2.set_title('Combined')
+    ax2.axis('off')
+    plt.show()
+
+def make_derivative():
+    
+    folders = ['1st', '2nd', '3rd', '4th', '5th']
+
+    for n_folder in folders:
+        
+        path = 'C:\\anaconda3\\envs\\torch\machine_learning\\pytorch_exercise\\frequency\\frequency_cam\\{}_epoch\\'.format(n_folder)
+
+        feature_map = np.transpose(np.load(path + 'first_map.npy'), (0, 2, 3, 1))
+
+        feature_map_left = np.zeros((50, 112, 112, 64))
+        feature_map_up = np.zeros((50, 112, 112, 64))
+
+        feature_map_left[:, :111, :, :] = feature_map[:, 1: ,:, :]
+        feature_map_up[:, :, :111, :] = feature_map[:, :, 1:, :]
+
+        feature_map_x_diff = np.abs(feature_map[:, :, :, :].reshape(50, 112, 112, 64)-feature_map_left[:, :, :, :].reshape(50, 112, 112, 64))
+        feature_map_y_diff = np.abs(feature_map[:, :, :, :].reshape(50, 112, 112, 64)-feature_map_up[:, :, :, :].reshape(50, 112, 112, 64))
+
+        diff_sqrt = np.sqrt(feature_map_x_diff*feature_map_x_diff + feature_map_y_diff*feature_map_y_diff)
+
+        np.save(path + 'derivative.npy', diff_sqrt)
+
+def plot_gradcam():
+
+    fix_randomness(42)
+    
+    conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    device = torch.device(0)
+
+    if not True:
+        print('Run baseline model...')
+        recover_model = recovered_net(baseline_layers, 'W', True).to(device)
+    else :
+        print('Run target model...')
+        recover_model = recovered_net(conv_layers, 'W', True).to(device)
+        recover_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_1_123.pth', map_location="cuda:0"))
+
+
+    test_transform = transforms.Compose([
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+    ])
+
+    test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True,  transform=test_transform)
+
+    test_loader = DataLoader(test_set, batch_size = 5, shuffle = False, num_workers=2)
+
+    image, target = iter(test_loader).next()
+    index = 4
+    sample, label = image[index], target[index]
+    sample, label = sample.to(device).unsqueeze(0), label.to(device).unsqueeze(0)
+
+    cam = grad_cam(recover_model)
+
+    ret_cam, _ = cam.get_label_cam(sample, label)
+    print(sample.shape)
+    sample_np = np.transpose(sample.detach().cpu().numpy(), (0, 2, 3, 1)).squeeze(0)
+    cam_np = ret_cam.detach().view(224, 224, 1).numpy()
+    print(cam_np.shape)
+
+    fig = plt.figure(figsize=(12, 6))
+    
+    ax1 = fig.add_subplot(1, 2, 1)
+    ax1.imshow(sample_np)
+    ax2 = fig.add_subplot(1, 2, 2)
+    ax2.imshow(cam_np, cmap = 'jet')
+    plt.show()
+
 
 if __name__ == '__main__':
-    plot_activation_cam()
+    #plot_activation_cam()
+    #check_derivative()
+    #make_derivative()
+    plot_gradcam()
 

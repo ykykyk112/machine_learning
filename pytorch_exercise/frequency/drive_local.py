@@ -13,7 +13,7 @@ from torchsummary import summary
 from machine_learning.pytorch_exercise.frequency.vgg_gradcam import recovered_net
 from machine_learning.pytorch_exercise.cnn_cifar10.random_seed import fix_randomness
 from machine_learning.pytorch_exercise.cnn_cifar10.model import train_save_model
-from torchvision.transforms.transforms import RandomCrop
+
 
 def drive():
 
@@ -26,7 +26,7 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(0)
+    device = torch.device(3)
 
     print('no dropout, default value : 0.1, random crop, train - target, validation - pred')
     if not True:

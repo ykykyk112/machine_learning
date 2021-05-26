@@ -5,3 +5,4 @@ model_saved/
 *.npy
 *.txt
 *.pth
+pytorch_exercise/frequency/frequency_cam/frequency_cam.zip
