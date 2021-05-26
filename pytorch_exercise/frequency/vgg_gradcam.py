@@ -116,8 +116,8 @@ class recovered_net(nn.Module):
 
         '''
         #cam_ret = self.cam.get_batch_label_cam(x, y)
-        # cam_ret = self.cam.get_cam(x, y)
-        cam_ret = torch.zeros((50, 4, 4))
+        cam_ret = self.cam.get_cam(x, y)
+        #cam_ret = torch.zeros((50, 4, 4))
         cam_ret = cam_ret.to(self.device)
 
 

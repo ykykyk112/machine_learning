@@ -101,6 +101,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
     
     for i in range(epoch) :
+        
+        first_data = True
 
         train_loss, valid_loss = 0.0, 0.0
         train_acc, valid_acc = 0.0, 0.0
@@ -143,17 +145,18 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 valid_output, _ = model(valid_data)
             else :
                     #valid_output = model.forward_cam(valid_data, valid_target)
-                valid_output = model.forward_cam(valid_data, valid_target)
+                valid_output = model.forward_cam_eval(valid_data, valid_target)
 
 
             v_loss = model.loss(valid_output, valid_target)
 
             _, v_pred = torch.max(valid_output, dim = 1)
             
-            if i > 7:
+            if i > 10 and first_data:
+                print('-----------------------------------', i, '-----------------------------------')
                 print('loss :', v_loss)
                 print('output :', valid_output)
-
+                first_data = False
 
             valid_loss += v_loss.item()
             valid_acc += torch.sum(v_pred == valid_target.data)
