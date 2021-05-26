@@ -29,7 +29,7 @@ class recovered_net(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
-        self.device = torch.device(3)
+        self.device = torch.device(0)
         self.cam = grad_cam(self)
 
     def _make_layer_conv(self, conv_layers, recover_mode, upsample_mode):
@@ -101,10 +101,14 @@ class recovered_net(nn.Module):
         cam_ret = self.cam.get_batch_label_cam(x, y)
         cam_ret = cam_ret.to(self.device)
         cam_ret = cam_ret.detach()
-        print(cam_ret.max(), cam_ret.min())
+        channel_max = torch.amax(cam_ret, dim = (1, 2))
+        channel_min = torch.amin(cam_ret, dim = (1, 2))
+        cam_ret = (cam_ret - channel_min.unsqueeze(1).unsqueeze(1)) / ((channel_max.unsqueeze(1).unsqueeze(1) - channel_min.unsqueeze(1).unsqueeze(1))+1e-9)
+        
         
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
         self.optimizer.zero_grad()
+        
         x = self.features.forward_cam(x, cam_ret)
         x = x.view(x.size(0), -1)
         x = self.classifier.forward(x)
@@ -120,6 +124,10 @@ class recovered_net(nn.Module):
         cam_ret = self.cam.get_cam(x, y)
         #cam_ret = torch.zeros((50, 4, 4))
         cam_ret = cam_ret.to(self.device)
+        cam_ret = cam_ret.detach()
+        channel_max = torch.amax(cam_ret, dim = (1, 2))
+        channel_min = torch.amin(cam_ret, dim = (1, 2))
+        cam_ret = (cam_ret - channel_min.unsqueeze(1).unsqueeze(1)) / ((channel_max.unsqueeze(1).unsqueeze(1) - channel_min.unsqueeze(1).unsqueeze(1))+1e-9)
 
 
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
