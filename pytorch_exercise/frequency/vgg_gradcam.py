@@ -98,9 +98,12 @@ class recovered_net(nn.Module):
 
         '''
         #cam_ret = self.cam.get_batch_label_cam(x, y)
+        params = list(self.parameters())
+        print('grad', params[4].grad, params[15].grad)
+        print('value', params[4].item(), params[15].item())
+        print('----------------------------------------')
         cam_ret = self.cam.get_batch_label_cam(x, y)
         cam_ret = cam_ret.to(self.device)
-        params = list(self.parameters())
         
         print('grad', params[4].grad, params[15].grad)
         print('value', params[4].item(), params[15].item())
