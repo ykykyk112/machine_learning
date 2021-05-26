@@ -3,7 +3,7 @@ import torch.nn as nn
 import math
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
-from machine_learning.pytorch_exercise.frequency.basicblock import RecoverConv2d
+from pytorch_exercise.frequency.basicblock import RecoverConv2d
 
 class recovered_net(nn.Module):
     def __init__(self, conv_layers, recover_mode = 'W', interpolation = True):
