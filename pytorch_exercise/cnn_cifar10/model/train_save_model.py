@@ -150,9 +150,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
             _, v_pred = torch.max(valid_output, dim = 1)
             
-            if i > 7:
+            if epoch > 7:
                 print('loss :', v_loss)
-                print('output :', valid_output)
+                print('output :', torch.sum(valid_output, dim = 0))
 
 
             valid_loss += v_loss.item()
