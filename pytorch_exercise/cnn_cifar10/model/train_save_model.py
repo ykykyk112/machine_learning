@@ -102,7 +102,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     
     for i in range(epoch) :
         
-        first_data = True
 
         train_loss, valid_loss = 0.0, 0.0
         train_acc, valid_acc = 0.0, 0.0
@@ -125,9 +124,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
             t_loss = model.loss(train_output, train_target)
             t_loss.backward()
-            print('--------------backward------------')
-            p = list(model.parameters())
-            print(p[4].grad, p[15].grad)
+
             model.optimizer.step()
 
             _, pred = torch.max(train_output, dim = 1)
@@ -154,14 +151,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             v_loss = model.loss(valid_output, valid_target)
 
             _, v_pred = torch.max(valid_output, dim = 1)
-            
-            if i > 4 and first_data:
-                print('-----------------------------------', i, '-----------------------------------')
-                print('loss :', v_loss)
-                print('target :', valid_target[:10])
-                print('output :', valid_output[:10])
-                print('\n')
-                first_data = False
+        
 
             valid_loss += v_loss.item()
             valid_acc += torch.sum(v_pred == valid_target.data)
