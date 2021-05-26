@@ -103,7 +103,6 @@ class recovered_net(nn.Module):
 
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
         self.optimizer.zero_grad()
-        self.zero_grad()
 
         x = self.features.forward_cam(x, cam_ret)
         x = x.view(x.size(0), -1)
