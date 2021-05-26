@@ -81,8 +81,8 @@ class RecoverConv2d(nn.Module):
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
                 heatmap_upsample = self.upsample(heatmap.unsqueeze(1))
             ret_dot = ret_second_forward * heatmap_upsample
-            return ret_pooling + self.sum_factor*(ret_dot)
-            #return ret_pooling + 0.2*(ret_dot)
+            #return ret_pooling + self.sum_factor*(ret_dot)
+            return ret_pooling + 0.2*(ret_dot)
 
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
