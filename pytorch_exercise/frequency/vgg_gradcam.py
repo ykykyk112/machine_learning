@@ -27,7 +27,7 @@ class recovered_net(nn.Module):
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=10, gamma=0.1)
+        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
         self.device = torch.device(3)
         self.cam = grad_cam(self)
@@ -123,7 +123,7 @@ class recovered_net(nn.Module):
 
 
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
-        #self.optimizer.zero_grad()
+        self.optimizer.zero_grad()
 
         x = self.features.forward_cam(x, cam_ret)
         x = x.view(x.size(0), -1)
