@@ -29,7 +29,7 @@ class recovered_net(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
-        self.device = torch.device(0)
+        self.device = torch.device(3)
         self.cam = grad_cam(self)
 
     def _make_layer_conv(self, conv_layers, recover_mode, upsample_mode):
@@ -108,7 +108,7 @@ class recovered_net(nn.Module):
         
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
         self.optimizer.zero_grad()
-        
+
         x = self.features.forward_cam(x, cam_ret)
         x = x.view(x.size(0), -1)
         x = self.classifier.forward(x)
