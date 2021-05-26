@@ -18,6 +18,7 @@ from torchsummary import summary
 from random_seed import fix_randomness
 from model import train_save_model
 from parallel import parallel_net
+from vgg_recover import recovered_net
 
 def drive():
 

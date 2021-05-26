@@ -62,7 +62,8 @@ class parallel_net(nn.Module):
         # update recover_gradcam's parameters from recover_backbone
         self._copy_weight()
         # get gradcam heatmap from recover_gradcam model
-        
+        heatmap = self._get_grad_cam(x, y)
+        print(heatmap.shape)
         return self.recover_backbone(x)
 
     
