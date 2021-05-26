@@ -23,14 +23,34 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
+        # register forward & backward hook on last nn.Conv2d module of recover_gradcam
+        for m in reversed(list(self.recover_gradcam.modules())):
+            if isinstance(m, nn.Conv2d):
+                self.hook_history.append(m.register_forward_hook(self.forward_hook))
+                self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
+                break
+
     def _copy_weight(self):
         with torch.no_grad():
             state_dict = self.recover_backbone.state_dict()
             self.recover_gradcam.load_state_dict(state_dict)
 
+    def _get_grad_cam(self, x, y):
+        self.recover_gradcam.eval()
+
+        
+
+    def forward_hook(self, _, input_image, output):
+        self.forward_result = torch.squeeze(output)
+        
+    def backward_hook(self, _, grad_input, grad_output):
+        self.backward_result = torch.squeeze(grad_output[0])
+
     def forward(self, x, y):
         # update recover_gradcam's parameters from recover_backbone
         self._copy_weight()
+        # get gradcam heatmap from recover_gradcam model
+        
         return self.recover_backbone(x)
 
     

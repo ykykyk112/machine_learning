@@ -33,7 +33,7 @@ def drive():
     device = torch.device(3)
 
     print('no dropout, default value : 0.1, random crop, train - target, validation - pred')
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
     else :
