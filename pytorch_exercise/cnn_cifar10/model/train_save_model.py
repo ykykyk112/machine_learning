@@ -125,6 +125,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
             t_loss = model.loss(train_output, train_target)
             t_loss.backward()
+            print('--------------backward------------')
+            p = list(model.parameters())
+            print(p[4].grad, p[15].grad)
             model.optimizer.step()
 
             _, pred = torch.max(train_output, dim = 1)
