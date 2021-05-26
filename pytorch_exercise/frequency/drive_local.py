@@ -1,10 +1,10 @@
 import sys, os
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-sys.path.append('/home/sjlee/git_project/machine_learning')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+# sys.path.append('/home/sjlee/git_project/machine_learning')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
@@ -15,9 +15,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from torchsummary import summary
-from vgg_gradcam import recovered_net
 from random_seed import fix_randomness
 from model import train_save_model
+from parallel import parallel_net
 
 def drive():
 
@@ -38,7 +38,8 @@ def drive():
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
     else :
         print('Run target model...')
-        recover_model = recovered_net(conv_layers, 'W', True).to(device)
+        recover_model = parallel_net(conv_layers, 'W', True).to(device)
+        print(next(recover_model.parameters()).is_cuda)
 
 
     train_transform = transforms.Compose([
