@@ -100,10 +100,15 @@ class recovered_net(nn.Module):
         #cam_ret = self.cam.get_batch_label_cam(x, y)
         cam_ret = self.cam.get_batch_label_cam(x, y)
         cam_ret = cam_ret.to(self.device)
-
+        params = list(self.parameters())
+        
+        print('grad', params[4].grad, params[15].grad)
+        print('value', params[4].item(), params[15].item())
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
         self.optimizer.zero_grad()
-
+        print('----------------------------------------')
+        print('grad', params[4].grad, params[15].grad)
+        print('value', params[4].item(), params[15].item(), '\n\n\n')
         x = self.features.forward_cam(x, cam_ret)
         x = x.view(x.size(0), -1)
         x = self.classifier.forward(x)
