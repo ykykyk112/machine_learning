@@ -1,5 +1,5 @@
 from torch import nn
-from machine_learning.pytorch_exercise.frequency.basicblock import RecoverConv2d
+from pytorch_exercise.frequency.basicblock import RecoverConv2d
 
 class MySequential(nn.Sequential):
     def __init__(self, *args):

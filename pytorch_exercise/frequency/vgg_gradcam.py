@@ -4,9 +4,9 @@ import torch.nn as nn
 import math
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
-from machine_learning.pytorch_exercise.frequency.basicblock import RecoverConv2d
-from machine_learning.pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
-from machine_learning.pytorch_exercise.cnn_cifar10.model import mysequential
+from pytorch_exercise.frequency.basicblock import RecoverConv2d
+from pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
+from pytorch_exercise.cnn_cifar10.model import mysequential
 
 class recovered_net(nn.Module):
     def __init__(self, conv_layers, recover_mode = 'W', interpolation = True):
@@ -29,7 +29,7 @@ class recovered_net(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         self.scheduler = StepLR(self.optimizer, step_size=10, gamma=0.1)
 
-        self.device = torch.device(0)
+        self.device = torch.device(3)
         self.cam = grad_cam(self)
 
     def _make_layer_conv(self, conv_layers, recover_mode, upsample_mode):
@@ -103,6 +103,7 @@ class recovered_net(nn.Module):
 
         # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
         self.optimizer.zero_grad()
+        self.zero_grad()
 
         x = self.features.forward_cam(x, cam_ret)
         x = x.view(x.size(0), -1)

@@ -1,7 +1,9 @@
-from machine_learning.pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
-from numpy.core.defchararray import index
-from numpy.lib.arraysetops import isin
-from machine_learning.pytorch_exercise.frequency.basicblock import RecoverConv2d
+import sys, os
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+sys.path.append('/home/sjlee/git_project/machine_learning')
+from cam.grad_cam import grad_cam
+from basicblock import RecoverConv2d
 import torch
 import torch.nn as nn
 import torchvision
@@ -10,10 +12,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from torchsummary import summary
+<<<<<<< HEAD
 from machine_learning.pytorch_exercise.frequency.vgg_gradcam import recovered_net
 from machine_learning.pytorch_exercise.cnn_cifar10.random_seed import fix_randomness
 from machine_learning.pytorch_exercise.cnn_cifar10.model import train_save_model
 
+=======
+from vgg_gradcam import recovered_net
+from random_seed import fix_randomness
+from model import train_save_model
+>>>>>>> 4ad9b57426334c277035d630d4d4d62505b79cd2
 
 def drive():
 
