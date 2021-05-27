@@ -145,7 +145,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                     valid_output, _ = model(valid_data)
                 else :
                         #valid_output = model.forward_cam(valid_data, valid_target)
-                    valid_output = model(valid_data, valid_target, idx)
+                    valid_output = model(valid_data, valid_target, idx, True)
 
 
                 v_loss = model.loss(valid_output, valid_target)
