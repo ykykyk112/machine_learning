@@ -11,7 +11,7 @@ class recovered_net(nn.Module):
         print(f'recover_mode = {recover_mode}, interpolation = {interpolation}')
         self.features = self._make_layer_conv(conv_layers = conv_layers, recover_mode = recover_mode, upsample_mode = interpolation)
         self.classifier = nn.Sequential(
-            nn.Linear(2 * 2 * 512, 1024),
+            nn.Linear(7 * 7 * 512, 1024),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
