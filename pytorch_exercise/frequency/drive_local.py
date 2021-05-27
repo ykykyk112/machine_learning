@@ -1,10 +1,10 @@
 import sys, os
-# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-# sys.path.append('/home/sjlee/git_project/machine_learning')
-sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+sys.path.append('/home/sjlee/git_project/machine_learning')
+# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
@@ -31,7 +31,7 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(0)
+    device = torch.device(1)
 
     print('no dropout, default value : 0.1, random crop, train - target, validation - pred, 224x224')
     if not False:
