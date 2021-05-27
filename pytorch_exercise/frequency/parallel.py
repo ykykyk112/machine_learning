@@ -43,6 +43,9 @@ class parallel_net(nn.Module):
 
         self.recover_gradcam.eval()
 
+        if eval:
+            return self.zero_mask.detach()
+
         # 50 is batch-size
         if not eval:
             latest_heatmap = self.latest_train_cam[idx*50:(idx+1)*50]
@@ -73,10 +76,7 @@ class parallel_net(nn.Module):
         else :
             self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
 
-        if not eval:
-            return cam_relu
-        else :
-            return self.zero_mask
+        return cam_relu
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
