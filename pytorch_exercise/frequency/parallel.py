@@ -23,7 +23,7 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
-        self.latest_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32).to(device)
+        self.latest_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
         
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
@@ -57,10 +57,9 @@ class parallel_net(nn.Module):
 
         a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
-        cam_relu = torch.nn.functional.relu(cam).unsqueeze(1)
+        cam_relu = torch.nn.functional.relu(cam).unsqueeze(1).detach()
 
         self.latest_cam[idx*50:(idx+1)*50] = cam_relu
-
 
         return cam_relu
 
