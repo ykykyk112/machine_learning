@@ -63,8 +63,8 @@ class RecoverConv2d(nn.Module):
         ret_upsample = self.up_sampling(ret_pooling)
         
         # second conv_block
+        ret_substract = ret_first_forward - ret_upsample
         with torch.no_grad():
-            ret_substract = ret_first_forward - ret_upsample
             ret_second_forward = self.feed_forward(torch.abs(ret_substract))
         ret_second_forward = self.second_batch_relu(ret_second_forward)
         ret_second_forward = self.second_max_pooling(ret_second_forward)
@@ -81,6 +81,7 @@ class RecoverConv2d(nn.Module):
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
                 heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
+            print(ret_dot)
             return ret_pooling + self.sum_factor*(ret_dot)
             #return ret_pooling + 0.2*(ret_dot)
 
