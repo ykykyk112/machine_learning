@@ -31,7 +31,7 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(3)
+    device = torch.device(1)
 
     print('no dropout, default value : 0.1, random crop, train - target, validation - pred')
     if not True:
