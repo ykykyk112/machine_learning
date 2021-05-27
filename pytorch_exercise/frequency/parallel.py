@@ -58,7 +58,7 @@ class parallel_net(nn.Module):
             for i in range(len(y)):
                 with torch.no_grad():
                     _, pred = torch.max(output[i], dim = 0)
-                loss += output[idx, pred]
+                loss += output[i, pred]
         
         loss.backward(retain_graph = False)
 
