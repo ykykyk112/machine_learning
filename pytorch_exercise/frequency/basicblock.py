@@ -80,7 +80,9 @@ class RecoverConv2d(nn.Module):
                 #ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
                 heatmap_upsample = self.upsample(heatmap)
-            ret_dot = ret_second_forward * 1.0
+            ret_dot = ret_second_forward * heatmap_upsample
+            print(torch.amax(heatmap_upsample, dim = (1, 2, 3)))
+            print('\n\n\n')
             return ret_pooling + self.sum_factor*(ret_dot)
             #return ret_pooling + 0.2*(ret_dot)
 
