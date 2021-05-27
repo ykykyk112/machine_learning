@@ -23,9 +23,8 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
-        self.latest_train_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
-        self.latest_valid_cam = torch.ones((10000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
-        self.zero_mask = torch.zeros((50, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_train_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device) * (0.5)
+        self.latest_valid_cam = torch.ones((10000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device) * (0.5)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         for m in reversed(list(self.recover_gradcam.modules())):
@@ -69,15 +68,17 @@ class parallel_net(nn.Module):
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam).unsqueeze(1).detach()
 
-        if not eval:
-            self.latest_train_cam[idx*50:(idx+1)*50] = cam_relu
-        else :
-            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
+
+        c_max, c_min = torch.amax(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
+        cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-10)
+
 
         if not eval:
-            return cam_relu
+            self.latest_train_cam[idx*50:(idx+1)*50] = cam_rescaled
         else :
-            return self.zero_mask.detach()
+            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_rescaled
+
+        return cam_rescaled
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
@@ -89,7 +90,6 @@ class parallel_net(nn.Module):
         # update recover_gradcam's parameters from recover_backbone
         self._copy_weight()
         # get gradcam heatmap from recover_gradcam model and update heatmap on self.latest_cam used for forward in _get_grad_cam function
-        print('---------------------get--grad--cam---------------------')
         heatmap = self._get_grad_cam(x, y, idx, eval)
         return self.recover_backbone(x, heatmap)
 
