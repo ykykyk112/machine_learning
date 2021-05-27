@@ -70,10 +70,8 @@ class parallel_net(nn.Module):
 
         if not eval:
             self.latest_train_cam[idx*50:(idx+1)*50] = cam_relu
-            print('training')
         else :
             self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
-            print('validation')
 
         return cam_relu
 
