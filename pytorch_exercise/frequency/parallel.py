@@ -38,7 +38,7 @@ class parallel_net(nn.Module):
             state_dict = self.recover_backbone.state_dict()
             self.recover_gradcam.load_state_dict(state_dict)
 
-    def _get_grad_cam(self, x, y, idx):
+    def _get_grad_cam(self, x, y, idx, eval):
 
         self.recover_gradcam.eval()
 
@@ -48,8 +48,14 @@ class parallel_net(nn.Module):
         output = self.recover_gradcam(x, latest_heatmap)
         
         loss = 0.
-        for i in range(len(y)):
-            loss += output[i, y[i]]
+        if not eval:
+            for i in range(len(y)):
+                loss += output[i, y[i]]
+        else :
+            for idx in range(len(y)):
+                with torch.no_grad():
+                    _, pred = torch.max(output[idx], dim = 0)
+                loss += output[idx, pred]
         
         loss.backward(retain_graph = False)
 
@@ -69,11 +75,11 @@ class parallel_net(nn.Module):
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
 
-    def forward(self, x, y, idx):
+    def forward(self, x, y, idx, eval = False):
         # update recover_gradcam's parameters from recover_backbone
         self._copy_weight()
         # get gradcam heatmap from recover_gradcam model and update heatmap on self.latest_cam used for forward in _get_grad_cam function
-        heatmap = self._get_grad_cam(x, y, idx)
+        heatmap = self._get_grad_cam(x, y, idx, eval)
         return self.recover_backbone(x, heatmap)
 
     

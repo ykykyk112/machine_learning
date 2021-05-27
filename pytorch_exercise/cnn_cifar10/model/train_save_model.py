@@ -114,7 +114,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 print(f'{(idx+1)}/{len(train_loader)} is trained\r', end = '')
             train_data, train_target = train_data.to(device), train_target.to(device)
 
-            start = time.time()
             model.optimizer.zero_grad()
             if cam_mode :
                 train_output, _ = model.forward(train_data)
@@ -127,7 +126,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             t_loss.backward()
 
             model.optimizer.step()
-            print(idx, '  loss :', t_loss.item(), time.time()-start)
+            print(idx, '  loss :', t_loss.item(), list(model.recover_backbone.parameters())[4].item(), list(model.recover_backbone.parameters())[15].item())
             _, pred = torch.max(train_output, dim = 1)
 
             train_loss += t_loss.item()
@@ -137,7 +136,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         model.eval()
 
-        for valid_data, valid_target in test_loader :
+        for idx, (valid_data, valid_target) in enumerate(test_loader) :
                 
             valid_data, valid_target = valid_data.to(device), valid_target.to(device)
 
@@ -146,7 +145,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 valid_output, _ = model(valid_data)
             else :
                     #valid_output = model.forward_cam(valid_data, valid_target)
-                valid_output = model(valid_data, valid_target)
+                valid_output = model(valid_data, valid_target, idx, True)
 
 
             v_loss = model.loss(valid_output, valid_target)
