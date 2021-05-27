@@ -140,7 +140,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 
             valid_data, valid_target = valid_data.to(device), valid_target.to(device)
 
-
+            model.optimizer.zero_grad()
             if cam_mode :
                 valid_output, _ = model(valid_data)
             else :
