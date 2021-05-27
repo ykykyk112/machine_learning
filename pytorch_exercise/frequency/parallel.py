@@ -23,8 +23,8 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
-        self.latest_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
-        
+        self.latest_train_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_valid_cam = torch.ones((10000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         for m in reversed(list(self.recover_gradcam.modules())):
@@ -65,7 +65,12 @@ class parallel_net(nn.Module):
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam).unsqueeze(1).detach()
 
-        self.latest_cam[idx*50:(idx+1)*50] = cam_relu
+        if not eval:
+            self.latest_train_cam[idx*50:(idx+1)*50] = cam_relu
+            print('training')
+        else :
+            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
+            print('validation')
 
         return cam_relu
 
