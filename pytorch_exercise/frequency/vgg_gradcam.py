@@ -84,32 +84,20 @@ class recovered_net(nn.Module):
         for h in self.hook_history:
             h.remove()
 
-    def forward(self, x):
-        self.feature_maps = []
-        x = self.features.forward(x)
-        x = x.view(x.size(0), -1)
-        x = self.classifier.forward(x)
-        return x
+    # def forward(self, x):
+    #     self.feature_maps = []
+    #     x = self.features.forward(x)
+    #     x = x.view(x.size(0), -1)
+    #     x = self.classifier.forward(x)
+    #     return x
 
-    def forward_cam(self, x, y):
+    def forward(self, x, heatmap):
         '''
             get heatmap,
             heritage nn.Sequential and modified forward(x, y) -> only apply y to 'R' layer
 
         '''
-        #cam_ret = self.cam.get_batch_label_cam(x, y)
-        cam_ret = self.cam.get_batch_label_cam(x, y)
-        cam_ret = cam_ret.to(self.device)
-        #cam_ret = cam_ret.detach()
-        channel_max = torch.amax(cam_ret, dim = (1, 2))
-        channel_min = torch.amin(cam_ret, dim = (1, 2))
-        cam_ret = (cam_ret - channel_min.unsqueeze(1).unsqueeze(1)) / ((channel_max.unsqueeze(1).unsqueeze(1) - channel_min.unsqueeze(1).unsqueeze(1))+1e-9)
-        
-        
-        # make optimizer's gradient to zero value, because gradient saved by grad cam operation is dummy gradient.
-        self.optimizer.zero_grad()
-
-        x = self.features.forward_cam(x, cam_ret)
+        x = self.features.forward_cam(x, heatmap)
         x = x.view(x.size(0), -1)
         x = self.classifier.forward(x)
         return x

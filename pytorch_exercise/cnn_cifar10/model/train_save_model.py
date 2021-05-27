@@ -3,6 +3,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 def train_eval_model(model, epoch, train_loader, test_loader) :
 
@@ -113,20 +114,20 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 print(f'{(idx+1)}/{len(train_loader)} is trained\r', end = '')
             train_data, train_target = train_data.to(device), train_target.to(device)
 
-
+            start = time.time()
             model.optimizer.zero_grad()
             if cam_mode :
                 train_output, _ = model.forward(train_data)
             else :
                 #train_output = model.forward_cam(train_data, train_target)
-                train_output = model(train_data)
+                train_output = model(train_data, train_target, idx)
 
 
             t_loss = model.loss(train_output, train_target)
             t_loss.backward()
 
             model.optimizer.step()
-
+            print(idx, '  loss :', t_loss.item(), time.time()-start)
             _, pred = torch.max(train_output, dim = 1)
 
             train_loss += t_loss.item()
@@ -145,7 +146,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 valid_output, _ = model(valid_data)
             else :
                     #valid_output = model.forward_cam(valid_data, valid_target)
-                valid_output = model(valid_data)
+                valid_output = model(valid_data, valid_target)
 
 
             v_loss = model.loss(valid_output, valid_target)
@@ -190,10 +191,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         #     converge_count = 0
 
         params = list(model.parameters())
-        #first_weight = params[4].item()
-        first_weight = 0.
-        #second_weight = params[15].item()
-        second_weight = 0.
+        first_weight = params[4].item()
+        #first_weight = 0.
+        second_weight = params[15].item()
+        #second_weight = 0.
 
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        

@@ -14,7 +14,7 @@ class MySequential(nn.Sequential):
     def forward_cam(self, x, heatmap):
         for module in self:
             if isinstance(module, RecoverConv2d):
-                x = module.forward_dot(x, heatmap)
+                x = module(x, heatmap)
             else:
                 x = module(x)
         return x

@@ -50,7 +50,7 @@ class RecoverConv2d(nn.Module):
             )
 
 
-    def forward_dot(self, x, heatmap):
+    def forward(self, x, heatmap):
 
         # get grad-cam from network, which has parameters trained previous epoch
 
@@ -79,7 +79,7 @@ class RecoverConv2d(nn.Module):
             with torch.no_grad():
                 #ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
-                heatmap_upsample = self.upsample(heatmap.unsqueeze(1))
+                heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
             return ret_pooling + self.sum_factor*(ret_dot)
             #return ret_pooling + 0.2*(ret_dot)
@@ -89,37 +89,37 @@ class RecoverConv2d(nn.Module):
             ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
             return ret_pooling + ret_rescaled
         
-    def forward(self, x):
+    # def forward(self, x):
 
-        # first conv_block
-        ret_first_forward = self.feed_forward(x)
-        ret_first_forward = self.first_batch_relu(ret_first_forward)
-        ret_pooling = self.first_max_pooling(ret_first_forward)
+    #     # first conv_block
+    #     ret_first_forward = self.feed_forward(x)
+    #     ret_first_forward = self.first_batch_relu(ret_first_forward)
+    #     ret_pooling = self.first_max_pooling(ret_first_forward)
         
-        # get boundary feature map
-        ret_upsample = self.up_sampling(ret_pooling)
+    #     # get boundary feature map
+    #     ret_upsample = self.up_sampling(ret_pooling)
         
-        # second conv_block
-        with torch.no_grad():
-            ret_substract = ret_first_forward - ret_upsample
-            ret_second_forward = self.feed_forward(torch.abs(ret_substract))
-        ret_second_forward = self.second_batch_relu(ret_second_forward)
-        ret_second_forward = self.second_max_pooling(ret_second_forward)
+    #     # second conv_block
+    #     with torch.no_grad():
+    #         ret_substract = ret_first_forward - ret_upsample
+    #         ret_second_forward = self.feed_forward(torch.abs(ret_substract))
+    #     ret_second_forward = self.second_batch_relu(ret_second_forward)
+    #     ret_second_forward = self.second_max_pooling(ret_second_forward)
         
 
-        if self.comp_mode == 'C' or self.comp_mode == 'c':
-            ret_concat = torch.cat([ret_pooling, ret_second_forward], dim = 1)
-            ret_reduction = self.conv_compression(ret_concat)
-            return ret_reduction
+    #     if self.comp_mode == 'C' or self.comp_mode == 'c':
+    #         ret_concat = torch.cat([ret_pooling, ret_second_forward], dim = 1)
+    #         ret_reduction = self.conv_compression(ret_concat)
+    #         return ret_reduction
 
-        elif self.comp_mode == 'W' or self.comp_mode == 'w':
-            with torch.no_grad():
-                ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
-            #ret_dropout = self.dropout(ret_rescaled)
-            return ret_pooling + self.sum_factor*(ret_rescaled)
-            #return ret_pooling + 0.1*(ret_rescaled)
+    #     elif self.comp_mode == 'W' or self.comp_mode == 'w':
+    #         with torch.no_grad():
+    #             ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
+    #         #ret_dropout = self.dropout(ret_rescaled)
+    #         return ret_pooling + self.sum_factor*(ret_rescaled)
+    #         #return ret_pooling + 0.1*(ret_rescaled)
 
 
-        elif self.comp_mode == 'S' or self.comp_mode == 's':
-            ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
-            return ret_pooling + ret_rescaled
+    #     elif self.comp_mode == 'S' or self.comp_mode == 's':
+    #         ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
+    #         return ret_pooling + ret_rescaled

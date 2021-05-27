@@ -12,7 +12,7 @@ from pytorch_exercise.frequency.vgg_gradcam import recovered_net
 
 
 class parallel_net(nn.Module):
-    def __init__(self, conv_layers, recover_mode = 'W', interpolation = True):
+    def __init__(self, conv_layers, recover_mode = 'W', interpolation = True, device = None):
         super(parallel_net, self).__init__()
         print(f'parallel model, recover_mode = {recover_mode}, interpolation = {interpolation}')
 
@@ -23,11 +23,14 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
+        self.latest_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32).to(device)
+        
+
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         for m in reversed(list(self.recover_gradcam.modules())):
             if isinstance(m, nn.Conv2d):
-                self.hook_history.append(m.register_forward_hook(self.forward_hook))
-                self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
+                m.register_forward_hook(self.forward_hook)
+                m.register_full_backward_hook(self.backward_hook)
                 break
 
     def _copy_weight(self):
@@ -35,20 +38,29 @@ class parallel_net(nn.Module):
             state_dict = self.recover_backbone.state_dict()
             self.recover_gradcam.load_state_dict(state_dict)
 
-    def _get_grad_cam(self, x, y):
+    def _get_grad_cam(self, x, y, idx):
+
         self.recover_gradcam.eval()
 
-        output = self.model(x)
+        # 50 is batch-size
+        latest_heatmap = self.latest_cam[idx*50:(idx+1)*50]
+        
+        output = self.recover_gradcam(x, latest_heatmap)
         
         loss = 0.
-        for idx in range(len(y)):
-            loss += output[idx, y[idx]]
+        for i in range(len(y)):
+            loss += output[i, y[i]]
         
-        loss.backward()
+        loss.backward(retain_graph = False)
+
+        self.recover_gradcam.optimizer.zero_grad()
 
         a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
-        cam_relu = torch.nn.functional.relu(cam)
+        cam_relu = torch.nn.functional.relu(cam).unsqueeze(1)
+
+        self.latest_cam[idx*50:(idx+1)*50] = cam_relu
+
 
         return cam_relu
 
@@ -58,12 +70,11 @@ class parallel_net(nn.Module):
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
 
-    def forward(self, x, y):
+    def forward(self, x, y, idx):
         # update recover_gradcam's parameters from recover_backbone
         self._copy_weight()
-        # get gradcam heatmap from recover_gradcam model
-        heatmap = self._get_grad_cam(x, y)
-        print(heatmap.shape)
-        return self.recover_backbone(x)
+        # get gradcam heatmap from recover_gradcam model and update heatmap on self.latest_cam used for forward in _get_grad_cam function
+        heatmap = self._get_grad_cam(x, y, idx)
+        return self.recover_backbone(x, heatmap)
 
     
