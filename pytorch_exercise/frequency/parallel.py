@@ -25,7 +25,7 @@ class parallel_net(nn.Module):
 
         self.latest_train_cam = torch.ones((50000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
         self.latest_valid_cam = torch.ones((10000, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
-        self.zero_mask = torch.zeros((50, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
+        self.zero_mask = torch.ones((50, 1, 4, 4), dtype=torch.float32, requires_grad=False).to(device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         for m in reversed(list(self.recover_gradcam.modules())):
@@ -43,8 +43,6 @@ class parallel_net(nn.Module):
 
         self.recover_gradcam.eval()
 
-        if eval:
-            return self.zero_mask.detach()
 
         # 50 is batch-size
         if not eval:
@@ -76,7 +74,10 @@ class parallel_net(nn.Module):
         else :
             self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
 
-        return cam_relu
+        if not eval:
+            return cam_relu
+        else :
+            return self.zero_mask.detach()
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
