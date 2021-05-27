@@ -52,13 +52,9 @@ class parallel_net(nn.Module):
         output = self.recover_gradcam(x, latest_heatmap)
         
         loss = 0.
-        if not eval:
-            for i in range(len(y)):
-                loss += output[i, y[i]]
-        else :
-            for i in range(len(y)):
-                _, pred = torch.max(output[i], dim = 0)
-                loss += output[i, pred]
+        for i in range(len(y)):
+            _, pred = torch.max(output[i], dim = 0)
+            loss += output[i, pred]
         
         loss.backward(retain_graph = False)
 
