@@ -23,7 +23,7 @@ from frequency.vgg_recover import recovered_net
 def drive():
 
 
-    seed_number = 123
+    seed_number = 57
     print('seed number :', seed_number)
     fix_randomness(seed_number)
     
