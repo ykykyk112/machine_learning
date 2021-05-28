@@ -12,7 +12,7 @@ class RecoverConv2d(nn.Module):
         self.stride, self.padding = stride, padding
         self.comp_mode = comp_mode
         self.upsample_mode = upsample_mode
-        self.sum_factor = torch.nn.Parameter(torch.tensor([0.1]), requires_grad = True)
+        self.sum_factor = torch.nn.Parameter(torch.ones((50, 1, 1, 1))*(0.1), requires_grad = True)
 
         self.pooling_kernel_size = 2
                 
@@ -81,6 +81,7 @@ class RecoverConv2d(nn.Module):
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
                 heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
+            print(self.sum_factor)
             return ret_pooling + self.sum_factor*(ret_dot)
             #return ret_pooling + 0.2*(ret_dot)
 
