@@ -66,7 +66,7 @@ class parallel_net(nn.Module):
 
 
         c_max, c_min = torch.amax(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
-        cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-10)
+        #cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-10)
 
 
         if not eval:
