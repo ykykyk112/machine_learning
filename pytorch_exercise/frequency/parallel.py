@@ -70,11 +70,11 @@ class parallel_net(nn.Module):
 
 
         if not eval:
-            self.latest_train_cam[idx*50:(idx+1)*50] = cam_rescaled
+            self.latest_train_cam[idx*50:(idx+1)*50] = cam_relu
         else :
-            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_rescaled
+            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
 
-        return cam_rescaled
+        return cam_relu
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
