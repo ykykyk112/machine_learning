@@ -12,8 +12,8 @@ class RecoverConv2d(nn.Module):
         self.stride, self.padding = stride, padding
         self.comp_mode = comp_mode
         self.upsample_mode = upsample_mode
-        self.sum_factor = torch.nn.Parameter(torch.ones((1, self.out_channels, 1, 1))*(0.), requires_grad = True)
-        #self.sum_factor = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
+        #self.sum_factor = torch.nn.Parameter(torch.ones((1, self.out_channels, 1, 1))*(0.), requires_grad = True)
+        self.sum_factor = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
 
         self.pooling_kernel_size = 2
                 

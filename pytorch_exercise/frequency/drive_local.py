@@ -63,7 +63,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 30, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 
 
 def test():
