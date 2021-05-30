@@ -64,15 +64,15 @@ class parallel_net(nn.Module):
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam).unsqueeze(1).detach()
 
-
-        c_max, c_min = torch.amax(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
-        #cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-10)
+        with torch.no_grad():
+            c_max, c_min = torch.amax(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
+            cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-10)
 
 
         if not eval:
-            self.latest_train_cam[idx*50:(idx+1)*50] = cam_relu
+            self.latest_train_cam[idx*50:(idx+1)*50] = cam_rescaled
         else :
-            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_relu
+            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_rescaled
 
         return cam_relu
 
