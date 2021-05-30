@@ -23,7 +23,7 @@ from frequency.vgg_recover import recovered_net
 def drive():
 
 
-    seed_number = 57
+    seed_number = 42
     print('seed number :', seed_number)
     fix_randomness(seed_number)
     
@@ -34,7 +34,7 @@ def drive():
     device = torch.device(1)
 
     print('no dropout, default value : 1.0, random crop, train - target, validation - pred, 224x224')
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
     else :
