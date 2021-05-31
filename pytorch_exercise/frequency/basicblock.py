@@ -77,6 +77,7 @@ class RecoverConv2d(nn.Module):
             return ret_reduction
 
         elif self.comp_mode == 'W' or self.comp_mode == 'w':
+
             with torch.no_grad():
                 #ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)

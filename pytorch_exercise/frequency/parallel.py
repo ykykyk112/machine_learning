@@ -1,3 +1,4 @@
+from pytorch_exercise.frequency.alexnet import AlexNet
 from pytorch_exercise.frequency.vgg_gradcam import recovered_net
 import torch
 from torch._C import device
