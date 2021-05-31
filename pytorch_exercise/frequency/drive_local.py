@@ -1,10 +1,10 @@
 import sys, os
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-sys.path.append('/home/sjlee/git_project/machine_learning')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+# sys.path.append('/home/sjlee/git_project/machine_learning')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
@@ -37,8 +37,8 @@ def drive():
     print('no dropout, default value : 1.0, random crop, train - target, validation - pred, 224x224')
     if not True:
         print('Run baseline model...')
-        #recover_model = recovered_net(baseline_layers, 'W', True).to(device)
-        recover_model = AlexNet(True, 'W', True).to(device)
+        recover_model = recovered_net(baseline_layers, 'W', True).to(device)
+        #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
         recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
@@ -66,7 +66,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 1, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 
 
 def test():
@@ -123,33 +123,6 @@ def test():
     plt.show()
 
 
-def calc():
-    a = torch.ones((4, 3, 2, 2))
-    b = torch.tensor([
-        [[[1., 2.],
-          [3., 4.]]],
-
-
-        [[[10., 9.],
-          [5., 2.]]],
-          
-          
-        [[[7., 1.],
-          [3., 4.]]],
-          
-
-        [[[1., 2.],
-          [5., 3.]]]])
-
-    c = b
-    
-    c_max, c_min = torch.amax(c, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(c, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
-
-    c_rescaled = (c - c_min) / (c_max - c_min)
-
-    print(a*c_rescaled)
-
 if __name__ == '__main__':
     drive()
     #test()
-    #calc()

@@ -86,8 +86,8 @@ class AlexNet(nn.Module):
                 nn.init.xavier_uniform_(m.weight)
                 m.bias.data.zero_()
 
-    def forward(self, x):
-        x = self.features.forward(x)
+    def forward(self, x, heatmap):
+        x = self.features.forward_cam(x, heatmap)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
