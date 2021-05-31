@@ -200,7 +200,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
     np.save('./cam_ret.npy', model.latest_valid_cam.detach().cpu())
     model = model.to('cpu')
-    torch.save(model.state_dict(), './target_parameter.npy')
+    torch.save(model.state_dict(), './target_parameter.pth')
 
     print('model parameter, grad cam heatmap are saved')
 
