@@ -126,7 +126,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             t_loss.backward()
 
             model.optimizer.step()
-            #print(idx, '  loss :', t_loss.item(), list(model.recover_backbone.parameters())[4].item(), list(model.recover_backbone.parameters())[15].item())
+            print(idx, '  loss :', t_loss.item())
             _, pred = torch.max(train_output, dim = 1)
 
             train_loss += t_loss.item()
@@ -149,7 +149,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
 
             v_loss = model.loss(valid_output, valid_target)
-
+            print(v_loss.item())
             _, v_pred = torch.max(valid_output, dim = 1)
         
 
@@ -198,7 +198,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
 
-    np.save('./cam_ret.npy', model.latest_valid_cam)
+    np.save('./cam_ret.npy', model.latest_valid_cam.detach().cpu())
+    model = model.to('cpu')
     torch.save(model.state_dict(), './target_parameter.npy')
 
     print('model parameter, grad cam heatmap are saved')

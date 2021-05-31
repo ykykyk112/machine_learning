@@ -37,8 +37,8 @@ def drive():
     print('no dropout, default value : 1.0, random crop, train - target, validation - pred, 224x224')
     if not True:
         print('Run baseline model...')
-        #recover_model = recovered_net(baseline_layers, 'W', True).to(device)
-        recover_model = AlexNet(True, 'W', True).to(device)
+        recover_model = recovered_net(baseline_layers, 'W', True).to(device)
+        #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
         recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
@@ -66,7 +66,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 1, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 
 
 def test():
