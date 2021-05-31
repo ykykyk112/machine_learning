@@ -1,10 +1,10 @@
 import sys, os
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-sys.path.append('/home/sjlee/git_project/machine_learning')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+# sys.path.append('/home/sjlee/git_project/machine_learning')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
@@ -123,33 +123,6 @@ def test():
     plt.show()
 
 
-def calc():
-    a = torch.ones((4, 3, 2, 2))
-    b = torch.tensor([
-        [[[1., 2.],
-          [3., 4.]]],
-
-
-        [[[10., 9.],
-          [5., 2.]]],
-          
-          
-        [[[7., 1.],
-          [3., 4.]]],
-          
-
-        [[[1., 2.],
-          [5., 3.]]]])
-
-    c = b
-    
-    c_max, c_min = torch.amax(c, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(c, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
-
-    c_rescaled = (c - c_min) / (c_max - c_min)
-
-    print(a*c_rescaled)
-
 if __name__ == '__main__':
     drive()
     #test()
-    #calc()
