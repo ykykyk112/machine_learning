@@ -88,7 +88,7 @@ def test():
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     device = torch.device(0)
 
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
     else :
@@ -118,6 +118,7 @@ def test():
         ax3.imshow(label_cam[i], cmap = 'jet')
 
     plt.show()
+
 
 def calc():
     a = torch.ones((4, 3, 2, 2))
