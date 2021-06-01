@@ -32,6 +32,7 @@ class parallel_net(nn.Module):
             if isinstance(m, nn.Conv2d):
                 m.register_forward_hook(self.forward_hook)
                 m.register_full_backward_hook(self.backward_hook)
+                print(m)
                 break
 
     def _copy_weight(self):
@@ -42,7 +43,7 @@ class parallel_net(nn.Module):
     def _get_grad_cam(self, x, y, idx, eval):
 
         self.recover_gradcam.eval()
-        
+
         batch_size = 50
 
         # 50 is batch-size

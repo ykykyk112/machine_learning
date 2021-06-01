@@ -63,7 +63,7 @@ class grad_cam() :
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam)
 
-        return cam_relu
+        return cam_relu, pred
 
     def get_label_cam(self, image_batch, label_batch):
         # heatmap을 저장할 empty tensor

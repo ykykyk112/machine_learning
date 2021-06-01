@@ -79,7 +79,7 @@ def put_parameters():
     
     valid_loss, valid_acc = 0., 0.
 
-    prediction = torch.empty()
+    prediction = torch.empty((10000, ))
 
     for idx, (valid_data, valid_target) in enumerate(test_loader) :
                 
@@ -88,17 +88,19 @@ def put_parameters():
 
         valid_output = recover_model(valid_data, valid_target, idx, True)
 
-
         v_loss = recover_model.loss(valid_output, valid_target)
         _, v_pred = torch.max(valid_output, dim = 1)
 
         valid_loss += v_loss.item()
         valid_acc += torch.sum(v_pred == valid_target.data)
         print(idx, '/', len(test_loader))
+        prediction[idx*2:(idx+1)*2] = v_pred
     
     #valid_acc = valid_acc*(100/valid_data.size()[0])
 
     print('loss', valid_loss, 'accuracy', valid_acc)
+
+    np.save('./model_pred.npy', prediction)
 
 def plot_cam():
 
@@ -109,6 +111,17 @@ def plot_cam():
     device = torch.device(0)
 
     conv_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 'R', 512, 512, 'R']
+    baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+
+    print('Run baseline model...')
+    baseline_model = recovered_net(baseline_layers, 'W', True).to(device)
+    baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\baseline_123.pth', map_location="cuda:0"))
+
+    half_model = recovered_net(conv_layers, 'W', True).to(device)
+    half_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_123.pth', map_location="cuda:0"))
+
+    one_model = recovered_net(conv_layers, 'W', True).to(device)
+    one_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_1_123.pth', map_location="cuda:0"))
 
     print('Run target model...')
     recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
@@ -123,18 +136,43 @@ def plot_cam():
     ])
 
     test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True,  transform=test_transform)
-    test_loader = DataLoader(test_set, batch_size = 10000, shuffle = False, num_workers=0)
+    test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=0)
     
-    image, label = iter(test_loader).next()
-    image_denorm = inverse_normalize(image, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
 
     valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret.npy'))
-
-    print(valid_cam.shape)
 
     upsample = nn.Upsample(size = 224, mode = 'bilinear', align_corners = False)
     
     cam_upsample = upsample(valid_cam)
+
+    baseline_cam = grad_cam.grad_cam(baseline_model)
+    recover_cam = grad_cam.grad_cam(recover_model)
+    half_cam = grad_cam.grad_cam(half_model)
+    one_cam = grad_cam.grad_cam(one_model)
+
+    for idx, (test_data, test_target) in enumerate(test_loader):
+        
+        recover_model.eval()
+        baseline_model.eval()
+        one_model.eval()
+        half_model.eval()
+
+        image_denorm = inverse_normalize(test_data, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
+
+        recover_ret, recover_pred = recover_cam.get_cam(test_data, test_target)
+        recover_ret, recover_pred = upsample(recover_ret.detach().cpu()), recover_pred.detach().cpu()
+
+        baseline_ret, baseline_pred = baseline_cam.get_cam(test_data, test_target)
+        baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu()), baseline_pred.detach().cpu()
+
+        one_ret, one_pred = one_cam.get_cam(test_data, test_target)
+        one_ret, one_pred = upsample(one_ret.detach().cpu()), one_pred.detach().cpu()
+
+        half_ret, half_pred = half_cam.get_cam(test_data, test_target)
+        half_ret, half_pred = upsample(half_ret.detach().cpu()), half_pred.detach().cpu()
+
+        
+
 
     image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1))
     cam_np = np.transpose(cam_upsample.numpy(), (0, 2, 3, 1))
