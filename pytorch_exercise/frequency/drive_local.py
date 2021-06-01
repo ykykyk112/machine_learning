@@ -75,9 +75,10 @@ def drive():
         test_image[idx*50:(idx+1)*50] = test_data.data
         test_label[idx*50:(idx+1)*50] = test_target.data
 
+    test_image_np, test_label_np = test_image.numpy(), test_label.numpy()
 
-    np.save('./test_image.npy', test_image.data)
-    np.save('./test_label.npy', test_label.data)
+    np.save('./test_image.npy', test_image_np)
+    np.save('./test_label.npy', test_label_np)
 
     print('save all complete')
 
