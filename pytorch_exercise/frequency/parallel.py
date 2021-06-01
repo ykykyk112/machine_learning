@@ -42,13 +42,14 @@ class parallel_net(nn.Module):
     def _get_grad_cam(self, x, y, idx, eval):
 
         self.recover_gradcam.eval()
-
+        
+        batch_size = 50
 
         # 50 is batch-size
         if not eval:
-            latest_heatmap = self.latest_train_cam[idx*50:(idx+1)*50]
+            latest_heatmap = self.latest_train_cam[idx*batch_size:(idx+1)*batch_size]
         else :
-            latest_heatmap = self.latest_valid_cam[idx*50:(idx+1)*50]
+            latest_heatmap = self.latest_valid_cam[idx*batch_size:(idx+1)*batch_size]
         
         output = self.recover_gradcam(x, latest_heatmap)
         
@@ -71,9 +72,9 @@ class parallel_net(nn.Module):
 
 
         if not eval:
-            self.latest_train_cam[idx*50:(idx+1)*50] = cam_rescaled
+            self.latest_train_cam[idx*batch_size:(idx+1)*batch_size] = cam_rescaled
         else :
-            self.latest_valid_cam[idx*50:(idx+1)*50] = cam_rescaled
+            self.latest_valid_cam[idx*batch_size:(idx+1)*batch_size] = cam_rescaled
 
         return cam_rescaled
 

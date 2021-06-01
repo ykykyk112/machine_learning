@@ -28,11 +28,11 @@ def drive():
     print('seed number :', seed_number)
     fix_randomness(seed_number)
     
-    conv_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 'R', 512, 512, 'R']
+    conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(1)
+    device = torch.device(0)
 
     print('no dropout, default value : 1.0, random crop, train - target, validation - pred, 224x224')
     if not True:
@@ -65,37 +65,23 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    #train_save_model.train_eval_model_gpu(recover_model, 1, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 
-    test_image = torch.empty((10000, 3, 224, 224))
-    test_label = torch.empty((10000,))
-    
-
-    for idx, (test_data, test_target) in enumerate(test_loader) :
-        test_image[idx*50:(idx+1)*50] = test_data.data
-        test_label[idx*50:(idx+1)*50] = test_target.data
-
-    test_image_np, test_label_np = test_image.numpy(), test_label.numpy()
-
-    np.save('./test_image.npy', test_image_np)
-    np.save('./test_label.npy', test_label_np)
-
-    print('save all complete')
 
 
 def test():
 
-    fix_randomness(123)
+    fix_randomness(42)
 
     test_transform = transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
     test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True, transform = test_transform)
 
-    test_loader = DataLoader(test_set, batch_size = 3, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 1, shuffle = True, num_workers=2)
 
     sample, label = iter(test_loader).next()
 
