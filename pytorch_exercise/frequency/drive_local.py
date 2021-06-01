@@ -45,7 +45,6 @@ def drive():
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
 
-
     train_transform = transforms.Compose([
         transforms.Resize(224),
         transforms.RandomHorizontalFlip(),
@@ -66,7 +65,25 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 1, device, train_loader, test_loader, False, None)
+
+    train_image, test_image = torch.empty((50000, 3, 224, 224)), torch.empty((10000, 3, 224, 224))
+    train_label, test_label = torch.empty((50000,)), torch.empty((10000,))
+    
+    for idx, (train_data, train_target) in enumerate(train_loader) :
+        train_image[idx*50:(idx+1)*50] = train_data
+        train_label[idx*50:(idx+1)*50] = train_target
+
+    for idx, (test_data, test_target) in enumerate(test_loader) :
+        test_image[idx*50:(idx+1)*50] = test_data
+        test_label[idx*50:(idx+1)*50] = test_target
+
+    np.save('./train_image.npy', train_image.detach())
+    np.save('./train_label.npy', train_label.detach())
+    np.save('./test_image.npy', test_image.detach())
+    np.save('./test_label.npy', test_label.detach())
+
+    print('save all complete')
 
 
 def test():

@@ -197,12 +197,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
-
-    np.save('./cam_ret.npy', model.latest_valid_cam.detach().cpu())
-    model = model.to('cpu')
-    torch.save(model.state_dict(), './target_parameter.pth')
-
-    print('model parameter, grad cam heatmap are saved')
+            
 
     return
 
