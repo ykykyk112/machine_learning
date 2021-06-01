@@ -65,7 +65,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
 
-    train_save_model.train_eval_model_gpu(recover_model, 1, device, train_loader, test_loader, False, None)
+    #train_save_model.train_eval_model_gpu(recover_model, 1, device, train_loader, test_loader, False, None)
 
     train_image, test_image = torch.empty((50000, 3, 224, 224)), torch.empty((10000, 3, 224, 224))
     train_label, test_label = torch.empty((50000,)), torch.empty((10000,))
