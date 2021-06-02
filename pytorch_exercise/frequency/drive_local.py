@@ -28,7 +28,7 @@ def drive():
     print('seed number :', seed_number)
     fix_randomness(seed_number)
     
-    conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R', 512, 512, 512, 'M']
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
@@ -46,7 +46,7 @@ def drive():
 
 
     train_transform = transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize(64),
         transforms.RandomHorizontalFlip(),
         #transforms.RandomCrop(size=64, padding=4),
         transforms.ToTensor(),
@@ -54,7 +54,7 @@ def drive():
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize(64),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
