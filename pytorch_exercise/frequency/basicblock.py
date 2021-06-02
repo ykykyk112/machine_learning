@@ -14,6 +14,7 @@ class RecoverConv2d(nn.Module):
         self.upsample_mode = upsample_mode
         #self.sum_factor = torch.nn.Parameter(torch.ones((1, self.out_channels, 1, 1))*(0.), requires_grad = True)
         self.sum_factor = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
+        self.comp_conv = nn.Conv2d(self.in_channels, 1, 1, 1, 0)
 
         self.pooling_kernel_size = 2
                 
@@ -51,7 +52,7 @@ class RecoverConv2d(nn.Module):
             )
 
 
-    def forward(self, x, heatmap):
+    def forward(self, x, heatmap = None):
 
         # get grad-cam from network, which has parameters trained previous epoch
 
@@ -76,21 +77,29 @@ class RecoverConv2d(nn.Module):
             ret_reduction = self.conv_compression(ret_concat)
             return ret_reduction
 
-        elif self.comp_mode == 'W' or self.comp_mode == 'w':
+        elif (self.comp_mode == 'W' or self.comp_mode == 'w') and heatmap != None:
 
             with torch.no_grad():
                 #ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
                 heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
-            return ret_pooling + self.sum_factor*(ret_dot)
+            ret_comp = self.comp_conv(ret_dot)
+            return ret_pooling + self.sum_factor*(ret_comp)
             #return ret_pooling + 0.2*(ret_dot)
 
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
             ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
             return ret_pooling + ret_rescaled
-        
+
+        elif (self.comp_mode == 'W' or self.comp_mode == 'w') and heatmap == None:
+            with torch.no_grad():
+                ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
+            #ret_dropout = self.dropout(ret_rescaled)
+            return ret_pooling + self.sum_factor*(ret_rescaled)
+            #return ret_pooling + 0.1*(ret_rescaled)
+
     # def forward(self, x):
 
     #     # first conv_block

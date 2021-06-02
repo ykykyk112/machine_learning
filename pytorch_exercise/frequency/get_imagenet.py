@@ -3,6 +3,7 @@ import nibabel as nib
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
+
 sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
 sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
 sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
@@ -111,22 +112,23 @@ def plot_cam():
     device = torch.device(0)
 
     conv_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 'R', 512, 512, 'R']
+    conv_layers_2 = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
 
     print('Run baseline model...')
     baseline_model = recovered_net(baseline_layers, 'W', True).to(device)
     baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\baseline_123.pth', map_location="cuda:0"))
 
-    half_model = recovered_net(conv_layers, 'W', True).to(device)
+    half_model = recovered_net(conv_layers_2, 'W', True).to(device)
     half_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_123.pth', map_location="cuda:0"))
 
-    one_model = recovered_net(conv_layers, 'W', True).to(device)
+    one_model = recovered_net(conv_layers_2, 'W', True).to(device)
     one_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_1_123.pth', map_location="cuda:0"))
 
     print('Run target model...')
-    recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
-    recover_model.load_state_dict(torch.load('pytorch_exercise\\frequency\data\\target_parameter.pth'))
-    recover_model.latest_valid_cam = valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret.npy')).to(device)
+    recover_model = parallel_net(conv_layers_2, 'W', True, device).to(device)
+    recover_model.load_state_dict(torch.load('pytorch_exercise\\frequency\data\\target_parameter_former.pth'))
+    recover_model.latest_valid_cam = valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_former.npy')).to(device)
     print('complete load all parameters')
     
     test_transform = transforms.Compose([
@@ -139,18 +141,24 @@ def plot_cam():
     test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=0)
     
 
-    valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret.npy'))
+    valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_low.npy'))
 
     upsample = nn.Upsample(size = 224, mode = 'bilinear', align_corners = False)
     
     cam_upsample = upsample(valid_cam)
+    cam_np = np.transpose(cam_upsample.numpy(), (0, 2, 3, 1))
+    cam_pred = np.load('./model_pred.npy')
 
-    baseline_cam = grad_cam.grad_cam(baseline_model)
-    recover_cam = grad_cam.grad_cam(recover_model)
-    half_cam = grad_cam.grad_cam(half_model)
-    one_cam = grad_cam.grad_cam(one_model)
+    baseline_cam = grad_cam(baseline_model)
+    recover_cam = grad_cam(recover_model)
+    half_cam = grad_cam(half_model)
+    one_cam = grad_cam(one_model)
+
+    class_map = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
     for idx, (test_data, test_target) in enumerate(test_loader):
+
+        test_data, test_target = test_data.to(device), test_target.to(device)
         
         recover_model.eval()
         baseline_model.eval()
@@ -158,39 +166,67 @@ def plot_cam():
         half_model.eval()
 
         image_denorm = inverse_normalize(test_data, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
-
-        recover_ret, recover_pred = recover_cam.get_cam(test_data, test_target)
-        recover_ret, recover_pred = upsample(recover_ret.detach().cpu()), recover_pred.detach().cpu()
+        image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1)).reshape(224, 224, 3)
 
         baseline_ret, baseline_pred = baseline_cam.get_cam(test_data, test_target)
-        baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu()), baseline_pred.detach().cpu()
+        baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu().unsqueeze(0)), baseline_pred.detach().cpu()
+
+        #recover_ret, recover_pred = recover_cam.get_cam_for_recover(test_data, test_target, idx)
+        #recover_ret, recover_pred = upsample(recover_ret.detach().cpu().unsqueeze(0)), recover_pred.detach().cpu()
 
         one_ret, one_pred = one_cam.get_cam(test_data, test_target)
-        one_ret, one_pred = upsample(one_ret.detach().cpu()), one_pred.detach().cpu()
+        one_ret, one_pred = upsample(one_ret.detach().cpu().unsqueeze(0)), one_pred.detach().cpu()
 
         half_ret, half_pred = half_cam.get_cam(test_data, test_target)
-        half_ret, half_pred = upsample(half_ret.detach().cpu()), half_pred.detach().cpu()
+        half_ret, half_pred = upsample(half_ret.detach().cpu().unsqueeze(0)), half_pred.detach().cpu()
 
+        baseline_np, recover_np, one_np, half_np = baseline_ret.numpy().reshape(224, 224, 1), one_ret.numpy().reshape(224, 224, 1), one_ret.numpy().reshape(224, 224, 1), half_ret.numpy().reshape(224, 224, 1)
         
+        if not( int(baseline_pred)==int(half_pred) and int(half_pred)==int(one_pred) and int(one_pred) == int(test_target) and int(test_target) == int(baseline_pred)):
+            print('Error case')
+            continue
 
+        # if int(test_target) != 3:
+        #     continue
 
-    image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1))
-    cam_np = np.transpose(cam_upsample.numpy(), (0, 2, 3, 1))
+        fig = plt.figure(figsize=(16, 4))
 
-    fig = plt.figure(figsize = (12, 12))
+        ax1 = fig.add_subplot(1, 5, 1)
+        ax1.imshow(image_np)
+        ax1.set_title(class_map[int(test_target.detach().cpu())])
+        ax1.axis('off')
 
-    index = 45
+        ax2 = fig.add_subplot(1, 5, 2)
+        ax2.imshow(image_np)
+        ax2.imshow(baseline_np, cmap = 'jet', alpha = 0.3)
+        ax2.set_title('Baseline')
+        ax2.axis('off')
+        
+        ax3 = fig.add_subplot(1, 5, 3)
+        ax3.imshow(image_np)
+        ax3.imshow(half_np, cmap = 'jet', alpha = 0.3)
+        ax3.set_title('Recover(1.0)')
+        ax3.axis('off')
+        
+        ax4 = fig.add_subplot(1, 5, 4)
+        ax4.imshow(image_np)
+        ax4.imshow(one_np, cmap = 'jet', alpha = 0.3)
+        ax4.set_title('Recover(0.5)')
+        ax4.axis('off')
+        
+        ax5 = fig.add_subplot(1, 5, 5)
+        ax5.imshow(image_np)
+        ax5.imshow(cam_np[idx], cmap = 'jet', alpha = 0.3)
+        ax5.set_title('Heatmap mask')
+        ax5.axis('off')
 
-    for i in range(3):
-        for j in range(3):
-            ax = fig.add_subplot(3, 3, 3*i+j+1)
-            ax.imshow(image_np[3*i+j+1+index])
-            ax.imshow(cam_np[3*i+j+1+index], cmap = 'jet', alpha = 0.3)
-            ax.axis('off')
-    plt.show()
-
+        plt.show()
+        #plt.savefig('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\\frequency_cam\\both_correct2\\{0}\\{1}.png'.format(class_map[int(baseline_pred)], idx))
+        #plt.close()
+        print(idx, '/', len(test_loader))
+        del test_data, test_target
 
 if __name__ == '__main__' :
     #make_dataset()
-    put_parameters()
-    #plot_cam()
+    #put_parameters()
+    plot_cam()

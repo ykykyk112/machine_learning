@@ -58,8 +58,10 @@ class grad_cam() :
             loss += output[idx, pred]
         
         loss.backward()
-
-        a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
+        if len(self.backward_result.shape) == 3:
+            a_k = torch.mean(self.backward_result.unsqueeze(0), dim=(2, 3), keepdim=True)
+        else:
+            a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam)
 
@@ -123,3 +125,25 @@ class grad_cam() :
         cam_relu = torch.nn.functional.relu(cam)
 
         return cam_relu
+
+    def get_cam_for_recover(self, image_batch, label_batch, idx):
+        
+        self.model.eval()
+        
+        output = self.model(image_batch, label_batch, idx, True)
+        
+        loss = 0.
+        for idx in range(len(label_batch)):
+            with torch.no_grad():
+                _, pred = torch.max(output[idx], dim = 0)
+            loss += output[idx, pred]
+        loss.backward()
+        if len(self.backward_result.shape) == 3:
+            a_k = torch.mean(self.backward_result.unsqueeze(0), dim=(2, 3), keepdim=True)
+        else:
+            a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
+        print(a_k)
+        cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
+        cam_relu = torch.nn.functional.relu(cam)
+
+        return cam_relu, pred
