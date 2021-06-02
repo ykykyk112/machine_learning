@@ -110,6 +110,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         model.train()
 
         for idx, (train_data, train_target) in enumerate(train_loader) :
+            print(idx)
             if (idx+1)%50==0:
                 print(f'{(idx+1)}/{len(train_loader)} is trained\r', end = '')
             train_data, train_target = train_data.to(device), train_target.to(device)
