@@ -126,7 +126,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             t_loss.backward()
 
             model.optimizer.step()
-            #print(idx, '  loss :', t_loss.item())
+            print(idx, '  loss :', t_loss.item())
             _, pred = torch.max(train_output, dim = 1)
 
             train_loss += t_loss.item()
