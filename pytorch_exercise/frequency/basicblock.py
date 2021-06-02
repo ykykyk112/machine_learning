@@ -14,7 +14,7 @@ class RecoverConv2d(nn.Module):
         self.upsample_mode = upsample_mode
         #self.sum_factor = torch.nn.Parameter(torch.ones((1, self.out_channels, 1, 1))*(0.), requires_grad = True)
         self.sum_factor = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
-        self.comp_conv = nn.Conv2d(self.in_channels, self.out_channels, 1, 1, 0)
+        #self.comp_conv = nn.Conv2d(self.in_channels, self.out_channels, 1, 1, 0)
 
         self.pooling_kernel_size = 2
                 
@@ -84,8 +84,8 @@ class RecoverConv2d(nn.Module):
                 self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
                 heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
-            ret_comp = self.comp_conv(ret_dot)
-            return ret_pooling + self.sum_factor*(ret_comp)
+            #ret_comp = self.comp_conv(ret_dot)
+            return ret_pooling + self.sum_factor*(ret_dot)
             #return ret_pooling + 0.2*(ret_dot)
 
 

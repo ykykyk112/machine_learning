@@ -1,10 +1,10 @@
 import sys, os
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-sys.path.append('/home/sjlee/git_project/machine_learning')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+# sys.path.append('/home/sjlee/git_project/machine_learning')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
@@ -32,10 +32,10 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(1)
+    device = torch.device(0)
 
-    print('no dropout, default value : 1.0, random crop, train - target, validation - pred, 224x224')
-    if not True:
+    print('baseline, 224x224, STL10, random seed : 42')
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
@@ -46,7 +46,7 @@ def drive():
 
 
     train_transform = transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(224),
         transforms.RandomHorizontalFlip(),
         #transforms.RandomCrop(size=64, padding=4),
         transforms.ToTensor(),
@@ -54,16 +54,17 @@ def drive():
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
-
-    train_set = torchvision.datasets.CIFAR10('./data', train = True, download = True,  transform=train_transform)
-    test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True,  transform=test_transform)
+    
+    train_set = torchvision.datasets.STL10(root = './data', split='train', download = True,  transform=train_transform)
+    test_set = torchvision.datasets.STL10(root = './data', split = 'test', download = True,  transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)    
+    test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)
+
 
     train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 

@@ -141,7 +141,7 @@ def plot_cam():
     test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=0)
     
 
-    valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_low.npy'))
+    valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_lowall.npy'))
 
     upsample = nn.Upsample(size = 224, mode = 'bilinear', align_corners = False)
     
