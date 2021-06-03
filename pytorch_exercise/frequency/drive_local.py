@@ -123,7 +123,19 @@ def test():
 
     plt.show()
 
+def model_summary():
+    fix_randomness(42)
+    device = torch.device(0)
+    conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R', 512, 512, 'R']
+    baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+
+    print('Run baseline model...')
+    recover_model = recovered_net(baseline_layers, 'W', True).to(device)
+
+    print(summary(recover_model, (3, 224, 224)))
+
 
 if __name__ == '__main__':
     drive()
     #test()
+    #model_summary()

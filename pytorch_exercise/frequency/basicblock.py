@@ -1,4 +1,3 @@
-from pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
 import torch
 import torch.nn as nn
 

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from pytorch_exercise.frequency.basicblock import RecoverConv2d
 
 '''
 Class Implementation :
@@ -22,15 +23,28 @@ Function Implemantation :
 '''
 
 class grad_cam() :
-    def __init__(self, model):
+    def __init__(self, model, isbaseline):
         # hook on last conv-layer (model.features[40])
         self.model = model
         self.hook_history = []
-        for m in reversed(list(self.model.modules())):
-            if isinstance(m, nn.Conv2d):
-                self.hook_history.append(m.register_forward_hook(self.forward_hook))
-                self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
-                break
+        self.forward_result = None
+        self.backward_result = None
+
+        if isbaseline:
+            for m in reversed(list(self.model.modules())):
+                if isinstance(m, nn.MaxPool2d):
+                    self.hook_history.append(m.register_forward_hook(self.forward_hook))
+                    self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
+                    break
+        
+        else:
+            for m in reversed(list(self.model.modules())):
+                if isinstance(m, RecoverConv2d):
+                    self.hook_history.append(m.register_forward_hook(self.forward_hook))
+                    self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
+                    break
+
+
 
     def remove_hook(self):
         for h in self.hook_history:
@@ -48,16 +62,16 @@ class grad_cam() :
     def get_cam(self, image_batch, label_batch):
         
         self.model.eval()
-        
+
         output = self.model(image_batch)
-        
+
         loss = 0.
         for idx in range(len(label_batch)):
-            with torch.no_grad():
-                _, pred = torch.max(output[idx], dim = 0)
+            _, pred = torch.max(output[idx], dim = 0)
             loss += output[idx, pred]
-        
+
         loss.backward()
+
         if len(self.backward_result.shape) == 3:
             a_k = torch.mean(self.backward_result.unsqueeze(0), dim=(2, 3), keepdim=True)
         else:

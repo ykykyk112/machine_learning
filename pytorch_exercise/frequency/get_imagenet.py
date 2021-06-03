@@ -22,6 +22,7 @@ from model import train_save_model
 from parallel import parallel_net
 from frequency.vgg_recover import recovered_net
 from alexnet import AlexNet
+from frequency.basicblock import RecoverConv2d
 from about_image import inverse_normalize
 
 
@@ -112,23 +113,24 @@ def plot_cam():
     device = torch.device(0)
 
     conv_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 'R', 512, 512, 'R']
-    conv_layers_2 = [64, 'R', 128, 'R', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    conv_layers_2 = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R', 512, 512, 'R']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
 
     print('Run baseline model...')
-    baseline_model = recovered_net(baseline_layers, 'W', True).to(device)
-    baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\baseline_123.pth', map_location="cuda:0"))
-
     half_model = recovered_net(conv_layers_2, 'W', True).to(device)
-    half_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_123.pth', map_location="cuda:0"))
+    #half_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_123.pth', map_location="cuda:0"))
+
+    baseline_model = recovered_net(baseline_layers, 'W', True).to(device)
+    #baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\baseline_123.pth', map_location="cuda:0"))
+
 
     one_model = recovered_net(conv_layers_2, 'W', True).to(device)
-    one_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_1_123.pth', map_location="cuda:0"))
+    #one_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_1_123.pth', map_location="cuda:0"))
 
     print('Run target model...')
     recover_model = parallel_net(conv_layers_2, 'W', True, device).to(device)
-    recover_model.load_state_dict(torch.load('pytorch_exercise\\frequency\data\\target_parameter_former.pth'))
-    recover_model.latest_valid_cam = valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_former.npy')).to(device)
+    #recover_model.load_state_dict(torch.load('pytorch_exercise\\frequency\data\\target_parameter_former.pth'))
+    #recover_model.latest_valid_cam = valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_former.npy')).to(device)
     print('complete load all parameters')
     
     test_transform = transforms.Compose([
@@ -149,10 +151,10 @@ def plot_cam():
     cam_np = np.transpose(cam_upsample.numpy(), (0, 2, 3, 1))
     cam_pred = np.load('./model_pred.npy')
 
-    baseline_cam = grad_cam(baseline_model)
-    recover_cam = grad_cam(recover_model)
-    half_cam = grad_cam(half_model)
-    one_cam = grad_cam(one_model)
+    baseline_cam = grad_cam(baseline_model, True)
+    recover_cam = grad_cam(recover_model, False)
+    half_cam = grad_cam(half_model, False)
+    one_cam = grad_cam(one_model, False)
 
     class_map = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
@@ -168,23 +170,23 @@ def plot_cam():
         image_denorm = inverse_normalize(test_data, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
         image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1)).reshape(224, 224, 3)
 
+        one_ret, one_pred = one_cam.get_cam(test_data, test_target)
+        one_ret, one_pred = upsample(one_ret.detach().cpu().unsqueeze(0)), one_pred.detach().cpu()
+
         baseline_ret, baseline_pred = baseline_cam.get_cam(test_data, test_target)
         baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu().unsqueeze(0)), baseline_pred.detach().cpu()
 
         #recover_ret, recover_pred = recover_cam.get_cam_for_recover(test_data, test_target, idx)
         #recover_ret, recover_pred = upsample(recover_ret.detach().cpu().unsqueeze(0)), recover_pred.detach().cpu()
 
-        one_ret, one_pred = one_cam.get_cam(test_data, test_target)
-        one_ret, one_pred = upsample(one_ret.detach().cpu().unsqueeze(0)), one_pred.detach().cpu()
-
         half_ret, half_pred = half_cam.get_cam(test_data, test_target)
         half_ret, half_pred = upsample(half_ret.detach().cpu().unsqueeze(0)), half_pred.detach().cpu()
 
         baseline_np, recover_np, one_np, half_np = baseline_ret.numpy().reshape(224, 224, 1), one_ret.numpy().reshape(224, 224, 1), one_ret.numpy().reshape(224, 224, 1), half_ret.numpy().reshape(224, 224, 1)
         
-        if not( int(baseline_pred)==int(half_pred) and int(half_pred)==int(one_pred) and int(one_pred) == int(test_target) and int(test_target) == int(baseline_pred)):
-            print('Error case')
-            continue
+        #if not( int(baseline_pred)==int(half_pred) and int(half_pred)==int(one_pred) and int(one_pred) == int(test_target) and int(test_target) == int(baseline_pred)):
+        #    print('Error case')
+        #    continue
 
         # if int(test_target) != 3:
         #     continue
