@@ -28,7 +28,7 @@ class recovered_net(nn.Module):
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=30, gamma=0.1)
+        self.scheduler = StepLR(self.optimizer, step_size=25, gamma=0.1)
         #self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', 0.1, 5)
 
 
