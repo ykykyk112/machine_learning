@@ -170,12 +170,11 @@ def plot_cam():
         image_denorm = inverse_normalize(test_data, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
         image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1)).reshape(224, 224, 3)
 
-        one_ret, one_pred = one_cam.get_cam(test_data, test_target)
-        one_ret, one_pred = upsample(one_ret.detach().cpu().unsqueeze(0)), one_pred.detach().cpu()
-
-        return
         baseline_ret, baseline_pred = baseline_cam.get_cam(test_data, test_target)
         baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu().unsqueeze(0)), baseline_pred.detach().cpu()
+        return
+        one_ret, one_pred = one_cam.get_cam(test_data, test_target)
+        one_ret, one_pred = upsample(one_ret.detach().cpu().unsqueeze(0)), one_pred.detach().cpu()
 
         #recover_ret, recover_pred = recover_cam.get_cam_for_recover(test_data, test_target, idx)
         #recover_ret, recover_pred = upsample(recover_ret.detach().cpu().unsqueeze(0)), recover_pred.detach().cpu()

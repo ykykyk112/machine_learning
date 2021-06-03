@@ -160,7 +160,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         valid_acc = valid_acc*(100/valid_data.size()[0])
 
         curr_lr = model.optimizer.param_groups[0]['lr']
-        model.scheduler.step()
+        model.scheduler.step(float(v_loss.item()))
 
         avg_train_loss = train_loss/len(train_loader)
         train_loss_history.append(float(avg_train_loss))
