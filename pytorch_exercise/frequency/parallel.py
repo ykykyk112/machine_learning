@@ -32,7 +32,6 @@ class parallel_net(nn.Module):
             if isinstance(m, RecoverConv2d):
                 m.register_forward_hook(self.forward_hook)
                 m.register_full_backward_hook(self.backward_hook)
-                print(m)
                 break
 
     def _copy_weight(self):
