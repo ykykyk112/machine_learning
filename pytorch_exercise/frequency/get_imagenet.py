@@ -173,6 +173,7 @@ def plot_cam():
         one_ret, one_pred = one_cam.get_cam(test_data, test_target)
         one_ret, one_pred = upsample(one_ret.detach().cpu().unsqueeze(0)), one_pred.detach().cpu()
 
+        return
         baseline_ret, baseline_pred = baseline_cam.get_cam(test_data, test_target)
         baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu().unsqueeze(0)), baseline_pred.detach().cpu()
 

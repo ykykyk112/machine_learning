@@ -57,6 +57,8 @@ class grad_cam() :
         
     # backward_result는 backpropagation에서 구한 y_c를 feature-map의 각 elem으로 편미분한 gradient이다.
     def backward_hook(self, _, grad_input, grad_output):
+        print(grad_output[0].shape)
+        print(grad_input[0].shape)
         self.backward_result = torch.squeeze(grad_output[0])
         
     def get_cam(self, image_batch, label_batch):
