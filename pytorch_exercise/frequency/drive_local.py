@@ -34,8 +34,8 @@ def drive():
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     device = torch.device(1)
 
-    print('baseline, 224x224, STL10, random seed : 42')
-    if not True:
+    print('baseline, 96x96, STL10, random seed : 42')
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
@@ -46,17 +46,19 @@ def drive():
 
 
     train_transform = transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize(96),
         transforms.RandomHorizontalFlip(),
         #transforms.RandomCrop(size=64, padding=4),
         transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize(96),
         transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
     train_set = torchvision.datasets.STL10(root = './data', split='train', download = True,  transform=train_transform)
@@ -66,7 +68,7 @@ def drive():
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)
 
 
-    train_save_model.train_eval_model_gpu(recover_model, 75, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 90, device, train_loader, test_loader, False, None)
 
 
 
