@@ -31,7 +31,7 @@ class parallel_net(nn.Module):
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         for m in reversed(list(self.recover_gradcam.modules())):
-            if isinstance(m, RecoverConv2d):
+            if isinstance(m, Conv2d):
             #if isinstance(m, nn.Conv2d):
                 m.register_forward_hook(self.forward_hook)
                 m.register_full_backward_hook(self.backward_hook)
