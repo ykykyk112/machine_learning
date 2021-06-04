@@ -18,6 +18,7 @@ class RecoverConv2d(nn.Module):
         self.pooling_kernel_size = 2
                 
         self.feed_forward = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=self.kernel_size, stride=self.stride, padding = self.padding)
+        self.second_forward = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=self.kernel_size, stride=self.stride, padding = self.padding)
         
         self.first_batch_relu = nn.Sequential(
             nn.BatchNorm2d(self.out_channels),
@@ -65,8 +66,12 @@ class RecoverConv2d(nn.Module):
         
         # second conv_block
         ret_substract = ret_first_forward - ret_upsample
-        with torch.no_grad():
-            ret_second_forward = self.feed_forward(torch.abs(ret_substract))
+
+        # with torch.no_grad():
+        #     ret_second_forward = self.feed_forward(torch.abs(ret_substract))
+
+        ret_second_forward = self.second_forward(torch.abs(ret_substract))
+        
         ret_second_forward = self.second_batch_relu(ret_second_forward)
         ret_second_forward = self.second_max_pooling(ret_second_forward)
         
@@ -94,7 +99,8 @@ class RecoverConv2d(nn.Module):
 
         elif (self.comp_mode == 'W' or self.comp_mode == 'w') and heatmap == None:
             with torch.no_grad():
-                ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
+                c_max, c_min = torch.amax(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
+                ret_rescaled = (ret_second_forward - c_min) / ((c_max - c_min)+1e-15)
             #ret_dropout = self.dropout(ret_rescaled)
             return ret_pooling + self.sum_factor*(ret_rescaled)
             #return ret_pooling + 0.1*(ret_rescaled)
