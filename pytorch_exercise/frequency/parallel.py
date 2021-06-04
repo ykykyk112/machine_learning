@@ -53,15 +53,14 @@ class parallel_net(nn.Module):
             latest_heatmap = self.latest_train_cam[idx*batch_size:(idx+1)*batch_size]
         else :
             latest_heatmap = self.latest_valid_cam[idx*batch_size:(idx+1)*batch_size]
-        print('in_get_grad_cam')
-        print('get output')
+
         output = self.recover_gradcam(x, latest_heatmap)
         
         loss = 0.
         for i in range(len(y)):
             _, pred = torch.max(output[i], dim = 0)
             loss += output[i, pred]
-        print('get loss')
+
         loss.backward()
 
         self.recover_gradcam.optimizer.zero_grad()
@@ -89,12 +88,11 @@ class parallel_net(nn.Module):
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
-        print('recover forward hook', output.shape)
+
 
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
-        print('recover backward hook', grad_output[0].shape)
-        print(grad_output[0][0][0])
+
     
     def forward(self, x, y, idx, eval = False):
         # update recover_gradcam's parameters from recover_backbone
