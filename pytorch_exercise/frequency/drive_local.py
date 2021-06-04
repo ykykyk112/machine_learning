@@ -34,10 +34,10 @@ def drive():
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     device = torch.device(1)
 
-    print('baseline, 96x96, STL10, random seed : 42')
-    if not True:
+    print('baseline, 224x224 CIFAR10, random seed : 42, for save parameters')
+    if not False:
         print('Run baseline model...')
-        recover_model = recovered_net(baseline_layers, 'W', True).to(device)
+        recover_model = recovered_net(conv_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
@@ -46,29 +46,29 @@ def drive():
 
 
     train_transform = transforms.Compose([
-        transforms.Resize(96),
+        transforms.Resize(224),
         transforms.RandomHorizontalFlip(),
         #transforms.RandomCrop(size=64, padding=4),
         transforms.ToTensor(),
-        #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        #transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(96),
+        transforms.Resize(224),
         transforms.ToTensor(),
-        #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        #transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
-    train_set = torchvision.datasets.STL10(root = './data', split='train', download = True,  transform=train_transform)
-    test_set = torchvision.datasets.STL10(root = './data', split = 'test', download = True,  transform=test_transform)
+    train_set = torchvision.datasets.CIFAR10(root = './data', train=True, download = True,  transform=train_transform)
+    test_set = torchvision.datasets.CIFAR10(root = './data', train=False, download = True,  transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 50, shuffle = False, num_workers=2)
 
 
-    train_save_model.train_eval_model_gpu(recover_model, 45, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 
 
 
