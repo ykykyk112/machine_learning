@@ -35,7 +35,7 @@ def drive():
     device = torch.device(1)
 
     print('baseline, 96x96, STL10, random seed : 42')
-    if not False:
+    if not True:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
