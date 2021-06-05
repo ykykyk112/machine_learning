@@ -37,7 +37,7 @@ def drive():
     print('baseline, 224x224 CIFAR10, random seed : 42, for save parameters')
     if not False:
         print('Run baseline model...')
-        recover_model = recovered_net(conv_layers, 'W', True).to(device)
+        recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
