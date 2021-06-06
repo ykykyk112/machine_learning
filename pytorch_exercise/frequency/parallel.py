@@ -83,9 +83,11 @@ class parallel_net(nn.Module):
 
 
         if not eval:
-            self.latest_train_cam[idx*batch_size:(idx+1)*batch_size] = cam_rescaled
+            if b_end > 50000 : b_end = 50000
+            self.latest_train_cam[b_start:b_end] = cam_rescaled
         else :
-            self.latest_valid_cam[idx*batch_size:(idx+1)*batch_size] = cam_rescaled
+            if b_end > 10000 : b_end = 10000
+            self.latest_valid_cam[b_start:b_end] = cam_rescaled
 
         return cam_rescaled
 
