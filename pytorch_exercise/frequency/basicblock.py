@@ -18,7 +18,7 @@ class RecoverConv2d(nn.Module):
         self.pooling_kernel_size = 2
                 
         self.feed_forward = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=self.kernel_size, stride=self.stride, padding = self.padding)
-        self.second_forward = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=self.kernel_size, stride=self.stride, padding = self.padding)
+        #self.second_forward = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=self.kernel_size, stride=self.stride, padding = self.padding)
         
         self.first_batch_relu = nn.Sequential(
             nn.BatchNorm2d(self.out_channels),
@@ -67,10 +67,10 @@ class RecoverConv2d(nn.Module):
         # second conv_block
         ret_substract = ret_first_forward - ret_upsample
 
-        # with torch.no_grad():
-        #     ret_second_forward = self.feed_forward(torch.abs(ret_substract))
+        with torch.no_grad():
+            ret_second_forward = self.feed_forward(torch.abs(ret_substract))
 
-        ret_second_forward = self.second_forward(torch.abs(ret_substract))
+        #ret_second_forward = self.second_forward(torch.abs(ret_substract))
 
         ret_second_forward = self.second_batch_relu(ret_second_forward)
         ret_second_forward = self.second_max_pooling(ret_second_forward)
