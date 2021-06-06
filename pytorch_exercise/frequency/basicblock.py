@@ -12,7 +12,7 @@ class RecoverConv2d(nn.Module):
         self.comp_mode = comp_mode
         self.upsample_mode = upsample_mode
         #self.sum_factor = torch.nn.Parameter(torch.ones((1, self.out_channels, 1, 1))*(0.), requires_grad = True)
-        self.sum_factor = torch.nn.Parameter(torch.tensor([1.0]), requires_grad = True)
+        self.sum_factor = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
         #self.comp_conv = nn.Conv2d(self.in_channels, self.out_channels, 1, 1, 0)
 
         self.pooling_kernel_size = 2

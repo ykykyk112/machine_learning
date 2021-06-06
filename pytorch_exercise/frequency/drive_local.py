@@ -34,8 +34,8 @@ def drive():
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     device = torch.device(0)
 
-    print('baseline, 224x224 CIFAR10, random seed : 42, for save parameters')
-    if not False:
+    print('target(0.0), 224x224 CIFAR10, random seed : 42, cam-layer : RecoverConv2d')
+    if not True:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
