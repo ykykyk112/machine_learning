@@ -318,7 +318,7 @@ def get_fam():
 
     print('Run baseline model...')
     baseline_model = recovered_net(conv_layers, 'W', True).to(device)
-    #baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\adaptive_123.pth', map_location="cuda:0"))
+    baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\target_parameter_cifar_224.pth', map_location="cuda:0"))
 
     test_transform = transforms.Compose([
         transforms.Resize(224),
@@ -348,29 +348,53 @@ def get_fam():
         output = baseline_model(test_data)
         _, pred = torch.max(output, dim = 1)
 
+        f_map_boundary = torch.zeros((1, 1, 224, 224)).to(device)
         f_map = torch.zeros((1, 1, 224, 224)).to(device)
 
         for idx, f in enumerate(baseline_model.feature_maps):
-            if idx%2 == 0: continue
-            print(f.shape)
-            f_sum = torch.sum(f, dim = (1), keepdim = True)
-            f_upsample = upsample(f_sum)
-            f_map += (f_upsample/f.size(1))
+            # origin feature map sum
+            if idx%2 == 0:
+                f_sum = torch.sum(f, dim = (1), keepdim = True)
+                f_upsample = upsample(f_sum)
+                f_map += (f_upsample/f.size(1))
+            # boundary feature map sum
+            else:
+                f_sum = torch.sum(f, dim = (1), keepdim = True)
+                f_upsample = upsample(f_sum)
+                f_map_boundary += (f_upsample/f.size(1))
             f_np = f_upsample.detach().cpu().numpy().reshape(224, 224, 1)
             #plt.imshow(f_np, cmap = 'jet')
             #plt.title(class_map[int(pred)])
             #plt.show()
 
+        f_map_boundary_np = f_map_boundary.detach().cpu().numpy().reshape(224, 224, 1)
+        f_min, f_max = np.min(f_map_boundary_np), np.max(f_map_boundary_np)
+        f_map_boundary_np = (f_map_boundary_np - f_min) / (f_max - f_min)
         f_map_np = f_map.detach().cpu().numpy().reshape(224, 224, 1)
-        fig = plt.figure(figsize=(12, 6))
-        ax1 = fig.add_subplot(1, 2, 2)
-        ax1.imshow(f_map_np, cmap = 'jet')
+        f_total = f_map_boundary_np + f_map_np
+
+        fig = plt.figure(figsize=(12, 8))
+        ax1 = fig.add_subplot(1, 4, 1)
+        ax2 = fig.add_subplot(1, 4, 2)
+        ax3 = fig.add_subplot(1, 4, 3)
+        ax4 = fig.add_subplot(1, 4, 4)
+
+        ax1.imshow(image_np)
         ax1.set_title(class_map[int(pred)])
         ax1.axis('off')
-        ax2 = fig.add_subplot(1, 2, 1)
-        ax2.imshow(image_np)
-        ax2.set_title(class_map[int(pred)])
+
+        ax2.imshow(f_map_np, cmap = 'jet')
+        ax2.set_title('feature activation mapping')
         ax2.axis('off')
+
+        ax3.imshow(f_map_boundary_np, cmap = 'jet')
+        ax3.set_title('boudnary activation mapping')
+        ax3.axis('off')
+        
+        ax4.imshow(f_total, cmap = 'jet')
+        ax4.set_title('total activation mapping')
+        ax4.axis('off')
+        
         plt.show()
         
 
