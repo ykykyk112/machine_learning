@@ -46,13 +46,16 @@ class parallel_net(nn.Module):
 
         self.recover_gradcam.eval()
 
-        batch_size = 50
+        batch_size = 32
+        b_start, b_end = idx*batch_size, (idx+1)*batch_size
 
         # 50 is batch-size
         if not eval:
-            latest_heatmap = self.latest_train_cam[idx*batch_size:(idx+1)*batch_size]
+            if b_end > 50000 : b_end = 50000
+            latest_heatmap = self.latest_train_cam[b_start:b_end]
         else :
-            latest_heatmap = self.latest_valid_cam[idx*batch_size:(idx+1)*batch_size]
+            if b_end > 10000 : b_end = 10000
+            latest_heatmap = self.latest_valid_cam[b_start:b_end]
 
         output = self.recover_gradcam(x, latest_heatmap)
         
