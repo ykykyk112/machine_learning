@@ -26,12 +26,12 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
-        self.latest_train_cam = torch.zeros((50000, 1, 14, 14), dtype=torch.float32, requires_grad=False).to(device)
-        self.latest_valid_cam = torch.zeros((50000, 1, 14, 14), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_train_cam = torch.zeros((5000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_valid_cam = torch.zeros((8000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         for m in reversed(list(self.recover_gradcam.modules())):
-            if isinstance(m, Conv2d):
+            if isinstance(m, RecoverConv2d):
             #if isinstance(m, nn.Conv2d):
                 m.register_forward_hook(self.forward_hook)
                 m.register_full_backward_hook(self.backward_hook)
@@ -76,17 +76,15 @@ class parallel_net(nn.Module):
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam).unsqueeze(1).detach()
 
-        with torch.no_grad():
-            c_max, c_min = torch.amax(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
-            cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-15)
+        c_max, c_min = torch.amax(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(cam_relu, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
+        cam_rescaled = (cam_relu - c_min) / ((c_max - c_min)+1e-15)
         
 
-
         if not eval:
-            if b_end > 50000 : b_end = 50000
+            if b_end > 5000 : b_end = 5000
             self.latest_train_cam[b_start:b_end] = cam_rescaled
         else :
-            if b_end > 10000 : b_end = 10000
+            if b_end > 8000 : b_end = 8000
             self.latest_valid_cam[b_start:b_end] = cam_rescaled
 
         return cam_rescaled
@@ -97,6 +95,16 @@ class parallel_net(nn.Module):
 
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
+
+    def activation_hook(self, _, input_image, output):
+        self.feature_maps.append(output)
+
+    def register_hook(self):
+        self.feature_maps = []
+        self.hook_history = []
+        for m in self.modules():
+            if isinstance(m, nn.MaxPool2d):
+                self.hook_history.append(m.register_forward_hook(self.activation_hook))
 
     
     def forward(self, x, y, idx, eval = False):
