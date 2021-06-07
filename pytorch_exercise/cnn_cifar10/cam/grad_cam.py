@@ -1,6 +1,11 @@
+from numpy.lib.function_base import copy
 import torch
+from torch.autograd import backward
 import torch.nn as nn
+from torch.nn.modules.conv import Conv2d
+from torch.nn.modules.pooling import MaxPool2d
 from pytorch_exercise.frequency.basicblock import RecoverConv2d
+import copy
 
 '''
 Class Implementation :
@@ -29,10 +34,12 @@ class grad_cam() :
         self.hook_history = []
         self.forward_result = None
         self.backward_result = None
-
+        
         if isbaseline:
+            # self.hook_history.append(list(self.model.modules())[-20].register_forward_hook(self.forward_hook))
+            # self.hook_history.append(list(self.model.modules())[-20].register_full_backward_hook(self.backward_hook))
             for m in reversed(list(self.model.modules())):
-                if isinstance(m, nn.MaxPool2d):
+                if isinstance(m, MaxPool2d):
                     self.hook_history.append(m.register_forward_hook(self.forward_hook))
                     self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
                     break
@@ -43,7 +50,6 @@ class grad_cam() :
                     self.hook_history.append(m.register_forward_hook(self.forward_hook))
                     self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
                     break
-
 
 
     def remove_hook(self):
@@ -58,7 +64,7 @@ class grad_cam() :
     # backward_result는 backpropagation에서 구한 y_c를 feature-map의 각 elem으로 편미분한 gradient이다.
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
-        
+
     def get_cam(self, image_batch, label_batch):
         
         self.model.eval()
@@ -69,8 +75,9 @@ class grad_cam() :
         for idx in range(len(label_batch)):
             _, pred = torch.max(output[idx], dim = 0)
             loss += output[idx, pred]
-
+        
         loss.backward()
+
 
         if len(self.backward_result.shape) == 3:
             a_k = torch.mean(self.backward_result.unsqueeze(0), dim=(2, 3), keepdim=True)
@@ -143,20 +150,20 @@ class grad_cam() :
     def get_cam_for_recover(self, image_batch, label_batch, idx):
         
         self.model.eval()
-        
+
         output = self.model(image_batch, label_batch, idx, True)
-        
+
         loss = 0.
         for idx in range(len(label_batch)):
-            with torch.no_grad():
-                _, pred = torch.max(output[idx], dim = 0)
+            _, pred = torch.max(output[idx], dim = 0)
             loss += output[idx, pred]
+        
         loss.backward()
+
         if len(self.backward_result.shape) == 3:
             a_k = torch.mean(self.backward_result.unsqueeze(0), dim=(2, 3), keepdim=True)
         else:
             a_k = torch.mean(self.backward_result, dim=(2, 3), keepdim=True)
-        print(a_k)
         cam = torch.sum(a_k * torch.nn.functional.relu(self.forward_result), dim=1)
         cam_relu = torch.nn.functional.relu(cam)
 

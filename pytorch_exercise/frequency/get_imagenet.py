@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
 import time
+from numpy.lib.arraysetops import isin
 
 from torch.functional import split
 
@@ -244,7 +245,12 @@ def plot_maxpool_cam():
 
     print('Run baseline model...')
     baseline_model = recovered_net(baseline_layers, 'W', True).to(device)
-    baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\target_parameter_stl.pth', map_location="cuda:0"))
+    baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\baseline_123.pth', map_location="cuda:0"))
+
+    maxpool_model = recovered_net(conv_layers, 'W', True).to(device)
+    maxpool_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\target_parameter_cifar_224.pth', map_location="cuda:0"))
+    #maxpool_model.latest_valid_cam = torch.tensor(np.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\cam_ret_stl.npy')).to(device)
+    
 
     test_transform = transforms.Compose([
         transforms.Resize(224),
@@ -255,15 +261,22 @@ def plot_maxpool_cam():
     test_set = torchvision.datasets.STL10('./data', split = 'test', download = True,  transform=test_transform)
     test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=0)
 
-    baseline_cam = grad_cam(baseline_model, False)
-    maxpool_cam = grad_cam(baseline_model, True)
+    baseline_cam = grad_cam(baseline_model, True)
+    maxpool_cam = grad_cam(maxpool_model, False)
 
     class_map = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    #class_map = ['airplane', 'bird', 'car', 'cat', 'deer', 'dog', 'horse', 'monkey', 'ship', 'truck']
+
 
     valid_cam = torch.tensor(np.load('pytorch_exercise\\frequency\data\\cam_ret_stl.npy'))
     upsample = nn.Upsample(size = 224, mode = 'bilinear', align_corners = False)
     
     recover_ret = upsample(valid_cam)
+
+    # for idx, p in enumerate(reversed(list(maxpool_model.modules()))):
+    #     print(idx, '-----------------')
+    #     print(p)
+    # return 
 
     for idx, (test_data, test_target) in enumerate(test_loader):
 
@@ -274,14 +287,17 @@ def plot_maxpool_cam():
         image_denorm = inverse_normalize(test_data, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
         image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1)).reshape(224, 224, 3)
 
-        baseline_ret, baseline_pred = baseline_cam.get_cam_for_recover(test_data, test_target, idx)
-        baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu().unsqueeze(0)), baseline_pred.detach().cpu()
-
+        print('RecoverModel')
         maxpool_ret, maxpool_pred = maxpool_cam.get_cam(test_data, test_target)
         maxpool_ret, maxpool_pred = upsample(maxpool_ret.detach().cpu().unsqueeze(0)), maxpool_pred.detach().cpu()
 
+        print('ConvModel')
+        baseline_ret, baseline_pred = baseline_cam.get_cam(test_data, test_target)
+        baseline_ret, baseline_pred = upsample(baseline_ret.detach().cpu().unsqueeze(0)), baseline_pred.detach().cpu()
+
+
         baseline_np = baseline_ret.numpy().reshape(224, 224, 1)
-        recover_np = recover_ret[idx].numpy().reshape(224, 224, 1)
+        recover_np = maxpool_ret.numpy().reshape(224, 224, 1)
 
         fig = plt.figure(figsize=(12, 4))
 
@@ -293,17 +309,17 @@ def plot_maxpool_cam():
         ax2 = fig.add_subplot(1, 3, 2)
         ax2.imshow(image_np)
         ax2.imshow(baseline_np, cmap = 'jet', alpha = 0.4)
-        ax2.set_title('Baseline')
+        ax2.set_title('MaxPool2d / ' + class_map[int(baseline_pred)])
         ax2.axis('off')
 
         ax3 = fig.add_subplot(1, 3, 3)
         ax3.imshow(image_np)
         ax3.imshow(recover_np, cmap = 'jet', alpha = 0.4)
-        ax3.set_title('Recover')
+        ax3.set_title('RecoverConv2d / ' + class_map[int(maxpool_pred)])
         ax3.axis('off')
 
         plt.show()
-        print(idx/len(test_loader))
+        #print(idx/len(test_loader))
 
 def get_fam():
 
@@ -319,6 +335,7 @@ def get_fam():
     print('Run baseline model...')
     baseline_model = recovered_net(conv_layers, 'W', True).to(device)
     baseline_model.load_state_dict(torch.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\target_parameter_cifar_224.pth', map_location="cuda:0"))
+    #baseline_model.latest_valid_cam = torch.tensor(np.load('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\\frequency\data\\cam_ret_stl.npy')).to(device)
 
     test_transform = transforms.Compose([
         transforms.Resize(224),
@@ -326,7 +343,7 @@ def get_fam():
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    test_set = torchvision.datasets.CIFAR10('./data', train = False, download = True,  transform=test_transform)
+    test_set = torchvision.datasets.STL10('./data', split = 'test', download = True,  transform=test_transform)
     test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=0)
 
     #class_map = ['airplane', 'bird', 'car', 'cat', 'deer', 'dog', 'horse', 'monkey', 'ship', 'truck']
@@ -345,13 +362,15 @@ def get_fam():
         image_denorm = inverse_normalize(test_data, mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010), batch = True)
         image_np = np.transpose(image_denorm.numpy(), (0, 2, 3, 1)).reshape(224, 224, 3)
 
+        baseline_model.feature_maps = []
+        #output = baseline_model(test_data, test_target, idx, True)
         output = baseline_model(test_data)
         _, pred = torch.max(output, dim = 1)
-
+        
         f_map_boundary = torch.zeros((1, 1, 224, 224)).to(device)
         f_map = torch.zeros((1, 1, 224, 224)).to(device)
 
-        for idx, f in enumerate(baseline_model.feature_maps):
+        for idx, f in enumerate(baseline_model.feature_maps[:10]):
             # origin feature map sum
             if idx%2 == 0:
                 f_sum = torch.sum(f, dim = (1), keepdim = True)
@@ -361,6 +380,10 @@ def get_fam():
             else:
                 f_sum = torch.sum(f, dim = (1), keepdim = True)
                 f_upsample = upsample(f_sum)
+
+                #f_upsample[:, :, :, :4], f_upsample[:, :, :, 220:] = f_upsample[:, :, :, :4] * 0.5, f_upsample[:, :, :, 220:] * 0.5
+                #f_upsample[:, :, :4, :], f_upsample[:, :, 220:, :] = f_upsample[:, :, :4, :] * 0.5, f_upsample[:, :, 220:, :] * 0.5
+
                 f_map_boundary += (f_upsample/f.size(1))
             f_np = f_upsample.detach().cpu().numpy().reshape(224, 224, 1)
             #plt.imshow(f_np, cmap = 'jet')
@@ -404,4 +427,5 @@ if __name__ == '__main__' :
     #make_dataset()
     #put_parameters()
     #plot_cam()
-    get_fam()
+    plot_maxpool_cam()
+    #get_fam()
