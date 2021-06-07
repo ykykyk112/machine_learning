@@ -201,7 +201,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if avg_valid_loss < best_valid_loss : best_valid_loss = avg_valid_loss
         if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
 
-    np.save('./cam_ret_cifar_224_RecoverConv2d.npy', model.latest_valid_cam.detach().cpu())
+    np.save('./cam_ret_cifar_224_Conv2d_separated.npy', model.latest_valid_cam.detach().cpu())
     model = model.to('cpu')
     #torch.save(model.state_dict(), './target_parameter_cifar_224_separated_one.pth')
 
