@@ -132,8 +132,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
             
-            print(train_acc, train_data.size()[0])
-            return
 
         #with torch.no_grad():
 
@@ -160,8 +158,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             valid_acc += torch.sum(v_pred == valid_target.data)
 
 
-        train_acc = train_acc*(100/train_data.size()[0])
-        valid_acc = valid_acc*(100/valid_data.size()[0])
+        train_acc = train_acc*(100.)
+        valid_acc = valid_acc*(100.)
 
         curr_lr = model.optimizer.param_groups[0]['lr']
         model.scheduler.step()
