@@ -132,8 +132,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
             
-            print(train_acc, len(train_loader))
-            if idx > 5 : break
 
         #with torch.no_grad():
 
@@ -159,8 +157,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             valid_loss += v_loss.item()
             valid_acc += torch.sum(v_pred == valid_target.data)
 
-            print(valid_acc, len(test_loader))
-            if idx > 5 : break
 
         train_acc = train_acc*(100.)
         valid_acc = valid_acc*(100.)
@@ -174,10 +170,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/len(train_loader)
+        avg_train_acc = train_acc/50000.
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/len(test_loader)
+        avg_valid_acc = valid_acc/10000.
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
