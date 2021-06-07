@@ -132,6 +132,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
             
+            print(train_acc)
+            if idx > 5 : break
 
         #with torch.no_grad():
 
