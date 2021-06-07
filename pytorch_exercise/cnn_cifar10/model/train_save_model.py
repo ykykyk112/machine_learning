@@ -156,6 +156,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             valid_loss += v_loss.item()
             valid_acc += torch.sum(v_pred == valid_target.data)
 
+            print(valid_acc, train_data.size()[0])
+            return
+
         train_acc = train_acc*(100/train_data.size()[0])
         valid_acc = valid_acc*(100/valid_data.size()[0])
 
