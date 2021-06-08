@@ -50,25 +50,25 @@ def drive():
         transforms.RandomHorizontalFlip(),
         #transforms.RandomCrop(size=64, padding=4),
         transforms.ToTensor(),
-        #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        #transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
     test_transform = transforms.Compose([
         transforms.Resize(224),
         transforms.ToTensor(),
-        #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        #transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
-    train_set = torchvision.datasets.STL10(root = './data', split='train', download = True,  transform=train_transform)
-    test_set = torchvision.datasets.STL10(root = './data', split='test', download = True,  transform=test_transform)
+    train_set = torchvision.datasets.CIFAR10(root = './data', train = True, download = True,  transform=train_transform)
+    test_set = torchvision.datasets.CIFAR10(root = './data', train = False, download = True,  transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
 
-    train_save_model.train_eval_model_gpu(recover_model, 45, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 36, device, train_loader, test_loader, False, None)
 
 
 
