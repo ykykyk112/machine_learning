@@ -26,8 +26,8 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
-        self.latest_train_cam = torch.zeros((5000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
-        self.latest_valid_cam = torch.zeros((8000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_train_cam = torch.ones((5000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_valid_cam = torch.ones((8000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         #for m in reversed(list(self.recover_gradcam.modules())):
@@ -36,9 +36,9 @@ class parallel_net(nn.Module):
                 #m.register_forward_hook(self.forward_hook)
                 #m.register_full_backward_hook(self.backward_hook)
                 #break
-        reversed(list(self.recover_gradcam.modules()))[11].register_forward_hook(self.forward_hook)
-        reversed(list(self.recover_gradcam.modules()))[11].register_full_backward_hook(self.backward_hook)
-        print('hook layer :', reversed(list(self.recover_gradcam.modules()))[11])
+        list(self.recover_gradcam.modules())[91].register_forward_hook(self.forward_hook)
+        list(self.recover_gradcam.modules())[91].register_full_backward_hook(self.backward_hook)
+        print('hook layer :', list(self.recover_gradcam.modules())[91])
 
     def _copy_weight(self):
         with torch.no_grad():

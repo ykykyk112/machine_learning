@@ -279,10 +279,10 @@ def plot_maxpool_cam():
     
     recover_ret = upsample(valid_cam)
 
-    for idx, p in enumerate(reversed(list(maxpool_model.recover_gradcam.modules()))):
-        print(idx, '-----------------')
-        print(p)
-    return 
+    # for idx, p in enumerate(list(maxpool_model.recover_gradcam.modules())):
+    #     print(idx, '-----------------')
+    #     print(p)
+    # return 
 
     for idx, (test_data, test_target) in enumerate(test_loader):
 
