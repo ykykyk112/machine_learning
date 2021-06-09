@@ -26,16 +26,19 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
-        self.latest_train_cam = torch.zeros((50000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
-        self.latest_valid_cam = torch.zeros((10000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_train_cam = torch.zeros((5000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
+        self.latest_valid_cam = torch.zeros((8000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
-        for m in reversed(list(self.recover_gradcam.modules())):
-            if isinstance(m, RecoverConv2d):
+        #for m in reversed(list(self.recover_gradcam.modules())):
+            #if isinstance(m, RecoverConv2d):
             #if isinstance(m, nn.Conv2d):
-                m.register_forward_hook(self.forward_hook)
-                m.register_full_backward_hook(self.backward_hook)
-                break
+                #m.register_forward_hook(self.forward_hook)
+                #m.register_full_backward_hook(self.backward_hook)
+                #break
+        list(self.model.modules())[-115].register_forward_hook(self.forward_hook)
+        list(self.model.modules())[-115].register_full_backward_hook(self.forward_hook)
+        print('hook layer :', list(self.model.modules())[-115])
 
     def _copy_weight(self):
         with torch.no_grad():
@@ -51,10 +54,10 @@ class parallel_net(nn.Module):
 
         # 50 is batch-size
         if not eval:
-            if b_end > 50000 : b_end = 50000
+            if b_end > 5000 : b_end = 5000
             latest_heatmap = self.latest_train_cam[b_start:b_end]
         else :
-            if b_end > 10000 : b_end = 10000
+            if b_end > 8000 : b_end = 8000
             latest_heatmap = self.latest_valid_cam[b_start:b_end]
 
         output = self.recover_gradcam(x, latest_heatmap)
@@ -81,10 +84,10 @@ class parallel_net(nn.Module):
         
 
         if not eval:
-            if b_end > 50000 : b_end = 50000
+            if b_end > 5000 : b_end = 5000
             self.latest_train_cam[b_start:b_end] = cam_rescaled
         else :
-            if b_end > 10000 : b_end = 10000
+            if b_end > 8000 : b_end = 8000
             self.latest_valid_cam[b_start:b_end] = cam_rescaled
 
         return cam_rescaled
@@ -107,11 +110,14 @@ class parallel_net(nn.Module):
                 self.hook_history.append(m.register_forward_hook(self.activation_hook))
 
     
-    def forward(self, x, y, idx, eval = False):
+    def forward(self, x, y = None, idx = None, eval = False):
         # update recover_gradcam's parameters from recover_backbone
         self._copy_weight()
+        
         # get gradcam heatmap from recover_gradcam model and update heatmap on self.latest_cam used for forward in _get_grad_cam function
-        heatmap = self._get_grad_cam(x, y, idx, eval)
+        if y == None : heatmap = None
+        else : heatmap = self._get_grad_cam(x, y, idx, eval)
+
         return self.recover_backbone(x, heatmap)
 
     

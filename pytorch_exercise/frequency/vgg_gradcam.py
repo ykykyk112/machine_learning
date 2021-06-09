@@ -28,7 +28,7 @@ class recovered_net(nn.Module):
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
+        self.scheduler = StepLR(self.optimizer, step_size=15, gamma=0.5)
         #self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', 0.1, 5)
 
 
@@ -43,10 +43,12 @@ class recovered_net(nn.Module):
                 model += [RecoverConv2d(input_size, input_size, kernel_size=3, stride=1, padding = 1, comp_mode = recover_mode, upsample_mode = deconv_mode)]
             elif conv == 'M':
                 model += [nn.MaxPool2d(2, 2)]
+            elif conv == 'A':
+                model += [nn.ReLU(inplace = True)]
             else:
                 model += [nn.Conv2d(input_size, conv, kernel_size=3, stride=1, padding = 1), 
                           nn.BatchNorm2d(conv),
-                          nn.ReLU(inplace=True)]
+                          nn.ReLU(inplace = True)]
                 input_size= conv
         
         return mysequential.MySequential(*model)
@@ -85,7 +87,7 @@ class recovered_net(nn.Module):
             h.remove()
 
 
-    def forward(self, x, heatmap):
+    def forward(self, x, heatmap = None):
         '''
             get heatmap,
             heritage nn.Sequential and modified forward(x, y) -> only apply y to 'R' layer

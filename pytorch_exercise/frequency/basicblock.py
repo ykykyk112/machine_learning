@@ -68,7 +68,7 @@ class RecoverConv2d(nn.Module):
         ret_substract = ret_first_forward - ret_upsample
 
         #with torch.no_grad():
-        #    ret_second_forward = self.feed_forward(torch.abs(ret_substract))
+        #   ret_second_forward = self.feed_forward(torch.abs(ret_substract))
 
         ret_second_forward = self.second_forward(torch.abs(ret_substract))
 
@@ -83,14 +83,11 @@ class RecoverConv2d(nn.Module):
 
         elif (self.comp_mode == 'W' or self.comp_mode == 'w') and heatmap != None:
 
-            with torch.no_grad():
-                #ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
-                self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
-                heatmap_upsample = self.upsample(heatmap)
+            self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
+            heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
-            #ret_comp = self.comp_conv(ret_dot)
-            return ret_pooling + self.sum_factor*(ret_dot)
-            #return ret_pooling + 0.2*(ret_dot)
+            ret = ret_pooling + self.sum_factor*(ret_dot)
+            return ret
 
 
         elif self.comp_mode == 'S' or self.comp_mode == 's':
@@ -101,9 +98,8 @@ class RecoverConv2d(nn.Module):
             #with torch.no_grad():
             c_max, c_min = torch.amax(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
             ret_rescaled = (ret_second_forward - c_min) / ((c_max - c_min)+1e-15)
-            ret = ret_pooling + self.sum_factor*(ret_rescaled)
+            ret = ret_pooling + self.sum_factor*(ret_second_forward)
             return ret
-            #return ret_pooling + 0.1*(ret_rescaled)
 
     # def forward(self, x):
 
