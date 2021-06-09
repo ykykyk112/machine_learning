@@ -66,9 +66,9 @@ class parallel_net(nn.Module):
         for i in range(len(y)):
             _, pred = torch.max(output[i], dim = 0)
             loss += output[i, pred]
-
+        print('before backward')
         loss.backward()
-
+        print('after backward')
         self.recover_gradcam.optimizer.zero_grad()
 
         if len(self.backward_result.shape) == 3:
