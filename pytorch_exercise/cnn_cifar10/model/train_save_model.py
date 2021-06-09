@@ -135,28 +135,28 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         with torch.no_grad():
 
-        	model.eval()
-      	  
+            model.eval()
+            
             for idx, (valid_data, valid_target) in enumerate(test_loader):
                 
                 valid_data, valid_target = valid_data.to(device), valid_target.to(device)
 
-            	model.optimizer.zero_grad()
+                model.optimizer.zero_grad()
 
-            	if cam_mode :
-                	valid_output, _ = model(valid_data)
-            	else :
-                	valid_output = model(valid_data)
-                	#valid_output = model(valid_data, valid_target, idx, True)
+                if cam_mode :
+                    valid_output, _ = model(valid_data)
+                else :
+                    valid_output = model(valid_data)
+                    #valid_output = model(valid_data, valid_target, idx, True)
 
 
-            	v_loss = model.loss(valid_output, valid_target)
-            	#print(v_loss.item())
-            	_, v_pred = torch.max(valid_output, dim = 1)
+                v_loss = model.loss(valid_output, valid_target)
+                #print(v_loss.item())
+                _, v_pred = torch.max(valid_output, dim = 1)
         
 
-            	valid_loss += v_loss.item()
-            	valid_acc += torch.sum(v_pred == valid_target.data)
+                valid_loss += v_loss.item()
+                valid_acc += torch.sum(v_pred == valid_target.data)
 
 
         train_acc = train_acc*(100.)
