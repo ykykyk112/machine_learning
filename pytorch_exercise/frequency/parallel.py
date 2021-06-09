@@ -36,7 +36,7 @@ class parallel_net(nn.Module):
                 #m.register_forward_hook(self.forward_hook)
                 #m.register_full_backward_hook(self.backward_hook)
                 #break
-        list(self.recover_gradcam.modules())[91].register_forward_hook(self.forward_hook)
+        list(self.recover_gradcam.modules())[82].register_forward_hook(self.forward_hook)
         list(self.recover_gradcam.modules())[91].register_full_backward_hook(self.backward_hook)
         print('hook layer :', list(self.recover_gradcam.modules())[91])
 
