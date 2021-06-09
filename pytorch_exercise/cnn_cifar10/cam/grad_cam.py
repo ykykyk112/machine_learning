@@ -34,22 +34,34 @@ class grad_cam() :
         self.hook_history = []
         self.forward_result = None
         self.backward_result = None
-        
-        if isbaseline:
-            # self.hook_history.append(list(self.model.modules())[-20].register_forward_hook(self.forward_hook))
-            # self.hook_history.append(list(self.model.modules())[-20].register_full_backward_hook(self.backward_hook))
+
+        if isbaseline == 0:
             for m in reversed(list(self.model.modules())):
                 if isinstance(m, MaxPool2d):
                     self.hook_history.append(m.register_forward_hook(self.forward_hook))
                     self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
                     break
         
+        elif isbaseline == 1:
+            self.hook_history.append(list(self.model.modules())[-20].register_forward_hook(self.forward_hook))
+            self.hook_history.append(list(self.model.modules())[-20].register_full_backward_hook(self.backward_hook))
+            print(list(self.model.modules())[-20])
+            # for m in reversed(list(self.model.modules())):
+            #     if isinstance(m, MaxPool2d):
+            #         self.hook_history.append(m.register_forward_hook(self.forward_hook))
+            #         self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
+            #         break
+        
         else:
-            for m in reversed(list(self.model.modules())):
-                if isinstance(m, RecoverConv2d):
-                    self.hook_history.append(m.register_forward_hook(self.forward_hook))
-                    self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
-                    break
+            # 11 second maxpool, 12 first maxpool
+            self.hook_history.append(list(self.model.modules())[-19].register_forward_hook(self.forward_hook))
+            self.hook_history.append(list(self.model.modules())[-19].register_full_backward_hook(self.backward_hook))
+            print(list(self.model.modules())[-19])
+            # for m in reversed(list(self.model.modules())):
+            #     if isinstance(m, Conv2d):
+            #         self.hook_history.append(m.register_forward_hook(self.forward_hook))
+            #         self.hook_history.append(m.register_full_backward_hook(self.backward_hook))
+            #         break
 
 
     def remove_hook(self):

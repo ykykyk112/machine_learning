@@ -38,7 +38,7 @@ class parallel_net(nn.Module):
                 #break
         reversed(list(self.recover_gradcam.modules()))[11].register_forward_hook(self.forward_hook)
         reversed(list(self.recover_gradcam.modules()))[11].register_full_backward_hook(self.backward_hook)
-        print('hook layer :', reversed(list(self.recover_gradcam.modules()))[-12])
+        print('hook layer :', reversed(list(self.recover_gradcam.modules()))[11])
 
     def _copy_weight(self):
         with torch.no_grad():
