@@ -26,7 +26,7 @@ class recovered_net(nn.Module):
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
+        self.scheduler = StepLR(self.optimizer, step_size=15, gamma=0.5)
 
     def _make_layer_conv(self, conv_layers, recover_mode, upsample_mode):
         
