@@ -61,8 +61,8 @@ def drive():
         transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
     ])
 
-    train_set = torchvision.datasets.STL10(root = './data', split = 'Train', download = True,  transform=train_transform)
-    test_set = torchvision.datasets.STL10(root = './data', split = 'Test', download = True,  transform=test_transform)
+    train_set = torchvision.datasets.STL10(root = './data', split = 'train', download = True,  transform=train_transform)
+    test_set = torchvision.datasets.STL10(root = './data', split = 'test', download = True,  transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
