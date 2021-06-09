@@ -36,9 +36,9 @@ class parallel_net(nn.Module):
                 #m.register_forward_hook(self.forward_hook)
                 #m.register_full_backward_hook(self.backward_hook)
                 #break
-        list(self.modules())[-115].register_forward_hook(self.forward_hook)
-        list(self.modules())[-115].register_backward_hook(self.backward_hook)
-        print('hook layer :', list(self.modules())[-115])
+        list(self.recover_gradcam.modules())[-12].register_forward_hook(self.forward_hook)
+        list(self.recover_gradcam.modules())[-12].register_backward_hook(self.backward_hook)
+        print('hook layer :', list(self.recover_gradcam.modules())[-115])
 
     def _copy_weight(self):
         with torch.no_grad():
@@ -66,9 +66,9 @@ class parallel_net(nn.Module):
         for i in range(len(y)):
             _, pred = torch.max(output[i], dim = 0)
             loss += output[i, pred]
-        print('before backward')
+
         loss.backward()
-        print('after backward')
+
         self.recover_gradcam.optimizer.zero_grad()
 
         if len(self.backward_result.shape) == 3:
@@ -98,7 +98,6 @@ class parallel_net(nn.Module):
 
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
-        print('backward hook')
 
     def activation_hook(self, _, input_image, output):
         self.feature_maps.append(output)
