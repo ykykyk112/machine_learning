@@ -38,7 +38,7 @@ class parallel_net(nn.Module):
                 #break
         list(self.modules())[-115].register_forward_hook(self.forward_hook)
         list(self.modules())[-115].register_full_backward_hook(self.forward_hook)
-        print('hook layer :', list(self.model.modules())[-115])
+        print('hook layer :', list(self.modules())[-115])
 
     def _copy_weight(self):
         with torch.no_grad():
