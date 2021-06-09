@@ -98,6 +98,7 @@ class parallel_net(nn.Module):
 
     def backward_hook(self, _, grad_input, grad_output):
         self.backward_result = torch.squeeze(grad_output[0])
+        print('backward hook')
 
     def activation_hook(self, _, input_image, output):
         self.feature_maps.append(output)
