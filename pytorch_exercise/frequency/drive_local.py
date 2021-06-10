@@ -67,7 +67,7 @@ def drive():
     train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train', transform=train_transform)
     test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 32, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
     train_save_model.train_eval_model_gpu(recover_model, 32, device, train_loader, test_loader, False, None)
