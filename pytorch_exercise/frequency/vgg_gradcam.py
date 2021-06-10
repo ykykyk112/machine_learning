@@ -19,7 +19,7 @@ class recovered_net(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 10)
+            nn.Linear(512, 30)
         )
 
         self._initialize_weights()
@@ -28,7 +28,7 @@ class recovered_net(nn.Module):
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=15, gamma=0.5)
+        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.5)
         #self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', 0.1, 5)
 
 
