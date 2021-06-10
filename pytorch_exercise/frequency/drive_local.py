@@ -35,7 +35,7 @@ def drive():
     device = torch.device(1)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    print('baseline, ImageNet subset (30 classes, train image : 39000, test_image : 1500)')
+    print('our model, ImageNet subset (30 classes, train image : 39000, test_image : 1500)')
     if not True:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)

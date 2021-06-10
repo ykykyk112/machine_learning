@@ -49,7 +49,7 @@ class parallel_net(nn.Module):
 
         self.recover_gradcam.eval()
 
-        batch_size = 1
+        batch_size = 32
         b_start, b_end = idx*batch_size, (idx+1)*batch_size
 
         # 50 is batch-size
