@@ -65,7 +65,7 @@ def drive():
     ])
 
     train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train', transform=test_transform)
+    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/val', transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
