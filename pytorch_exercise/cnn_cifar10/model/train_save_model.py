@@ -171,10 +171,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/5000.
+        avg_train_acc = train_acc/39000.
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/8000.
+        avg_valid_acc = valid_acc/1500.
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -206,7 +206,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
     #np.save('./STL10/cam_ret_stl_recoverconv_separated.npy', model.latest_valid_cam.detach().cpu())
     model = model.to('cpu')
-    torch.save(model.state_dict(), './STL10/baseline_stl.pth')
+    torch.save(model.state_dict(), './ImageNet/baseline_imagenet_subset.pth')
 
 
     print('model parameter, grad cam heatmap are saved')

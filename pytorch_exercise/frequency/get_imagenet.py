@@ -4,6 +4,7 @@ import nibabel as nib
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os, wget, shutil
+from torchvision.transforms.transforms import RandomHorizontalFlip
 import time
 from xml.etree.ElementTree import parse
 from numpy.lib.arraysetops import isin
@@ -450,20 +451,40 @@ def model_summary():
     
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    test_set = torchvision.datasets.ImageFolder('D:\imagenet_object_localization_patched2019\ILSVRC\Data\CLS-LOC\\val', train_transform)
-    test_loader = DataLoader(test_set, batch_size=32, shuffle=True, num_workers=4)
+    test_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
+    ])
+    
+    train_set = torchvision.datasets.ImageFolder('D:\imagenet_object_localization_patched2019\ILSVRC\Data\CLS-LOC\\train_subset', train_transform)
+    train_loader = DataLoader(train_set, batch_size=1300, shuffle=False, num_workers=4)
+    test_set = torchvision.datasets.ImageFolder('D:\imagenet_object_localization_patched2019\ILSVRC\Data\CLS-LOC\\val_subset', test_transform)
+    test_loader = DataLoader(test_set, batch_size=50, shuffle=False, num_workers=4)
 
-    image, label = iter(test_loader).next()
-    image = inverse_normalize(image, mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225], batch = True)
-    image_np = np.transpose(image.numpy(), (0, 2, 3, 1))
+    for (train_image, train_label), (valid_image, valid_label) in zip(train_loader, test_loader):
 
-    for i in range(32):
-        plt.imshow(image_np[i])
-        plt.title(str(int(label[i])))
+        train_image = inverse_normalize(train_image, mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225], batch = True)
+        valid_image = inverse_normalize(valid_image, mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225], batch = True)
+
+        train_image = np.transpose(train_image.numpy(), (0, 2, 3, 1))
+        valid_image = np.transpose(valid_image.numpy(), (0, 2, 3, 1))
+
+        fig = plt.figure(figsize=(10, 5))
+
+        ax0 = fig.add_subplot(1, 2, 1)
+        ax0.imshow(train_image[0])
+        ax0.set_title(int(train_label[0]))
+
+        ax1 = fig.add_subplot(1, 2, 2)
+        ax1.imshow(valid_image[0])
+        ax1.set_title(int(valid_label[0]))
+
         plt.show()
 
     
@@ -473,6 +494,6 @@ if __name__ == '__main__' :
     #make_dataset()
     #put_parameters()
     #plot_cam()
-    plot_maxpool_cam()
+    #plot_maxpool_cam()
     #get_fam()
-    #model_summary()
+    model_summary()
