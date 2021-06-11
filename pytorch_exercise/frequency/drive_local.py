@@ -35,8 +35,8 @@ def drive():
     device = torch.device(1)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    print('our model, ImageNet subset (30 classes, train image : 39000, test_image : 1500)')
-    if not True:
+    print('baseline model, ImageNet subset (30 classes, train image : 39000, test_image : 1500)')
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
@@ -64,8 +64,8 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/val', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train_subset_2', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/val_subset_2', transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
