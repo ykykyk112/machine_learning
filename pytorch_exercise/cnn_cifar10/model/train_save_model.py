@@ -203,7 +203,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if avg_valid_loss < best_valid_loss : best_valid_loss = avg_valid_loss
         if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
 
-    #np.save('./ImageNet/cam_ret_imagenet_subset.npy', model.latest_valid_cam.detach().cpu())
+    np.save('./ImageNet/cam_ret_imagenet_subset_0611.npy', model.latest_valid_cam.detach().cpu())
     model = model.to('cpu')
     torch.save(model.state_dict(), './ImageNet/target_imagenet_subset_0611.pth')
 
