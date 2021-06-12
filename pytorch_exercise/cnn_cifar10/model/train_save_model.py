@@ -201,14 +201,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
         
         if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
-
-        if avg_valid_loss < best_valid_loss : 
-            best_valid_loss = avg_valid_loss
-            np.save('./ImageNet/cam_ret_imagenet_subset_sum.npy', model.latest_valid_cam.detach().cpu())
-            model = model.to('cpu')
-            torch.save(model.state_dict(), './ImageNet/target_imagenet_subset_sum.pth')
-            model = model.to(device)
-
+        if avg_valid_loss < best_valid_loss : best_valid_loss = avg_valid_loss
+        
+    np.save('./ImageNet/cam_ret_imagenet_subset_sum.npy', model.latest_valid_cam.detach().cpu())
+    model = model.to('cpu')
+    torch.save(model.state_dict(), './ImageNet/target_imagenet_subset_sum.pth')
 
     print('model parameter, grad cam heatmap are saved')
     print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
