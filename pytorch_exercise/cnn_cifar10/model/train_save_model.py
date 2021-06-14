@@ -209,7 +209,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             best_epoch = i+1
         
     #np.save('./ImageNet/cam_ret_imagenet_subset_48.npy', best_latest_valid_cam.cpu())
-    best_loss_parameter = best_loss_parameter.to('cpu')
     #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
     torch.save(best_loss_parameter, './ImageNet/test.pth')
 
