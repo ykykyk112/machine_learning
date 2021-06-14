@@ -210,7 +210,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         
     np.save('./ImageNet/cam_test.npy', best_latest_valid_cam.cpu())
     #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-    torch.save(best_loss_parameter, './ImageNet/test.pth')
+    torch.save(best_loss_parameter, './ImageNet/test2.pth')
 
     print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
     print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
