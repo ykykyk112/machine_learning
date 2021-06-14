@@ -92,12 +92,14 @@ class parallel_net(nn.Module):
 
         if not eval:
             if b_end > 71159 : b_end = 71159
-            self.latest_train_cam[b_start:b_end] = cam_rescaled
+            self.latest_train_cam[b_start:b_end] = cam_rescaled.to(self.device)
         else :
             if b_end > 2750 : b_end = 2750
-            self.latest_valid_cam[b_start:b_end] = cam_rescaled
+            self.latest_valid_cam[b_start:b_end] = cam_rescaled.to(self.device)
 
-        return cam_rescaled.to(self.device)
+        print(cam_rescaled.to(self.device).is_cuda)
+
+        return cam_rescaled
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
@@ -123,7 +125,7 @@ class parallel_net(nn.Module):
         
         # get gradcam heatmap from recover_gradcam model and update heatmap on self.latest_cam used for forward in _get_grad_cam function
         if y == None : heatmap = None
-        else : heatmap = self._get_grad_cam(x, y, idx, eval).to(self.device)
+        else : heatmap = self._get_grad_cam(x, y, idx, eval)
 
         return self.recover_backbone(x, heatmap)
 
