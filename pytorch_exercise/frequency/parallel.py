@@ -61,11 +61,11 @@ class parallel_net(nn.Module):
         if not eval:
             if b_end > 71159 : b_end = 71159
             latest_heatmap = self.latest_train_cam[b_start:b_end]
-            latest_heatamp = latest_heatmap.to(device)
+            latest_heatamp = latest_heatmap.to(self.device)
         else :
             if b_end > 2750 : b_end = 2750
             latest_heatmap = self.latest_valid_cam[b_start:b_end]
-            latest_heatamp = latest_heatmap.to(device)
+            latest_heatamp = latest_heatmap.to(self.device)
 
         output = self.recover_gradcam(x, latest_heatmap)
         
