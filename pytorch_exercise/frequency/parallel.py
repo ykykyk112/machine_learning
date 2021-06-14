@@ -26,6 +26,11 @@ class parallel_net(nn.Module):
         self.loss = self.recover_backbone.loss
         self.scheduler = self.recover_backbone.scheduler
 
+        if device != None : 
+            self.device = device
+            print('device')
+            print(device)
+
         self.latest_train_cam = torch.ones((71159, 1, 7, 7), dtype=torch.float32, requires_grad=False)
         self.latest_valid_cam = torch.ones((2750, 1, 7, 7), dtype=torch.float32, requires_grad=False)
 
