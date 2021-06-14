@@ -97,7 +97,7 @@ class parallel_net(nn.Module):
             if b_end > 2750 : b_end = 2750
             self.latest_valid_cam[b_start:b_end] = cam_rescaled
 
-        return cam_rescaled
+        return cam_rescaled.to(self.device)
 
     def forward_hook(self, _, input_image, output):
         self.forward_result = torch.squeeze(output)
