@@ -44,6 +44,8 @@ def drive():
     else :
         print('Run target model...')
         recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
+        recover_model.load_state_dict(torch.load('./ImageNet/test2.pth'))
+        recover_model.latest_valid_cam = torch.tensor(np.load('./ImageNet/cam_test.npy')).to(device)
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
 
