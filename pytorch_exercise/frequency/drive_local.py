@@ -39,6 +39,7 @@ def drive():
     if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
+        recover_model.load_state_dict(torch.load('./ImageNet/test.pth'))
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
