@@ -123,7 +123,7 @@ class parallel_net(nn.Module):
         
         # get gradcam heatmap from recover_gradcam model and update heatmap on self.latest_cam used for forward in _get_grad_cam function
         if y == None : heatmap = None
-        else : heatmap = self._get_grad_cam(x, y, idx, eval)
+        else : heatmap = self._get_grad_cam(x, y, idx, eval).to(self.device)
 
         return self.recover_backbone(x, heatmap)
 
