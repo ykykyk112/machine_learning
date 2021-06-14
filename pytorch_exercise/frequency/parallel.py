@@ -28,11 +28,10 @@ class parallel_net(nn.Module):
 
         if device != None : 
             self.device = device
-            print('device')
-            print(type(self.device))
+ 
 
-        self.latest_train_cam = torch.ones((71159, 1, 7, 7), dtype=torch.float32, requires_grad=False)
-        self.latest_valid_cam = torch.ones((2750, 1, 7, 7), dtype=torch.float32, requires_grad=False)
+        self.latest_train_cam = torch.ones((71159, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
+        self.latest_valid_cam = torch.ones((2750, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         #for m in reversed(list(self.recover_gradcam.modules())):
@@ -61,11 +60,11 @@ class parallel_net(nn.Module):
         if not eval:
             if b_end > 71159 : b_end = 71159
             latest_heatmap = self.latest_train_cam[b_start:b_end]
-            latest_heatamp = latest_heatmap.to(self.device)
+            latest_heatamp = latest_heatmap
         else :
             if b_end > 2750 : b_end = 2750
             latest_heatmap = self.latest_valid_cam[b_start:b_end]
-            latest_heatamp = latest_heatmap.to(self.device)
+            latest_heatamp = latest_heatmap
 
         output = self.recover_gradcam(x, latest_heatamp)
         
