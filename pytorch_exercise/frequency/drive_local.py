@@ -44,8 +44,6 @@ def drive():
     else :
         print('Run target model...')
         recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
-        recover_model.load_state_dict(torch.load('./ImageNet/test2.pth'))
-        recover_model.latest_valid_cam = torch.tensor(np.load('./ImageNet/cam_test.npy')).to(device)
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
 
@@ -73,7 +71,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
-    train_save_model.train_eval_model_gpu(recover_model, 2, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 
