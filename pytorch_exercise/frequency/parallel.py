@@ -92,12 +92,10 @@ class parallel_net(nn.Module):
 
         if not eval:
             if b_end > 71159 : b_end = 71159
-            self.latest_train_cam[b_start:b_end] = cam_rescaled.to(self.device)
+            self.latest_train_cam[b_start:b_end] = cam_rescaled
         else :
             if b_end > 2750 : b_end = 2750
-            self.latest_valid_cam[b_start:b_end] = cam_rescaled.to(self.device)
-
-        print(cam_rescaled.to(self.device).is_cuda)
+            self.latest_valid_cam[b_start:b_end] = cam_rescaled
 
         return cam_rescaled
 
