@@ -67,7 +67,7 @@ class parallel_net(nn.Module):
             latest_heatmap = self.latest_valid_cam[b_start:b_end]
             latest_heatamp = latest_heatmap.to(self.device)
 
-        output = self.recover_gradcam(x, latest_heatmap)
+        output = self.recover_gradcam(x, latest_heatamp)
         
         loss = 0.
         for i in range(len(y)):
