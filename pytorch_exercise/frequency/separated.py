@@ -130,12 +130,3 @@ class separated_network(nn.Module):
         print(x.shape, b.shape)
         return x, b
 
-conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
-boundary_layers = [64, 128, 256, 512]
-
-cuda_device = torch.device(1)
-
-separated_model = separated_network(conv_layers, boundary_layers, cuda_device)
-
-for m in list(separated_model.modules()):
-    print(m)
