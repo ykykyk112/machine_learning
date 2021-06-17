@@ -32,8 +32,10 @@ class separated_network(nn.Module):
         )
         self.boundary_classifier = nn.Sequential(
             nn.Linear(2 * 2 * 512, 1024),
+            nn.Dropout2d(0.2),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
+            nn.Dropout2d(0.2),
             nn.ReLU(inplace=True),
             nn.Linear(512, 10)
         )

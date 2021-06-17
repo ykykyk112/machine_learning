@@ -16,6 +16,7 @@ from torchsummary import summary
 from random_seed import fix_randomness
 from model import train_save_model
 from separated import separated_network
+from vgg_recover import recovered_net
 
 def drive():
 
@@ -26,11 +27,11 @@ def drive():
     conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
     boundary_layers = [64, 128, 256, 512]
 
-    baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M']
     device = torch.device(2)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
