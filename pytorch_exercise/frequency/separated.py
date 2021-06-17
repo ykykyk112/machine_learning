@@ -21,8 +21,10 @@ class separated_network(nn.Module):
         self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
+
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
+
         self.classifier = nn.Sequential(
             nn.Linear(2 * 2 * 512, 1024),
             nn.ReLU(inplace=True),
@@ -51,7 +53,7 @@ class separated_network(nn.Module):
         
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
-        self.boundary_loss = nn.CrossEntropyLoss()
+        #self.boundary_loss = nn.CrossEntropyLoss()
         self.ensemble_loss = nn.CrossEntropyLoss()
         self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
@@ -136,5 +138,5 @@ class separated_network(nn.Module):
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
         ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
-        return x, b, ensemble
+        return x, ensemble
 

@@ -126,9 +126,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
             t_loss = model.loss(train_output, train_target)
             #t_loss.backward()
-            b_loss = model.boundary_loss(boundary_output, train_target)
+            #b_loss = model.boundary_loss(boundary_output, train_target)
             e_loss = model.ensemble_loss(ensemble_output, train_target)
-            sum_loss = (t_loss + b_loss + e_loss)
+            sum_loss = (t_loss + e_loss)
             sum_loss.backward()
 
             model.optimizer.step()
