@@ -127,6 +127,5 @@ class separated_network(nn.Module):
         b = self.boundary_forward()
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
-        print(x.shape, b.shape)
         return x, b
 
