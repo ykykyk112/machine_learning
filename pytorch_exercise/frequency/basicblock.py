@@ -87,6 +87,11 @@ class RecoverConv2d(nn.Module):
             heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
             ret = ret_pooling + self.sum_factor*(ret_dot)
+            print(ret_pooling.shape)
+            print(self.sum_factor.shape)
+            print(ret_second_forward.shape)
+            print(heatmap_upsample.shape)
+            print('-'*30)
             return ret
 
 
@@ -99,10 +104,6 @@ class RecoverConv2d(nn.Module):
             c_max, c_min = torch.amax(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
             ret_rescaled = (ret_second_forward - c_min) / ((c_max - c_min)+1e-15)
             ret = ret_pooling + self.sum_factor*(ret_second_forward)
-            print(ret_pooling.shape)
-            print(self.sum_factor.shape)
-            print(ret_second_forward.shape)
-            print('-'*30)
             return ret
 
     # def forward(self, x):
