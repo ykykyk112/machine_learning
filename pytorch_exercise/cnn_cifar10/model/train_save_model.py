@@ -180,9 +180,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         valid_loss_history.append(float(avg_valid_loss))
 
         avg_train_acc = train_acc/50000.
+        avg_boundary_train_acc = boundary_acc/50000.
         train_acc_history.append(float(avg_train_acc))
 
         avg_valid_acc = valid_acc/10000.
+        avg_boundary_valid_acc = valid_boundary_acc/10000.
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -207,21 +209,21 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         second_weight = 0.
 
         if i%2==0 or i%2==1:
-            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.5f}% \t bdr_valid : {7:.5f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, boundary_acc, valid_boundary_acc))        
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.5f}% \t bdr_valid : {7:.5f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc))        
         
-        if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
-        if avg_valid_loss < best_valid_loss : 
-            best_valid_loss = avg_valid_loss
-            best_loss_parameter = model.state_dict()
-            best_latest_valid_cam = model.latest_valid_cam.detach()
-            best_epoch = i+1
+    #     if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
+    #     if avg_valid_loss < best_valid_loss : 
+    #         best_valid_loss = avg_valid_loss
+    #         best_loss_parameter = model.state_dict()
+    #         best_latest_valid_cam = model.latest_valid_cam.detach()
+    #         best_epoch = i+1
         
-    np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
-    #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-    torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_color.pth')
+    # np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
+    # #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
+    # torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_color.pth')
 
-    print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
-    print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
+    # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
+    # print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
 
     return
 
