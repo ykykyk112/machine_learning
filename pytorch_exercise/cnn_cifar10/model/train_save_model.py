@@ -120,24 +120,24 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             if cam_mode :
                 train_output, _ = model.forward(train_data)
             else :
-                #train_output = model(train_data)
-                train_output, boundary_output = model(train_data)
+                train_output = model(train_data)
+                #train_output, boundary_output = model(train_data)
                 #train_output = model(train_data, train_target, idx)
 
             t_loss = model.loss(train_output, train_target)
-            #t_loss.backward()
-            b_loss = model.boundary_loss(boundary_output, train_target)
-            sum_loss = (t_loss + b_loss)
-            sum_loss.backward()
+            t_loss.backward()
+            #b_loss = model.boundary_loss(boundary_output, train_target)
+            #sum_loss = (t_loss + b_loss)
+            #sum_loss.backward()
 
             model.optimizer.step()
             #print(idx, '  loss :', t_loss.item())
             _, pred = torch.max(train_output, dim = 1)
-            _, boundary_pred = torch.max(boundary_output, dim = 1)
+            #_, boundary_pred = torch.max(boundary_output, dim = 1)
 
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
-            boundary_acc += torch.sum(boundary_pred == train_target.data)
+            #boundary_acc += torch.sum(boundary_pred == train_target.data)
             
 
         with torch.no_grad():
@@ -153,19 +153,19 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 if cam_mode :
                     valid_output, _ = model(valid_data)
                 else :
-                    #valid_output = model(valid_data)
-                    valid_output, valid_boundary_output = model(valid_data)
+                    valid_output = model(valid_data)
+                    #valid_output, valid_boundary_output = model(valid_data)
                     #valid_output = model(valid_data, valid_target, idx, True)
 
 
                 v_loss = model.loss(valid_output, valid_target)
                 #print(v_loss.item())
                 _, v_pred = torch.max(valid_output, dim = 1)
-                _, v_boundary_pred = torch.max(valid_boundary_output, dim = 1)
+                #_, v_boundary_pred = torch.max(valid_boundary_output, dim = 1)
 
                 valid_loss += v_loss.item()
                 valid_acc += torch.sum(v_pred == valid_target.data)
-                valid_boundary_acc += torch.sum(v_boundary_pred == valid_target.data)
+                #valid_boundary_acc += torch.sum(v_boundary_pred == valid_target.data)
 
 
         train_acc = train_acc*(100.)
