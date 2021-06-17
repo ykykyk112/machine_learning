@@ -11,7 +11,7 @@ class RecoverConv2d(nn.Module):
         self.stride, self.padding = stride, padding
         self.comp_mode = comp_mode
         self.upsample_mode = upsample_mode
-        self.sum_factor = torch.nn.Parameter(torch.ones((1, self.out_channels, 1, 1))*(0.1), requires_grad = True)
+        self.sum_factor = torch.nn.Parameter(torch.zeros((1, self.out_channels, 1, 1)), requires_grad = True)
         #self.sum_factor = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
         #self.comp_conv = nn.Conv2d(self.in_channels, self.out_channels, 1, 1, 0)
 
@@ -99,6 +99,10 @@ class RecoverConv2d(nn.Module):
             c_max, c_min = torch.amax(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1), torch.amin(ret_second_forward, dim = (1, 2, 3)).unsqueeze(1).unsqueeze(1).unsqueeze(1)
             ret_rescaled = (ret_second_forward - c_min) / ((c_max - c_min)+1e-15)
             ret = ret_pooling + self.sum_factor*(ret_second_forward)
+            print(ret_pooling.shape)
+            print(self.sum_factor.shape)
+            print(ret_second_forward.shape)
+            print('-'*30)
             return ret
 
     # def forward(self, x):
