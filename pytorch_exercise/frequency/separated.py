@@ -32,10 +32,10 @@ class separated_network(nn.Module):
         )
         self.boundary_classifier = nn.Sequential(
             nn.Linear(2 * 2 * 512, 1024),
-            nn.Dropout2d(0.2),
+            #nn.Dropout2d(0.2),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
-            nn.Dropout2d(0.2),
+            #nn.Dropout2d(0.2),
             nn.ReLU(inplace=True),
             nn.Linear(512, 10)
         )
@@ -47,7 +47,7 @@ class separated_network(nn.Module):
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
         self.boundary_loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.5)
+        self.scheduler = StepLR(self.optimizer, step_size=10, gamma=0.1)
 
 
     def _make_layer_conv(self, conv_layers):
