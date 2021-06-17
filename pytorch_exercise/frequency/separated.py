@@ -21,6 +21,7 @@ class separated_network(nn.Module):
         self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
+        self.boundary_features, self.compression_conv = self.boundary_features.to(self.device), self.compression_conv.to(self.device)
         self.classifier = nn.Sequential(
             nn.Linear(2 * 2 * 512, 1024),
             nn.ReLU(inplace=True),
@@ -127,3 +128,13 @@ class separated_network(nn.Module):
         b = self.boundary_classifier(b)
         print(x.shape, b.shape)
         return x, b
+
+conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
+boundary_layers = [64, 128, 256, 512]
+
+cuda_device = torch.device(1)
+
+separated_model = separated_network(conv_layers, boundary_layers, cuda_device)
+
+for m in list(separated_model.modules()):
+    print(m)
