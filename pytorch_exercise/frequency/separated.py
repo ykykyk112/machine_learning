@@ -40,10 +40,10 @@ class separated_network(nn.Module):
             nn.Linear(512, 10)
         )
 
-        # self.ensemble_classifier = nn.Sequential(
-        #     nn.ReLU(inplace=True),
-        #     nn.Linear(20, 10)
-        # )
+        self.ensemble_classifier = nn.Sequential(
+            nn.Sigmoid(),
+            nn.Linear(20, 10)
+        )
 
         self._initialize_weights()
         
@@ -52,7 +52,7 @@ class separated_network(nn.Module):
         self.optimizer = optim.SGD(self.parameters(), lr = 1e-2, momentum = 0.9, weight_decay=0.0015)
         self.loss = nn.CrossEntropyLoss()
         self.boundary_loss = nn.CrossEntropyLoss()
-        #self.ensemble_loss = nn.CrossEntropyLoss()
+        self.ensemble_loss = nn.CrossEntropyLoss()
         self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
 
@@ -135,7 +135,6 @@ class separated_network(nn.Module):
         b = self.boundary_forward()
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
-        #ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
-        return x, b
-        #return x, b, ensemble
+        ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
+        return x, b, ensemble
 
