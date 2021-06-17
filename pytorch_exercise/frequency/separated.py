@@ -16,8 +16,9 @@ from pytorch_exercise.cnn_cifar10.model import mysequential
 from pytorch_exercise.frequency.vgg_gradcam import recovered_net
 
 class separated_network(nn.Module):
-    def __init__(self, conv_layers, boundary_layers):
+    def __init__(self, conv_layers, boundary_layers, device):
         super(separated_network, self).__init__()
+        self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
         self.classifier = nn.Sequential(
@@ -85,9 +86,9 @@ class separated_network(nn.Module):
         x = None
         for idx in range(len(self.boundary_features)):
             if x is None : 
-                x = self.boundary_features[idx](self.boundary_maps[idx])
+                x = self.boundary_features[idx](self.boundary_maps[idx].to(self.device))
             else :
-                x = torch.cat([x, self.boundary_maps[idx]], dim = 1)
+                x = torch.cat([x, self.boundary_maps[idx].to(self.device)], dim = 1)
                 x = self.compression_conv[idx-1](x)
                 x = self.boundary_features[idx](x)
         return x

@@ -36,7 +36,7 @@ def drive():
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
-        recover_model = separated_network(conv_layers, boundary_layers).to(device)
+        recover_model = separated_network(conv_layers, boundary_layers, device).to(device)
 
 
     train_transform = transforms.Compose([
