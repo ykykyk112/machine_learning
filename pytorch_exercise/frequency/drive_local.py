@@ -23,7 +23,6 @@ from alexnet import AlexNet
 
 def drive():
 
-
     seed_number = 42
     print('seed number :', seed_number)
     fix_randomness(seed_number)
