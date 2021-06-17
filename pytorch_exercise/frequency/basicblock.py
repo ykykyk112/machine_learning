@@ -87,11 +87,6 @@ class RecoverConv2d(nn.Module):
             heatmap_upsample = self.upsample(heatmap)
             ret_dot = ret_second_forward * heatmap_upsample
             ret = ret_pooling + self.sum_factor*(ret_dot)
-            print(ret_pooling.shape)
-            print(self.sum_factor.shape)
-            print(ret_second_forward.shape)
-            print(heatmap_upsample.shape)
-            print('-'*30)
             return ret
 
 
