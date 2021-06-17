@@ -53,7 +53,7 @@ class separated_network(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         self.boundary_loss = nn.CrossEntropyLoss()
         #self.ensemble_loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=10, gamma=0.1)
+        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
 
     def _make_layer_conv(self, conv_layers):
