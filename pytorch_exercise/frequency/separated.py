@@ -21,7 +21,8 @@ class separated_network(nn.Module):
         self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
-        self.boundary_features, self.compression_conv = self.boundary_features.to(self.device), self.compression_conv.to(self.device)
+        for m in self.boundary_features : m = m.to(self.device)
+        for m in self.compression_conv : m = m.to(self.device)
         self.classifier = nn.Sequential(
             nn.Linear(2 * 2 * 512, 1024),
             nn.ReLU(inplace=True),
