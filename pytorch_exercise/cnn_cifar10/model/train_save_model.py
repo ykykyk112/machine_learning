@@ -124,14 +124,14 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 #train_output = model(train_data, train_target, idx)
 
             t_loss = model.loss(train_output, train_target)
-            b_loss = model.boundary_loss(train_output, train_target)
+            b_loss = model.boundary_loss(boundary_output, train_target)
             sum_loss = (t_loss + b_loss)
             sum_loss.backward()
 
             model.optimizer.step()
             #print(idx, '  loss :', t_loss.item())
             _, pred = torch.max(train_output, dim = 1)
-            _, boundary_pred = torch.max(train_output, dim = 1)
+            _, boundary_pred = torch.max(boundary_output, dim = 1)
 
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
