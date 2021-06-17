@@ -101,37 +101,45 @@ class RecoverConv2d(nn.Module):
             ret = ret_pooling + self.sum_factor*(ret_second_forward)
             return ret
 
-    # def forward(self, x):
+class BoundaryConv2d(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride = 1, padding = 1):
+        super(BoundaryConv2d, self).__init__()
 
-    #     # first conv_block
-    #     ret_first_forward = self.feed_forward(x)
-    #     ret_first_forward = self.first_batch_relu(ret_first_forward)
-    #     ret_pooling = self.first_max_pooling(ret_first_forward)
+        self.in_channels, self.out_channels = in_channels, out_channels
+        self.kernel_size = kernel_size
+        self.stride, self.padding = stride, padding
+        self.pooling_kernel_size = 2
+        self.boundary = None
+                
+        self.feed_forward = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=self.kernel_size, stride=self.stride, padding = self.padding)
         
-    #     # get boundary feature map
-    #     ret_upsample = self.up_sampling(ret_pooling)
+        self.batchnorm_relu = nn.Sequential(
+            nn.BatchNorm2d(self.out_channels),
+            nn.ReLU(True)
+        )
         
-    #     # second conv_block
-    #     with torch.no_grad():
-    #         ret_substract = ret_first_forward - ret_upsample
-    #         ret_second_forward = self.feed_forward(torch.abs(ret_substract))
-    #     ret_second_forward = self.second_batch_relu(ret_second_forward)
-    #     ret_second_forward = self.second_max_pooling(ret_second_forward)
+        self.max_pooling = nn.MaxPool2d(self.pooling_kernel_size)
         
-
-    #     if self.comp_mode == 'C' or self.comp_mode == 'c':
-    #         ret_concat = torch.cat([ret_pooling, ret_second_forward], dim = 1)
-    #         ret_reduction = self.conv_compression(ret_concat)
-    #         return ret_reduction
-
-    #     elif self.comp_mode == 'W' or self.comp_mode == 'w':
-    #         with torch.no_grad():
-    #             ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
-    #         #ret_dropout = self.dropout(ret_rescaled)
-    #         return ret_pooling + self.sum_factor*(ret_rescaled)
-    #         #return ret_pooling + 0.1*(ret_rescaled)
+        self.up_sampling = nn.Sequential(
+            nn.Upsample(scale_factor=self.pooling_kernel_size, mode = 'bilinear', align_corners=False),
+            nn.ReLU(True)
+        )
 
 
-    #     elif self.comp_mode == 'S' or self.comp_mode == 's':
-    #         ret_rescaled = ret_second_forward * (ret_pooling.max()/ret_second_forward.max())
-    #         return ret_pooling + ret_rescaled
+
+    def forward(self, x):
+
+        # get grad-cam from network, which has parameters trained previous epoch
+
+        # first conv_block
+        ret_first_forward = self.feed_forward(x)
+        ret_first_forward = self.batchnorm_relu(ret_first_forward)
+        ret_pooling = self.max_pooling(ret_first_forward)
+        
+        # get substracted
+        ret_upsample = self.up_sampling(ret_pooling)
+        self.boundary = torch.abs(ret_first_forward - ret_upsample)
+
+        return ret_pooling
+
+        

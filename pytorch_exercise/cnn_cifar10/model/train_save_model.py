@@ -107,6 +107,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
         train_loss, valid_loss = 0.0, 0.0
         train_acc, valid_acc = 0.0, 0.0
+        boundary_acc, valid_boundary_acc = 0.0, 0.0
 
         model.train()
 
@@ -119,48 +120,55 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             if cam_mode :
                 train_output, _ = model.forward(train_data)
             else :
-                #train_output = model(train_data)
-                train_output = model(train_data, train_target, idx)
+                train_output, boundary_output = model(train_data)
+                #train_output = model(train_data, train_target, idx)
 
             t_loss = model.loss(train_output, train_target)
-            t_loss.backward()
+            b_loss = model.boundary_loss(train_output, train_target)
+            sum_loss = (t_loss + b_loss)
+            sum_loss.backward()
 
             model.optimizer.step()
             #print(idx, '  loss :', t_loss.item())
             _, pred = torch.max(train_output, dim = 1)
+            _, boundary_pred = torch.max(train_output, dim = 1)
 
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
+            boundary_acc += torch.sum(boundary_pred == train_target.data)
             
 
-        #with torch.no_grad():
+        with torch.no_grad():
 
-        model.eval()
-        
-        for idx, (valid_data, valid_target) in enumerate(test_loader):
+            model.eval()
             
-            valid_data, valid_target = valid_data.to(device), valid_target.to(device)
+            for idx, (valid_data, valid_target) in enumerate(test_loader):
+                
+                valid_data, valid_target = valid_data.to(device), valid_target.to(device)
 
-            model.optimizer.zero_grad()
+                model.optimizer.zero_grad()
 
-            if cam_mode :
-                valid_output, _ = model(valid_data)
-            else :
-                #valid_output = model(valid_data)
-                valid_output = model(valid_data, valid_target, idx, True)
+                if cam_mode :
+                    valid_output, _ = model(valid_data)
+                else :
+                    valid_output, valid_boundary_output = model(valid_data)
+                    #valid_output = model(valid_data, valid_target, idx, True)
 
 
-            v_loss = model.loss(valid_output, valid_target)
-            #print(v_loss.item())
-            _, v_pred = torch.max(valid_output, dim = 1)
-    
+                v_loss = model.loss(valid_output, valid_target)
+                #print(v_loss.item())
+                _, v_pred = torch.max(valid_output, dim = 1)
+                _, v_boundary_pred = torch.max(valid_boundary_output, dim = 1)
 
-            valid_loss += v_loss.item()
-            valid_acc += torch.sum(v_pred == valid_target.data)
+                valid_loss += v_loss.item()
+                valid_acc += torch.sum(v_pred == valid_target.data)
+                valid_boundary_acc += torch.sum(v_boundary_pred == valid_target.data)
 
 
         train_acc = train_acc*(100.)
         valid_acc = valid_acc*(100.)
+        boundary_acc = boundary_acc*(100.)
+        valid_boundary_acc = valid_boundary_acc*(100.)
 
         curr_lr = model.optimizer.param_groups[0]['lr']
         model.scheduler.step()
@@ -171,10 +179,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/39000.
+        avg_train_acc = train_acc/50000.
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/1500.
+        avg_valid_acc = valid_acc/10000.
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -199,7 +207,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         second_weight = 0.
 
         if i%2==0 or i%2==1:
-            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} 1st : {6:.4f} 2nd : {7:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.5f}% \t bdr_valid : {7:.5f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, boundary_acc, valid_boundary_acc))        
         
         if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
         if avg_valid_loss < best_valid_loss : 
