@@ -43,8 +43,10 @@ class separated_network(nn.Module):
         )
 
         self.ensemble_classifier = nn.Sequential(
-            nn.Tanh(),
-            nn.Linear(20, 10)
+            nn.ReLU(inplace=True),
+            nn.Linear(20, 100),
+            nn.ReLU(inplace=True),
+            nn.Linear(100, 10)
         )
 
         self._initialize_weights()
