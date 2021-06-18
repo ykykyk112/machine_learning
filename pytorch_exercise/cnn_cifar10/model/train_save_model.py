@@ -98,6 +98,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     valid_acc_history = []
     best_valid_loss = 100.0
     best_valid_acc = 0.0
+    best_boundary_valid_acc = 0.0
     converge_count = 0
     best_epoch = 0
 
@@ -128,7 +129,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             #t_loss.backward()
             b_loss = model.boundary_loss(boundary_output, train_target)
             e_loss = model.ensemble_loss(ensemble_output, train_target)
-            sum_loss = (t_loss + b_loss*(0.2) + e_loss)
+            sum_loss = (t_loss + b_loss + e_loss)
             sum_loss.backward()
 
             model.optimizer.step()
@@ -215,7 +216,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc))        
         
-    #     if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
+        if valid_boundary_acc > best_boundary_valid_acc : best_boundary_valid_acc = valid_boundary_acc
+        if valid_acc > best_valid_acc : best_valid_acc = valid_acc
     #     if avg_valid_loss < best_valid_loss : 
     #         best_valid_loss = avg_valid_loss
     #         best_loss_parameter = model.state_dict()
@@ -227,7 +229,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     # torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_color.pth')
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
-    # print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
+    print('best acc : {0:.6f}, best boundary acc : {1:.4f}'.format(best_valid_acc, best_boundary_valid_acc))
 
     return
 
