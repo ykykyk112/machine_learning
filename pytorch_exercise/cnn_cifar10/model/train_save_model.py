@@ -129,7 +129,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             #t_loss.backward()
             b_loss = model.boundary_loss(boundary_output, train_target)
             e_loss = model.ensemble_loss(ensemble_output, train_target)
-            sum_loss = (t_loss + b_loss + e_loss)
+            sum_loss = (t_loss + b_loss*(0.2) + e_loss)
             sum_loss.backward()
 
             model.optimizer.step()
@@ -229,7 +229,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     # torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_color.pth')
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
-    print('best acc : {0:.6f}, best boundary acc : {1:.4f}'.format(best_valid_acc, best_boundary_valid_acc))
+    print('best acc : {0:.6f}, best boundary acc : {1:.4f}'.format(best_valid_acc/10000., best_boundary_valid_acc/10000.))
 
     return
 
