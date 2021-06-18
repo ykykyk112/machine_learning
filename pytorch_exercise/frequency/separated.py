@@ -43,7 +43,7 @@ class separated_network(nn.Module):
         )
 
         self.ensemble_classifier = nn.Sequential(
-            nn.ReLU(),
+            nn.Sigmoid(),
             nn.Linear(20, 10)
         )
 
