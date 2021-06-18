@@ -140,5 +140,5 @@ class separated_network(nn.Module):
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
         ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
-        return x, b, ensemble
+        return ensemble
 

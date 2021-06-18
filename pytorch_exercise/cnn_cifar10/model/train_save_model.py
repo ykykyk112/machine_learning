@@ -358,13 +358,13 @@ def train_eval_model_gpu_cam(model, epoch, device, train_loader, test_loader, ca
         if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
-            best_loss_parameter = model.state_dict()
+            #best_loss_parameter = model.state_dict()
             #best_latest_valid_cam = model.latest_valid_cam.detach()
             best_epoch = i+1
         
     #np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
     #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-    torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
+    #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
 
     print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
     print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
