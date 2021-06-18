@@ -44,9 +44,7 @@ class separated_network(nn.Module):
 
         self.ensemble_classifier = nn.Sequential(
             nn.ReLU(inplace=True),
-            nn.Linear(20, 100),
-            nn.ReLU(inplace=True),
-            nn.Linear(100, 10)
+            nn.Linear(20, 10)
         )
 
         self._initialize_weights()
@@ -140,5 +138,5 @@ class separated_network(nn.Module):
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
         ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
-        return ensemble
+        return x, b, ensemble
 
