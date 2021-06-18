@@ -359,7 +359,7 @@ def train_eval_model_gpu_cam(model, epoch, device, train_loader, test_loader, ca
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
             best_loss_parameter = model.state_dict()
-            best_latest_valid_cam = model.latest_valid_cam.detach()
+            #best_latest_valid_cam = model.latest_valid_cam.detach()
             best_epoch = i+1
         
     #np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
