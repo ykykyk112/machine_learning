@@ -244,6 +244,147 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     # return ret
 
 
+def train_eval_model_gpu_cam(model, epoch, device, train_loader, test_loader, cam_mode, save_path = None) :
+
+    train_loss_history = []
+    valid_loss_history = []
+    train_acc_history = []
+    valid_acc_history = []
+    best_valid_loss = 100.0
+    best_valid_acc = 0.0
+    converge_count = 0
+    best_epoch = 0
+
+    
+    for i in range(epoch) :
+        
+
+        train_loss, valid_loss = 0.0, 0.0
+        train_acc, valid_acc = 0.0, 0.0
+
+        model.train()
+
+        for idx, (train_data, train_target) in enumerate(train_loader) :
+            if (idx+1)%50==0:
+                print(f'{(idx+1)}/{len(train_loader)} is trained\r', end = '')
+            train_data, train_target = train_data.to(device), train_target.to(device)
+
+            model.optimizer.zero_grad()
+            if cam_mode :
+                train_output, _ = model.forward(train_data)
+            else :
+                train_output = model(train_data)
+                #train_output = model(train_data, train_target, idx)
+
+            t_loss = model.loss(train_output, train_target)
+            t_loss.backward()
+
+
+            model.optimizer.step()
+            #print(idx, '  loss :', t_loss.item())
+            _, pred = torch.max(train_output, dim = 1)
+
+            train_loss += t_loss.item()
+            train_acc += torch.sum(pred == train_target.data)
+            
+
+        with torch.no_grad():
+
+            model.eval()
+            
+            for idx, (valid_data, valid_target) in enumerate(test_loader):
+                
+                valid_data, valid_target = valid_data.to(device), valid_target.to(device)
+
+                model.optimizer.zero_grad()
+
+                if cam_mode :
+                    valid_output, _ = model(valid_data)
+                else :
+                    valid_output = model(valid_data)
+                    #valid_output = model(valid_data, valid_target, idx, True)
+
+
+                v_loss = model.loss(valid_output, valid_target)
+                #print(v_loss.item())
+                _, v_pred = torch.max(valid_output, dim = 1)
+
+                valid_loss += v_loss.item()
+                valid_acc += torch.sum(v_pred == valid_target.data)
+
+
+        train_acc = train_acc*(100.)
+        valid_acc = valid_acc*(100.)
+
+        curr_lr = model.optimizer.param_groups[0]['lr']
+        model.scheduler.step()
+
+        avg_train_loss = train_loss/len(train_loader)
+        train_loss_history.append(float(avg_train_loss))
+
+        avg_valid_loss = valid_loss/len(test_loader)
+        valid_loss_history.append(float(avg_valid_loss))
+
+        avg_train_acc = train_acc/39000.
+        train_acc_history.append(float(avg_train_acc))
+
+        avg_valid_acc = valid_acc/1500.
+        valid_acc_history.append(float(avg_valid_acc))
+
+        # Code about early_stopping
+
+        # if (best_valid_loss < avg_valid_loss) or (avg_valid_acc - best_valid_acc) <= 0.3 :
+        #     converge_count += 1
+        #     if converge_count == 5:
+        #         ret = np.empty((4, len(train_loss_history)))
+        #         ret[0] = np.asarray(train_loss_history)
+        #         ret[1] = np.asarray(valid_loss_history)
+        #         ret[2] = np.asarray(train_acc_history)
+        #         ret[3] = np.asarray(valid_acc_history)
+        #         return ret
+        # elif (best_valid_loss > avg_valid_loss) :
+        #     best_valid_loss = avg_valid_loss
+        #     converge_count = 0
+
+        params = list(model.parameters())
+        #first_weight = params[4].item()
+        first_weight = 0.
+        #second_weight = params[15].item()
+        second_weight = 0.
+
+        if i%2==0 or i%2==1:
+            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
+        
+        if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
+        if avg_valid_loss < best_valid_loss : 
+            best_valid_loss = avg_valid_loss
+            best_loss_parameter = model.state_dict()
+            best_latest_valid_cam = model.latest_valid_cam.detach()
+            best_epoch = i+1
+        
+    #np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
+    #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
+    torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
+
+    print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
+    print('best loss : {0:.6f}, base acc : {1:.4f}'.format(best_valid_loss, best_valid_acc))
+
+    return
+
+    # ret = np.empty((4, len(train_loss_history)))
+    # ret[0] = np.asarray(train_loss_history)
+    # ret[1] = np.asarray(valid_loss_history)
+    # ret[2] = np.asarray(train_acc_history)
+    # ret[3] = np.asarray(valid_acc_history)
+
+    # if save_path != None:
+    #     model = model.to('cpu')
+    #     torch.save(model.state_dict(), save_path)
+
+    # return ret
+
+
+
 def save_model(model, epoch, train_loader, test_loader, path, cam_mode = False) :
 
     is_cuda = torch.cuda.is_available()

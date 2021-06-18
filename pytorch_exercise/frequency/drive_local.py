@@ -35,10 +35,9 @@ def drive():
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
     print('baseline model, ImageNet subset (30 classes, train image : 39000, test_image : 1500)')
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
-        recover_model.load_state_dict(torch.load('./ImageNet/test.pth'))
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
@@ -70,7 +69,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
-    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu_cam(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 
