@@ -58,7 +58,7 @@ class parallel_net(nn.Module):
 
         # 50 is batch-size
         if not eval:
-            if b_end > 39000 : b_end = 39000
+            if b_end > 38659 : b_end = 38659
             latest_heatmap = self.latest_train_cam[b_start:b_end]
             latest_heatamp = latest_heatmap
         else :
@@ -90,7 +90,7 @@ class parallel_net(nn.Module):
         
 
         if not eval:
-            if b_end > 39000 : b_end = 39000
+            if b_end > 38659 : b_end = 38659
             self.latest_train_cam[b_start:b_end] = cam_rescaled
         else :
             if b_end > 1500 : b_end = 1500
