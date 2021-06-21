@@ -144,7 +144,7 @@ class BoundaryConv2d(nn.Module):
 
 class InceptionConv2d(nn.Module):
     def __init__(self, in_channels, out_channels):
-        super(BoundaryConv2d, self).__init__()
+        super(InceptionConv2d, self).__init__()
 
         self.in_channels, self.out_channels = in_channels, out_channels
                 
