@@ -39,12 +39,13 @@ class MidpointNormalize(colors.Normalize):
 
 
 class AddGaussianNoise(object):
-    def __init__(self, mean=0., std=1.):
+    def __init__(self, mean=0., std=1., weight = 0.05):
         self.std = std
         self.mean = mean
+        self.weight = weight
         
     def __call__(self, tensor):
-        return tensor + torch.randn(tensor.size()) * self.std + self.mean
+        return tensor + (torch.randn(tensor.size()) * self.std * self.weight) + (self.mean * self.weight)
     
     def __repr__(self):
         return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
