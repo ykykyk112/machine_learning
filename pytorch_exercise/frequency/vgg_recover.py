@@ -15,7 +15,7 @@ class recovered_net(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 55)
+            nn.Linear(512, 10)
         )
 
         self._initialize_weights()
