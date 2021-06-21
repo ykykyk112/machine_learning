@@ -10,7 +10,7 @@ import torch.nn as nn
 import math
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
-from pytorch_exercise.frequency.basicblock import BoundaryConv2d, RecoverConv2d
+from pytorch_exercise.frequency.basicblock import BoundaryConv2d, RecoverConv2d, InceptionConv2d
 from pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
 from pytorch_exercise.cnn_cifar10.model import mysequential
 from pytorch_exercise.frequency.vgg_gradcam import recovered_net
@@ -55,7 +55,7 @@ class separated_network(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         self.boundary_loss = nn.CrossEntropyLoss()
         self.ensemble_loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.5)
+        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
 
     def _make_layer_conv(self, conv_layers):
@@ -83,7 +83,8 @@ class separated_network(nn.Module):
 
         for conv in boundary_layers:
             model += [nn.Sequential(
-                          nn.Conv2d(conv, conv, kernel_size=5, stride=1, padding = 2), 
+                          #nn.Conv2d(conv, conv, kernel_size=5, stride=1, padding = 2), 
+                          InceptionConv2d(conv, conv),
                           nn.BatchNorm2d(conv),
                           nn.ReLU(inplace = True),
                           nn.AvgPool2d((2, 2)))]
