@@ -158,6 +158,8 @@ class InceptionConv2d(nn.Module):
 
         # get separated channel size
         channel = x.size(1)/4
+        print(channel)
+        print(x.shape)
 
         # forward in each convolutional layers
         y_0 = self.one_by_one(x[:, :channel*1, :, :])
