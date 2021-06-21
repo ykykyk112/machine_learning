@@ -17,6 +17,7 @@ from random_seed import fix_randomness
 from model import train_save_model
 from separated import separated_network
 from vgg_recover import recovered_net
+from about_image import AddGaussianNoise
 
 def drive():
 
@@ -32,7 +33,7 @@ def drive():
     device = torch.device(2)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
@@ -45,11 +46,13 @@ def drive():
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        [AddGaussianNoise(0., 1.)],
     ])
 
     test_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        [AddGaussianNoise(0., 1.)],
     ])
 
     train_set = torchvision.datasets.CIFAR10(root = './data', train = True, download = True, transform=train_transform)
