@@ -30,8 +30,8 @@ class parallel_net(nn.Module):
             self.device = device
  
 
-        self.latest_train_cam = torch.ones((39000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
-        self.latest_valid_cam = torch.ones((1500, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
+        self.latest_train_cam = torch.ones((71159, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
+        self.latest_valid_cam = torch.ones((2750, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
         #for m in reversed(list(self.recover_gradcam.modules())):
