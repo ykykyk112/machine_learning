@@ -148,22 +148,32 @@ class InceptionConv2d(nn.Module):
 
         self.in_channels, self.out_channels = in_channels, out_channels
                 
-        self.one_by_one = nn.Conv2d(in_channels//4, out_channels//4, 1, 1, 0) 
-        self.three_by_three = nn.Conv2d(in_channels//4, out_channels//4, 3, 1, 1)
-        self.five_by_five = nn.Conv2d(in_channels//4, out_channels//4, 5, 1, 2)
-        self.seven_by_seven = nn.Conv2d(in_channels//4, out_channels//4, 7, 1, 3)
+        self.one_by_one = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+        )
+        self.three_by_three = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+            nn.Conv2d(out_channels//4, out_channels//4, 3, 1, 1)
+        )
+        self.five_by_five = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+            nn.Conv2d(out_channels//4, out_channels//4, 5, 1, 2)
+        )
+        self.seven_by_seven = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+            nn.Conv2d(out_channels//4, out_channels//4, 7, 1, 3)
+        )
 
 
     def forward(self, x):
 
         # get separated channel size
-        channel = x.size(1)//4
 
         # forward in each convolutional layers
-        y_0 = self.one_by_one(x[:, :channel*1, :, :])
-        y_1 = self.three_by_three(x[:, channel*1:channel*2, :, :])
-        y_2 = self.five_by_five(x[:, channel*2:channel*3, :, :])
-        y_3 = self.seven_by_seven(x[:, channel*3:channel*4, :, :])
+        y_0 = self.one_by_one(x)
+        y_1 = self.three_by_three(x)
+        y_2 = self.five_by_five(x)
+        y_3 = self.seven_by_seven(x)
         
         # concatenate each result
         y = torch.cat([y_0, y_1, y_2, y_3], dim = 1)
