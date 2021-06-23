@@ -153,14 +153,17 @@ class InceptionConv2d(nn.Module):
         )
         self.three_by_three = nn.Sequential(
             nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+            nn.ReLU(inplace=True),
             nn.Conv2d(out_channels//4, out_channels//4, 3, 1, 1)
         )
         self.five_by_five = nn.Sequential(
             nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+            nn.ReLU(inplace=True),
             nn.Conv2d(out_channels//4, out_channels//4, 5, 1, 2)
         )
         self.seven_by_seven = nn.Sequential(
             nn.Conv2d(in_channels, out_channels//4, 1, 1, 0),
+            nn.ReLU(inplace=True),
             nn.Conv2d(out_channels//4, out_channels//4, 7, 1, 3)
         )
 
