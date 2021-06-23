@@ -158,7 +158,7 @@ class separated_network(nn.Module):
         return boundary_maps
 
     def forward(self, x):
-        print(self.alpha)
+        print(F.sigmoid(self.alpha))
         x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
