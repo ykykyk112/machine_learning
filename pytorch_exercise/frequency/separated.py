@@ -10,6 +10,7 @@ import torch.nn as nn
 import math
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
+import torch.nn.functional as F
 from pytorch_exercise.frequency.basicblock import BoundaryConv2d, RecoverConv2d, InceptionConv2d
 from pytorch_exercise.cnn_cifar10.cam.grad_cam import grad_cam
 from pytorch_exercise.cnn_cifar10.model import mysequential
@@ -103,6 +104,7 @@ class separated_network(nn.Module):
             else :
                 x = torch.cat([x, self.boundary_maps[idx].to(self.device)], dim = 1)
                 x = self.compression_conv[idx-1](x)
+                x = F.relu(x)
                 x = self.boundary_features[idx](x)
         return x
 
@@ -123,6 +125,30 @@ class separated_network(nn.Module):
                 nn.init.xavier_uniform_(m.weight)
                 m.bias.data.zero_()
 
+        for block in self.boundary_features:
+            for module in block:
+                if isinstance(module, InceptionConv2d):
+                    for c in module.modules():
+                        if isinstance(c, nn.Conv2d):
+                        #He initialization for Conv2d-layer
+                            n = c.kernel_size[0] * c.kernel_size[1] * c.out_channels
+                            c.weight.data.normal_(0, math.sqrt(2. / n))
+                            if c.bias is not None:
+                                c.bias.data.zero_()
+                    
+                elif isinstance(module, nn.BatchNorm2d):
+                    module.weight.data.fill_(1)
+                    module.bias.data.zero_()
+
+        for m in self.compression_conv:
+            if isinstance(m, nn.Conv2d):
+                # He initialization for Conv2d-layer
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+                if m.bias is not None:
+                    m.bias.data.zero_()
+                
+
     def _get_boundary_location(self):
         boundary_maps = []
         for m in self.modules():
@@ -141,3 +167,8 @@ class separated_network(nn.Module):
         ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
         return x, b, ensemble
 
+
+conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
+boundary_layers = [64, 128, 256, 512]
+
+net = separated_network(conv_layers, boundary_layers, torch.device(0))
