@@ -114,7 +114,6 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         ensemble_acc, valid_ensemble_acc = 0.0, 0.0
 
         model.train()
-        alpha_prime = nn.Sigmoid()(model.alpha).to(device)
 
         for idx, (train_data, train_target) in enumerate(train_loader) :
             if (idx+1)%50==0:
@@ -128,6 +127,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 #train_output = model(train_data)
                 train_output, boundary_output, ensemble_output = model(train_data)
                 #train_output = model(train_data, train_target, idx)
+
+            alpha_prime = nn.Sigmoid()(model.alpha).to(device)
 
             t_loss = model.loss(train_output, train_target) * alpha_prime
             #t_loss.backward()
