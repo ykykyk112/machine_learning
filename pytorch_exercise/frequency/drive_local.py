@@ -20,6 +20,7 @@ from model import train_save_model
 from parallel import parallel_net
 from frequency.vgg_recover import recovered_net
 from alexnet import AlexNet
+from separated import separated_network
 
 def drive():
 
@@ -28,6 +29,7 @@ def drive():
     fix_randomness(seed_number)
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R', 512, 512, 'R']
+    boundary_layers = [64, 128, 256, 512, 512]
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
@@ -41,7 +43,8 @@ def drive():
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
-        recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
+        recover_model = separated_network(conv_layers, boundary_layers, device).to(device)
+        #recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
 
@@ -69,7 +72,7 @@ def drive():
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
-    train_save_model.train_eval_model_gpu_cam(recover_model, 48, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 
