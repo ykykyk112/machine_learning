@@ -30,7 +30,7 @@ def drive():
     boundary_layers = [64, 128, 256, 512]
 
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M']
-    device = torch.device(2)
+    device = torch.device(1)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
     if not False:
