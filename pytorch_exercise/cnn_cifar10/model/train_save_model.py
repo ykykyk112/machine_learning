@@ -135,7 +135,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             e_loss = model.ensemble_loss(ensemble_output, train_target)
             sum_loss = (t_loss + b_loss + e_loss)
             sum_loss.backward()
-            print(nn.Sigmoid()(model.alpha), sum_loss)
+            print(sum_loss)
 
             model.optimizer.step()
             #print(idx, '  loss :', t_loss.item())
