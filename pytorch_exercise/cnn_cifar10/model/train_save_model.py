@@ -192,14 +192,14 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/5000.
-        avg_boundary_train_acc = boundary_acc/5000.
-        avg_ensemble_train_acc = ensemble_acc/5000.
+        avg_train_acc = train_acc/50000.
+        avg_boundary_train_acc = boundary_acc/50000.
+        avg_ensemble_train_acc = ensemble_acc/50000.
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/8000.
-        avg_boundary_valid_acc = valid_boundary_acc/8000.
-        avg_ensemble_valid_acc = valid_ensemble_acc/8000.
+        avg_valid_acc = valid_acc/10000.
+        avg_boundary_valid_acc = valid_boundary_acc/10000.
+        avg_ensemble_valid_acc = valid_ensemble_acc/10000.
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -240,7 +240,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     # torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_color.pth')
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
-    print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/8000., best_boundary_valid_acc/8000., best_ensemble_valid_acc/8000.))
+    print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/10000., best_boundary_valid_acc/10000., best_ensemble_valid_acc/10000.))
 
     return
 
