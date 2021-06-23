@@ -1,4 +1,5 @@
 import torch
+from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -127,10 +128,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 train_output, boundary_output, ensemble_output = model(train_data)
                 #train_output = model(train_data, train_target, idx)
 
+            alpha_prime = nn.Sigmoid(model.alpha)
             t_loss = model.loss(train_output, train_target)
             #t_loss.backward()
-            b_loss = model.boundary_loss(boundary_output, train_target) * model.alpha
-            e_loss = model.ensemble_loss(ensemble_output, train_target) * (1 - model.alpha)
+            b_loss = model.boundary_loss(boundary_output, train_target) * alpha_prime
+            e_loss = model.ensemble_loss(ensemble_output, train_target) * (1 - alpha_prime)
             sum_loss = (t_loss + b_loss + e_loss)
             sum_loss.backward()
 
