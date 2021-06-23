@@ -22,7 +22,7 @@ class separated_network(nn.Module):
         self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
-        self.alpha = torch.nn.Parameter(torch.tensor([0.5]), requires_grad = True)
+        self.alpha = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
 
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
