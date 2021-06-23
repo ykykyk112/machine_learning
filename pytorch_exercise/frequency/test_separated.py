@@ -43,6 +43,7 @@ def drive():
 
 
     train_transform = transforms.Compose([
+        transforms.Resize((96, 96)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
@@ -51,6 +52,7 @@ def drive():
     ])
 
     test_transform = transforms.Compose([
+        transforms.Resize((96, 96)),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         #transforms.Normalize((0.4467, 0.4398, 0.4066), (0.2241, 0.2214, 0.2238)),
