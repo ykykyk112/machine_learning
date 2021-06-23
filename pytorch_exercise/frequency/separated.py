@@ -166,9 +166,3 @@ class separated_network(nn.Module):
         b = self.boundary_classifier(b)
         ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
         return x, b, ensemble
-
-
-conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
-boundary_layers = [64, 128, 256, 512]
-
-net = separated_network(conv_layers, boundary_layers, torch.device(0))
