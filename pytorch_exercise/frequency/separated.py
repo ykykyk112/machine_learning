@@ -28,25 +28,25 @@ class separated_network(nn.Module):
         for m in self.compression_conv : m = m.to(self.device)
 
         self.classifier = nn.Sequential(
-            nn.Linear(7 * 7 * 512, 1024),
+            nn.Linear(6 * 6 * 512, 1024),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 55)
+            nn.Linear(512, 10)
         )
         self.boundary_classifier = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.Linear(7 * 7 * 512, 1024),
+            nn.Dropout(0.5),
+            nn.Linear(6 * 6 * 512, 1024),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.2),
+            nn.Dropout(0.5),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 55)
+            nn.Linear(512, 10)
         )
 
         self.ensemble_classifier = nn.Sequential(
             nn.ReLU(inplace=True),
-            nn.Linear(110, 55)
+            nn.Linear(20, 10)
         )
 
         self._initialize_weights()
@@ -57,7 +57,7 @@ class separated_network(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         self.boundary_loss = nn.CrossEntropyLoss()
         self.ensemble_loss = nn.CrossEntropyLoss()
-        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.5)
+        self.scheduler = StepLR(self.optimizer, step_size=12, gamma=0.1)
 
 
     def _make_layer_conv(self, conv_layers):

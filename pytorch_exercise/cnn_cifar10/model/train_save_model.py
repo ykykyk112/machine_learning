@@ -104,6 +104,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     converge_count = 0
     best_epoch = 0
 
+    n_train, n_valid = 50000., 10000.
+
     
     for i in range(epoch) :
         
@@ -194,14 +196,14 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/71159.
-        avg_boundary_train_acc = boundary_acc/71159.
-        avg_ensemble_train_acc = ensemble_acc/71159.
+        avg_train_acc = train_acc/n_train
+        avg_boundary_train_acc = boundary_acc/n_train
+        avg_ensemble_train_acc = ensemble_acc/n_train
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/2750.
-        avg_boundary_valid_acc = valid_boundary_acc/2750.
-        avg_ensemble_valid_acc = valid_ensemble_acc/2750.
+        avg_valid_acc = valid_acc/n_valid
+        avg_boundary_valid_acc = valid_boundary_acc/n_valid
+        avg_ensemble_valid_acc = valid_ensemble_acc/n_valid
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -234,15 +236,15 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if valid_acc > best_valid_acc : best_valid_acc = valid_acc
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
-            best_loss_parameter = model.state_dict()
+            #best_loss_parameter = model.state_dict()
             best_epoch = i+1
         
     # np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
     # #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-    torch.save(best_loss_parameter, './ImageNet/separated_imagenet_noalpha_subsetsum.pth')
+    #torch.save(best_loss_parameter, './ImageNet/separated_imagenet_noalpha_subsetsum.pth')
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
-    print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/2750., best_boundary_valid_acc/2750., best_ensemble_valid_acc/2750.))
+    print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/n_valid, best_boundary_valid_acc/n_valid, best_ensemble_valid_acc/n_valid))
 
     return
 
