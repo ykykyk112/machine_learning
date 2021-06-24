@@ -22,7 +22,7 @@ class separated_network(nn.Module):
         self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
-        self.alpha = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
+        #self.alpha = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
 
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
@@ -165,6 +165,6 @@ class separated_network(nn.Module):
         b = self.boundary_forward()
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
-        ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
-        #ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
+        #ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
+        ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
         return x, b, ensemble
