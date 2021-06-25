@@ -85,8 +85,8 @@ class separated_network(nn.Module):
 
         for conv in boundary_layers:
             model += [nn.Sequential(
-                          #nn.Conv2d(conv, conv, kernel_size=5, stride=1, padding = 2), 
-                          InceptionConv2d(conv, conv),
+                          nn.Conv2d(conv, conv, kernel_size=5, stride=1, padding = 2), 
+                          #InceptionConv2d(conv, conv),
                           nn.BatchNorm2d(conv),
                           nn.ReLU(inplace = True),
                           nn.AvgPool2d((2, 2)))]
