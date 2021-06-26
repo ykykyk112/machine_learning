@@ -28,25 +28,25 @@ class separated_network(nn.Module):
         for m in self.compression_conv : m = m.to(self.device)
 
         self.classifier = nn.Sequential(
-            nn.Linear(7 * 7 * 512, 1024),
+            nn.Linear(6 * 6 * 512, 1024),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 55)
+            nn.Linear(512, 10)
         )
         self.boundary_classifier = nn.Sequential(
             nn.Dropout(0.2),
-            nn.Linear(7 * 7 * 512, 1024),
+            nn.Linear(6 * 6 * 512, 1024),
             nn.ReLU(inplace=True),
             nn.Dropout(0.2),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 55)
+            nn.Linear(512, 10)
         )
 
         self.ensemble_classifier = nn.Sequential(
             nn.ReLU(inplace=True),
-            nn.Linear(110, 55)
+            nn.Linear(20, 10)
         )
 
         self._initialize_weights()
@@ -85,7 +85,7 @@ class separated_network(nn.Module):
 
         for conv in boundary_layers:
             model += [nn.Sequential(
-                          nn.Conv2d(conv, conv, kernel_size=5, stride=1, padding = 2), 
+                          nn.Conv2d(conv, conv, kernel_size=3, stride=1, padding = 1), 
                           #InceptionConv2d(conv, conv),
                           nn.BatchNorm2d(conv),
                           nn.ReLU(inplace = True),
