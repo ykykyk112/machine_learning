@@ -89,7 +89,7 @@ class separated_network(nn.Module):
                           #InceptionConv2d(conv, conv),
                           nn.BatchNorm2d(conv),
                           nn.ReLU(inplace = True),
-                          nn.MaxPool2d((2, 2)))]
+                          nn.AvgPool2d((2, 2)))]
         
         for i in range(len(boundary_layers)-1):
             comp += [nn.Conv2d(boundary_layers[i]+boundary_layers[i+1], boundary_layers[i+1], kernel_size=1, stride=1, padding=0)]
@@ -165,7 +165,7 @@ class separated_network(nn.Module):
         b = self.boundary_forward()
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
-        #ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
+        ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
         ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
         #ensemble = x * torch.sigmoid(self.alpha) + b * (1 - torch.sigmoid(self.alpha))
         return x, b, ensemble
