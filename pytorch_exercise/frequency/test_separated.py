@@ -18,7 +18,6 @@ from model import train_save_model
 from separated import separated_network
 from vgg_recover import recovered_net
 from about_image import AddGaussianNoise
-from sklearn.metrics import classification_report
 
 def drive():
 
