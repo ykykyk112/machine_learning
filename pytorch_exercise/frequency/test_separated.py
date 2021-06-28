@@ -1,10 +1,10 @@
 import sys, os
-# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-# sys.path.append('/home/sjlee/git_project/machine_learning')
-sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+sys.path.append('/home/sjlee/git_project/machine_learning')
+# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 import torch
 import torch.nn as nn
 import torchvision
