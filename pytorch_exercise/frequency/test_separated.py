@@ -160,6 +160,6 @@ def test():
     print(summary(recover_model, (3, 224, 224)))
 
 if __name__ == '__main__':
-    #drive()
+    drive()
     #evaluate()
-    test()
+    #test()
