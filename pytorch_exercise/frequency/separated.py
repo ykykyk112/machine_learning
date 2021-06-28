@@ -22,31 +22,32 @@ class separated_network(nn.Module):
         self.device = device
         self.features = self._make_layer_conv(conv_layers = conv_layers)
         self.boundary_features, self.compression_conv = self._make_boundary_conv(boundary_layers = boundary_layers)
+        self.boundary_features, self.compression_conv = nn.ModuleList(self.boundary_features), nn.ModuleList(self.compression_conv)
         self.alpha = torch.nn.Parameter(torch.tensor([0.]), requires_grad = True)
 
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
 
         self.classifier = nn.Sequential(
-            nn.Linear(6 * 6 * 512, 1024),
+            nn.Linear(7 * 7 * 512, 1024),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 10)
+            nn.Linear(512, 55)
         )
         self.boundary_classifier = nn.Sequential(
             nn.Dropout(0.2),
-            nn.Linear(6 * 6 * 512, 1024),
+            nn.Linear(7 * 7 * 512, 1024),
             nn.ReLU(inplace=True),
             nn.Dropout(0.2),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 10)
+            nn.Linear(512, 55)
         )
 
         self.ensemble_classifier = nn.Sequential(
             nn.ReLU(inplace=True),
-            nn.Linear(20, 10)
+            nn.Linear(110, 55)
         )
 
         self._initialize_weights()
@@ -166,6 +167,6 @@ class separated_network(nn.Module):
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
         #ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
-        #ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
-        ensemble = x * torch.sigmoid(self.alpha) + b * (1 - torch.sigmoid(self.alpha))
+        ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
+        #ensemble = x * torch.sigmoid(self.alpha) + b * (1 - torch.sigmoid(self.alpha))
         return x, b, ensemble
