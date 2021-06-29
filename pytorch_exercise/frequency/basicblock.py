@@ -137,9 +137,8 @@ class BoundaryConv2d(nn.Module):
         ret_pooling = self.max_pooling(ret_first_forward)
         
         # get substracted
-        with torch.no_grad():
-            ret_upsample = self.up_sampling(ret_pooling)
-            self.boundary = torch.abs(ret_first_forward - ret_upsample).clone().detach()
+        ret_upsample = self.up_sampling(ret_pooling)
+        self.boundary = torch.abs(ret_first_forward - ret_upsample)
 
         return ret_pooling
 
