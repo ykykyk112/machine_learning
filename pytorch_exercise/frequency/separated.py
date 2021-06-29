@@ -89,8 +89,8 @@ class separated_network(nn.Module):
 
         for conv in boundary_layers:
             model += [nn.Sequential(
-                          #nn.Conv2d(conv, conv, kernel_size=3, stride=1, padding = 1), 
-                          InceptionConv2d(conv, conv),
+                          nn.Conv2d(conv, conv, kernel_size=3, stride=1, padding = 1), 
+                          #InceptionConv2d(conv, conv),
                           nn.BatchNorm2d(conv),
                           nn.ReLU(inplace = True),
                           nn.AvgPool2d((2, 2)))]
@@ -158,7 +158,7 @@ class separated_network(nn.Module):
         boundary_maps = []
         for m in self.modules():
             if isinstance(m, BoundaryConv2d):
-                boundary_maps.append(m.boundary)
+                boundary_maps.append(m.boundary.detach())
         return boundary_maps
 
     def forward(self, x):

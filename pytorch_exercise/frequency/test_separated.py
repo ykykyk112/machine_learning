@@ -24,7 +24,7 @@ def drive():
     seed_number = 42
     print('seed number :', seed_number)
     fix_randomness(seed_number)
-    print('PReLU')
+    print('No inception, 3x3 Conv, detached boundary map, AvgPool2d')
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
     boundary_layers = [64, 128, 256, 512]
