@@ -30,7 +30,7 @@ class parallel_net(nn.Module):
             self.device = device
  
 
-        self.latest_train_cam = torch.ones((39000, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
+        self.latest_train_cam = torch.ones((38659, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
         self.latest_valid_cam = torch.ones((1500, 1, 7, 7), dtype=torch.float32, requires_grad=False).to(self.device)
 
         # register forward & backward hook on last nn.Conv2d module of recover_gradcam
@@ -54,7 +54,7 @@ class parallel_net(nn.Module):
         self.recover_gradcam.eval()
 
         batch_size = 32
-        train_size, test_size = 39000, 1500
+        train_size, test_size = 38659, 1500
         b_start, b_end = idx*batch_size, (idx+1)*batch_size
 
         # 50 is batch-size
