@@ -36,8 +36,9 @@ def drive():
     device = torch.device(2)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    print('target model, no sum factor, no inception module, max-pooling, 0.5-weight on boundary & ensemble ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
-    if not True:
+    #print('target model, no sum factor, no inception module, max-pooling, 0.5-weight on boundary & ensemble ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
+    print('baseline on subset 2')
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
