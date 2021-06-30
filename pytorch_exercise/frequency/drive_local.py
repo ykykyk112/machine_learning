@@ -43,8 +43,8 @@ def drive():
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
-        recover_model = separated_network(conv_layers, boundary_layers, device).to(device)
-        #recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
+        #recover_model = separated_network(conv_layers, boundary_layers, device).to(device)
+        recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
 
@@ -66,13 +66,13 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train_subset_sum', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/val_subset_sum', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train_subset_2', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/val_subset_2', transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
-    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu_cam(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 

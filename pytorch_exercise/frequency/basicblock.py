@@ -75,13 +75,12 @@ class RecoverConv2d(nn.Module):
         ret_second_forward = self.second_batch_relu(ret_second_forward)
         ret_second_forward = self.second_max_pooling(ret_second_forward)
         
-
         if self.comp_mode == 'C' or self.comp_mode == 'c':
             ret_concat = torch.cat([ret_pooling, ret_second_forward], dim = 1)
             ret_reduction = self.conv_compression(ret_concat)
             return ret_reduction
 
-        elif (self.comp_mode == 'W' or self.comp_mode == 'w') and heatmap != None:
+        elif (self.comp_mode == 'W' or self.comp_mode == 'w') and (heatmap != None):
 
             self.upsample = nn.Upsample(size = ret_second_forward.size(2), mode = 'bilinear', align_corners=False)
             heatmap_upsample = self.upsample(heatmap)
