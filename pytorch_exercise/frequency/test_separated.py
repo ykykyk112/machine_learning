@@ -24,7 +24,7 @@ def drive():
     seed_number = 42
     print('seed number :', seed_number)
     fix_randomness(seed_number)
-    print('No inception, 5x5 Conv, MaxPool2d, no dropout, 3.0-weighted on original network.')
+    print('No inception, 5x5 Conv, MaxPool2d, no dropout, 0.5-weighted on boundary & ensemble network.')
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
     boundary_layers = [64, 128, 256, 512]
