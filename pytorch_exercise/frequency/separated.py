@@ -28,8 +28,8 @@ class separated_network(nn.Module):
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
 
-        width = 7
-        output_size = 55
+        width = 6
+        output_size = 100
 
         self.classifier = nn.Sequential(
             nn.Linear(width * width * 512, 1024),

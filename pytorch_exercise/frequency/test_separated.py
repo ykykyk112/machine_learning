@@ -24,6 +24,7 @@ def drive():
     seed_number = 42
     print('seed number :', seed_number)
     fix_randomness(seed_number)
+    print('On CIFAR100 Dataset')
     print('No inception, 5x5 Conv, MaxPool2d, no dropout, 0.25-weighted on boundary & ensemble network.')
     
     conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R']
@@ -59,8 +60,8 @@ def drive():
         #AddGaussianNoise(0., 1., 0.3),
     ])
 
-    train_set = torchvision.datasets.CIFAR10(root = './data', train = True, download = True, transform=train_transform)
-    test_set = torchvision.datasets.CIFAR10(root = './data', train = False, download = True, transform=test_transform)
+    train_set = torchvision.datasets.CIFAR100(root = './data', train = True, download = True, transform=train_transform)
+    test_set = torchvision.datasets.CIFAR100(root = './data', train = False, download = True, transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
