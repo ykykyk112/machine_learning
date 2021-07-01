@@ -28,8 +28,8 @@ class separated_network(nn.Module):
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
 
-        width = 6
-        output_size = 100
+        width = 7
+        output_size = 55
 
         self.classifier = nn.Sequential(
             nn.Linear(width * width * 512, 1024),
@@ -49,9 +49,17 @@ class separated_network(nn.Module):
         )
 
         self.ensemble_classifier = nn.Sequential(
+            nn.Linear(width * width * 1024, 2048),
             nn.ReLU(inplace=True),
-            nn.Linear(output_size * 2, output_size)
+            nn.Linear(2048, 512),
+            nn.ReLU(inplace=True),
+            nn.Linear(512, output_size)
         )
+
+        # self.ensemble_classifier = nn.Sequential(
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(output_size * 2, output_size)
+        # )
 
         self._initialize_weights()
         
@@ -163,13 +171,16 @@ class separated_network(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
+        x_f = x
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
         self.boundary_maps = self._get_boundary_location()
         b = self.boundary_forward()
+        b_f = b
         b = b.view(b.size(0), -1)
         b = self.boundary_classifier(b)
         #ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
-        ensemble = self.ensemble_classifier(torch.cat([x, b], dim = 1))
+        ensemble = torch.cat([x_f, b_f], dim = 1)
+        ensemble = self.ensemble_classifier(ensemble.view(ensemble.size(0), -1))
         #ensemble = x * torch.sigmoid(self.alpha) + b * (1 - torch.sigmoid(self.alpha))
         return x, b, ensemble
