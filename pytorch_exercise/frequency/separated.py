@@ -49,9 +49,9 @@ class separated_network(nn.Module):
         )
 
         self.ensemble_classifier = nn.Sequential(
-            nn.Linear(width * width * 1024, 2048),
+            nn.Linear(width * width * 1024, 1024),
             nn.ReLU(inplace=True),
-            nn.Linear(2048, 512),
+            nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
             nn.Linear(512, output_size)
         )
