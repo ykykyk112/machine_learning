@@ -56,6 +56,8 @@ class separated_network(nn.Module):
             nn.Linear(512, output_size)
         )
 
+        self.ensemble_relu = nn.ReLU(inplace=True)
+
         # self.ensemble_classifier = nn.Sequential(
         #     nn.ReLU(inplace=True),
         #     nn.Linear(output_size * 2, output_size)
@@ -181,6 +183,7 @@ class separated_network(nn.Module):
         b = self.boundary_classifier(b)
         #ensemble = self.ensemble_classifier(torch.cat([x * torch.sigmoid(self.alpha), b * (1 - torch.sigmoid(self.alpha))], dim = 1))
         ensemble = torch.cat([x_f, b_f], dim = 1)
+        ensemble = self.ensemble_relu(ensemble)
         ensemble = self.ensemble_classifier(ensemble.view(ensemble.size(0), -1))
         #ensemble = x * torch.sigmoid(self.alpha) + b * (1 - torch.sigmoid(self.alpha))
         return x, b, ensemble
