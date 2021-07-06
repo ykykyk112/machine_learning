@@ -28,7 +28,7 @@ def drive():
     print('seed number :', seed_number)
     fix_randomness(seed_number)
     
-    conv_layers = [64, 'R', 128, 'R', 256, 256, 'R', 512, 512, 'R', 512, 512, 'R']
+    conv_layers = [64, 'R', 128, 'R', 256, 256, 256, 'R', 512, 512, 512,'R', 512, 512, 512, 'R']
     boundary_layers = [64, 128, 256, 512, 512]
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
@@ -36,7 +36,8 @@ def drive():
     device = torch.device(2)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    print('target model, ensemble-fc-layer : 2048, 0.5-weight on boundary & ensemble, concat on feature-map, relu on concat, ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
+    print('target model, ensemble-fc-layer : 2048, 0.5-weight on boundary & ensemble, concat on feature-map, relu on concat')
+    print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     #print('baseline on subset 2')
     if not True:
         print('Run baseline model...')
