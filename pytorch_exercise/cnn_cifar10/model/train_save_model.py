@@ -134,7 +134,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             #t_loss.backward()
             b_loss = model.boundary_loss(boundary_output, train_target)
             e_loss = model.ensemble_loss(ensemble_output, train_target)
-            sum_loss = (t_loss + b_loss*(0.5) + e_loss*(0.5))
+            sum_loss = (t_loss + b_loss*(0.2) + e_loss*(0.2))
             sum_loss.backward()
             
             model.optimizer.step()
@@ -243,8 +243,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         
     # np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
     # #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-    torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_sum_210701/separated_boundary_relu_vgg19_2048.pth')
-    torch.save(best_loss_parameter, './ImageNet/ImageNet_sum_210701/separated_ensemble_relu_vgg19_2048.pth')
+    torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_sum_210707/separated_boundary_relu_vgg19_2048.pth')
+    torch.save(best_loss_parameter, './ImageNet/ImageNet_sum_210707/separated_ensemble_relu_vgg19_2048.pth')
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
     print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/n_valid, best_boundary_valid_acc/n_valid, best_ensemble_valid_acc/n_valid))
