@@ -345,10 +345,10 @@ def train_eval_model_gpu_cam(model, epoch, device, train_loader, test_loader, ca
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/39000.
+        avg_train_acc = train_acc/71159.
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/1500.
+        avg_valid_acc = valid_acc/2750.
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -375,15 +375,17 @@ def train_eval_model_gpu_cam(model, epoch, device, train_loader, test_loader, ca
         if i%2==0 or i%2==1:
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, first_weight, second_weight))        
         
-        if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
+        if avg_valid_acc > best_valid_acc : 
+            best_valid_acc = avg_valid_acc
+            best_acc_parameter = model.state_dict()
+            best_epoch = i+1
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
-            best_loss_parameter = model.state_dict()
+            #best_loss_parameter = model.state_dict()
             #best_latest_valid_cam = model.latest_valid_cam.detach()
-            best_epoch = i+1
         
     #np.save('./ImageNet/cam_ret_imagenet_subset_2_0630.npy', best_latest_valid_cam.cpu())
-    torch.save(best_loss_parameter, './ImageNet/baseline_imagenet_subset_2_0630.pth')
+    torch.save(best_acc_parameter, './ImageNet/ImageNet_sum_210701/baseline_best_accuracy.pth')
     #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
 
     print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
