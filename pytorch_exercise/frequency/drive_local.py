@@ -36,7 +36,7 @@ def drive():
     device = torch.device(3)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
-    print('target model, ensemble-fc-layer : 2048, 1.5-weight on backbone, 0.5-weight on boundary & ensemble, concat on feature-map, relu on concat')
+    print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     #print('baseline on subset 2')
