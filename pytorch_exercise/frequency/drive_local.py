@@ -40,7 +40,7 @@ def drive():
     print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     print('baseline on subset-sum')
-    if not True:
+    if not False:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
