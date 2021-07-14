@@ -29,32 +29,40 @@ class separated_network(nn.Module):
         for m in self.compression_conv : m = m.to(self.device)
 
         width = 7
-        output_size = 55
+        output_size = 1000
 
         self.classifier = nn.Sequential(
-            nn.Linear(width * width * 512, 1024),
+            nn.Linear(width * width * 512, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(1024, 512),
+            nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(512, output_size)
+            nn.Linear(4096, output_size)
         )
         self.boundary_classifier = nn.Sequential(
             #nn.Dropout(0.2),
-            nn.Linear(width * width * 512, 1024),
+            nn.Linear(width * width * 512, 4096),
             nn.ReLU(inplace=True),
             #nn.Dropout(0.2),
-            nn.Linear(1024, 512),
+            nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(512, output_size)
+            nn.Linear(4096, output_size)
         )
 
         self.ensemble_classifier = nn.Sequential(
-            nn.Linear(width * width * 1024, 2048),
+            nn.Linear(width * width * 1024, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(2048, 512),
+            nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(512, output_size)
+            nn.Linear(4096, output_size)
         )
+
+        # self.ensemble_classifier = nn.Sequential(
+        #     nn.Linear(width * width * 1024, 2048),
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(2048, 512),
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(512, output_size)
+        # )
 
         self.ensemble_relu = nn.ReLU(inplace=True)
 
