@@ -76,22 +76,13 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 1, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
 
-    key = 0
-    for (d, t) in iter(test_loader):
-        key += 1
-        if key % 100 == 0:
-            print(key)
-
-    print('----------------------')
-    print(key)
-
-    #train_save_model.train_eval_model_gpu(recover_model, 80, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 80, device, train_loader, test_loader, False, None)
 
 
 
