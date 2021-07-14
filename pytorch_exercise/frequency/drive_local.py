@@ -1,10 +1,12 @@
 import sys, os
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
-sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
-sys.path.append('/home/sjlee/git_project/machine_learning')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
-# sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
+
+from numpy.lib.arraysetops import isin
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise/cnn_cifar10')
+# sys.path.append('/home/sjlee/git_project/machine_learning/pytorch_exercise')
+# sys.path.append('/home/sjlee/git_project/machine_learning')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise\cnn_cifar10')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning\pytorch_exercise')
+sys.path.append('C:\\anaconda3\envs\\torch\machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
@@ -33,14 +35,14 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(4)
+    device = torch.device(3)
 
     #print('target(0.0), 224x224 STL10, random seed : 42, cam-layer : first MaxPool2d and RecoverConv2d')
     print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     print('baseline on subset-sum')
-    if not False:
+    if not True:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
@@ -50,6 +52,11 @@ def drive():
         #recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
+    # f = recover_model.features
+    # for i in f :
+    #     if isinstance(i, nn.BatchNorm2d):
+    #         print(i.running_var.shape)
+    # return
 
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -69,8 +76,8 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/train_subset_sum', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = './data/mini_imagenet/val_subset_sum', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
     train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
