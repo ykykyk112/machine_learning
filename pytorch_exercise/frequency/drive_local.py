@@ -79,10 +79,19 @@ def drive():
     train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
     test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 1, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 1, shuffle = False, num_workers=2)
 
-    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
+    key = 0
+    for (d, t) in iter(test_loader):
+        key += 1
+        if key % 10000 == 0:
+            print(key)
+
+    print('----------------------')
+    print(key)
+
+    #train_save_model.train_eval_model_gpu(recover_model, 80, device, train_loader, test_loader, False, None)
 
 
 
