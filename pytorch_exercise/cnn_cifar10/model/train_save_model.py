@@ -143,6 +143,24 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             _, boundary_pred = torch.max(boundary_output, dim = 1)
             _, ensemble_pred = torch.max(ensemble_output, dim = 1)
 
+            t5 = train_output.topk(5, 1, True, True).t()
+            boundary_t5 = boundary_output.topk(5, 1, True, True).t()
+            ensemble_t5 = ensemble_output.topk(5, 1, True, True).t()
+
+            batch_size = train_target.size(0)
+
+            correct_t5 = (t5 == train_target.unsqueeze(dim=0)).expand_as(t5)
+            correct_boundary_t5 = (boundary_t5 == train_target.unsqueeze(dim=0)).expand_as(boundary_t5)
+            correct_ensemble_t5 = (ensemble_t5 == train_target.unsqueeze(dim=0)).expand_as(ensemble_t5)
+
+            correct_t5 = correct_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+            correct_boundary_t5 = correct_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+            correct_ensemble_t5 = correct_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+
+            print(correct_t5)
+            print(correct_boundary_t5)
+            print(correct_ensemble_t5)
+
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
             boundary_acc += torch.sum(boundary_pred == train_target.data)
@@ -172,6 +190,24 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 _, v_pred = torch.max(valid_output, dim = 1)
                 _, v_boundary_pred = torch.max(valid_boundary_output, dim = 1)
                 _, v_ensemble_pred = torch.max(valid_ensemble_output, dim = 1)
+
+                v_t5 = valid_output.topk(5, 1, True, True).t()
+                v_boundary_t5 = valid_boundary_output.topk(5, 1, True, True).t()
+                v_ensemble_t5 = valid_ensemble_output.topk(5, 1, True, True).t()
+
+                batch_size = valid_target.size(0)
+
+                correct_v_t5 = (v_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_t5)
+                correct_v_boundary_t5 = (v_boundary_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_boundary_t5)
+                correct_v_ensemble_t5 = (v_ensemble_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_ensemble_t5)
+
+                correct_v_t5 = correct_v_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                correct_v_boundary_t5 = correct_v_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                correct_v_ensemble_t5 = correct_v_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+
+                print(correct_v_t5)
+                print(correct_v_boundary_t5)
+                print(correct_v_ensemble_t5)
 
                 valid_loss += v_loss.item()
                 valid_acc += torch.sum(v_pred == valid_target.data)
