@@ -104,11 +104,12 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     converge_count = 0
     best_epoch = 0
 
-    n_train, n_valid = 14197122., 50000.
+    #n_train, n_valid = 14197122., 50000.
+    n_train, n_valid = 71159., 2750.
     
     for i in range(epoch) :
         
-
+        continue
         train_loss, valid_loss = 0.0, 0.0
         t5_train_acc, t5_valid_acc = 0.0, 0.0
         train_acc, valid_acc = 0.0, 0.0
