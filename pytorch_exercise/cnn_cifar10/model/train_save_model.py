@@ -196,9 +196,12 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 _, v_boundary_pred = torch.max(valid_boundary_output, dim = 1)
                 _, v_ensemble_pred = torch.max(valid_ensemble_output, dim = 1)
 
-                v_t5 = valid_output.topk(5, 1, True, True).t()
-                v_boundary_t5 = valid_boundary_output.topk(5, 1, True, True).t()
-                v_ensemble_t5 = valid_ensemble_output.topk(5, 1, True, True).t()
+                _, v_t5 = valid_output.topk(5, 1, True, True)
+                v_t5 = v_t5.t()
+                _, v_boundary_t5 = valid_boundary_output.topk(5, 1, True, True).t()
+                v_boundary_t5 = v_boundary_t5.t()
+                _, v_ensemble_t5 = valid_ensemble_output.topk(5, 1, True, True).t()
+                v_ensemble_t5 = v_ensemble_t5.t()
 
                 batch_size = valid_target.size(0)
 
