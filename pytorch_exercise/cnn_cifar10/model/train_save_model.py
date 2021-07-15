@@ -110,9 +110,12 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         
 
         train_loss, valid_loss = 0.0, 0.0
+        t5_train_acc, t5_valid_acc = 0.0, 0.0
         train_acc, valid_acc = 0.0, 0.0
         boundary_acc, valid_boundary_acc = 0.0, 0.0
+        t5_boundary_acc, t5_valid_boundary_acc = 0.0, 0.0
         ensemble_acc, valid_ensemble_acc = 0.0, 0.0
+        t5_ensemble_acc, t5_valid_ensemble_acc = 0.0, 0.0
 
         model.train()
 
@@ -160,14 +163,13 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             correct_boundary_t5 = correct_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
             correct_ensemble_t5 = correct_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
 
-            print(correct_t5)
-            print(correct_boundary_t5)
-            print(correct_ensemble_t5)
-
             train_loss += t_loss.item()
             train_acc += torch.sum(pred == train_target.data)
             boundary_acc += torch.sum(boundary_pred == train_target.data)
             ensemble_acc += torch.sum(ensemble_pred == train_target.data)
+            t5_train_acc += correct_t5.item()
+            t5_boundary_acc += correct_boundary_t5.item()
+            t5_ensemble_acc += correct_ensemble_t5.item()
             
 
         with torch.no_grad():
@@ -208,14 +210,13 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 correct_v_boundary_t5 = correct_v_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
                 correct_v_ensemble_t5 = correct_v_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
 
-                print(correct_v_t5)
-                print(correct_v_boundary_t5)
-                print(correct_v_ensemble_t5)
-
                 valid_loss += v_loss.item()
                 valid_acc += torch.sum(v_pred == valid_target.data)
                 valid_boundary_acc += torch.sum(v_boundary_pred == valid_target.data)
                 valid_ensemble_acc += torch.sum(v_ensemble_pred == valid_target.data)
+                t5_valid_acc += correct_v_t5.item()
+                t5_valid_boundary_acc += correct_v_boundary_t5.item()
+                t5_valid_ensemble_acc += correct_v_ensemble_t5.item()
 
 
         train_acc = train_acc*(100.)
@@ -237,11 +238,17 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_train_acc = train_acc/n_train
         avg_boundary_train_acc = boundary_acc/n_train
         avg_ensemble_train_acc = ensemble_acc/n_train
+        avg_t5_train_acc = t5_train_acc/len(train_loader)
+        avg_t5_boundary_acc = t5_boundary_acc/len(train_loader)
+        avg_t5_ensemble_acc = t5_ensemble_acc/len(train_loader)
         train_acc_history.append(float(avg_train_acc))
 
         avg_valid_acc = valid_acc/n_valid
         avg_boundary_valid_acc = valid_boundary_acc/n_valid
         avg_ensemble_valid_acc = valid_ensemble_acc/n_valid
+        avg_t5_valid_acc = t5_valid_acc/len(test_loader)
+        avg_valid_t5_boundary_acc = t5_valid_boundary_acc/len(test_loader)
+        avg_valid_t5_ensemble_acc = t5_valid_ensemble_acc/len(test_loader)
         valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
@@ -268,7 +275,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if i%2==0 or i%2==1:
             #print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}% \t alpha : {10:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc, float(torch.sigmoid(model.alpha.data))))        
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
-        
+            print('                train_ac : {0:.6f}% \t valid_ac : {1:.6f}% \t bdr_train : {2:.6f}% \t bdr_valid : {3:.6f}% \t ens_train : {4:.6f}% \t ens_valid : {5:.6f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))
         if valid_boundary_acc > best_boundary_valid_acc : 
             best_boundary_valid_acc = valid_boundary_acc
             best_boundary_loss_parameter = model.state_dict()
