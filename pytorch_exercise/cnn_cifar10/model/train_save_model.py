@@ -144,6 +144,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             _, ensemble_pred = torch.max(ensemble_output, dim = 1)
 
             t5 = train_output.topk(5, 1, True, True)
+            print(t5)
             t5 = t5.t()
             boundary_t5 = boundary_output.topk(5, 1, True, True)
             boundary_t5 = boundary_t5.t()
