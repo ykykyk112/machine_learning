@@ -104,8 +104,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     converge_count = 0
     best_epoch = 0
 
-    #n_train, n_valid = 14197122., 50000.
-    n_train, n_valid = 71159., 2750.
+    n_train, n_valid = 14197122., 50000.
+    #n_train, n_valid = 71159., 2750.
     
     for i in range(epoch) :
         
@@ -282,11 +282,11 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if valid_boundary_acc > best_boundary_valid_acc : 
             best_boundary_valid_acc = valid_boundary_acc
             best_boundary_loss_parameter = model.state_dict()
-            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_sum_210716/separated_boundary_full_imagenet_epoch{}.pth'.format(epoch))
+            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_Total/best_boundary/separated_boundary_full_imagenet.pth')
         if valid_ensemble_acc > best_ensemble_valid_acc : 
             best_ensemble_valid_acc = valid_ensemble_acc
             best_loss_parameter = model.state_dict()
-            torch.save(best_loss_parameter, './ImageNet/ImageNet_sum_210716/separated_ensemble_full_imagenet_epoch{}.pth'.format(epoch))
+            torch.save(best_loss_parameter, './ImageNet/ImageNet_Total/best_ensemble/separated_ensemble_full_imagenet.pth')
         if valid_acc > best_valid_acc : best_valid_acc = valid_acc
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
@@ -294,8 +294,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         
     # np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
     # #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-    torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_sum_210707/separated_boundary_full_imagenet.pth')
-    torch.save(best_loss_parameter, './ImageNet/ImageNet_sum_210707/separated_ensemble_full_imagenet.pth')
+        if i % 5 == 0:
+            torch.save(model.state_dict(), './ImageNet/ImageNet_Total/separated_boundary_full_imagenet_epoch{}.pth'.format(i))
+
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
     print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/n_valid, best_boundary_valid_acc/n_valid, best_ensemble_valid_acc/n_valid))
