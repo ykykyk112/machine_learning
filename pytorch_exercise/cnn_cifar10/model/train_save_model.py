@@ -104,8 +104,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     converge_count = 0
     best_epoch = 0
 
-    n_train, n_valid = 14197122., 50000.
-    #n_train, n_valid = 71159., 2750.
+    #n_train, n_valid = 14197122., 50000.
+    n_train, n_valid = 71159., 2750.
     
     for i in range(epoch) :
         
@@ -278,13 +278,15 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if i%2==0 or i%2==1:
             #print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}% \t alpha : {10:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc, float(torch.sigmoid(model.alpha.data))))        
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
-            print('                top=5 acc          \t train_ac : {0:.4f}% \t                    \t valid_ac : {1:.4f}% \t              \t bdr_train : {2:.4f}% \t bdr_valid : {3:.4f}% \t ens_train : {4:.4f}% \t ens_valid : {5:.4f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))     
+            print('                top-5 acc          \t train_ac : {0:.4f}% \t                    \t valid_ac : {1:.4f}% \t              \t bdr_train : {2:.4f}% \t bdr_valid : {3:.4f}% \t ens_train : {4:.4f}% \t ens_valid : {5:.4f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))     
         if valid_boundary_acc > best_boundary_valid_acc : 
             best_boundary_valid_acc = valid_boundary_acc
             best_boundary_loss_parameter = model.state_dict()
+            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_sum_210716/separated_boundary_full_imagenet_epoch{}.pth'.format(epoch))
         if valid_ensemble_acc > best_ensemble_valid_acc : 
             best_ensemble_valid_acc = valid_ensemble_acc
             best_loss_parameter = model.state_dict()
+            torch.save(best_loss_parameter, './ImageNet/ImageNet_sum_210716/separated_ensemble_full_imagenet_epoch{}.pth'.format(epoch))
         if valid_acc > best_valid_acc : best_valid_acc = valid_acc
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
