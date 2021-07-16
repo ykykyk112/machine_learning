@@ -104,7 +104,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     converge_count = 0
     best_epoch = 0
 
-    n_train, n_valid = 1281167., 50000.
+    #n_train, n_valid = 1281167., 50000.
     #n_train, n_valid = 71159., 2750.
     
     for i in range(epoch) :
@@ -218,18 +218,18 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 valid_acc += (torch.sum(v_pred == valid_target.data)).item()*(100.0 / batch_size)
                 valid_boundary_acc += (torch.sum(v_boundary_pred == valid_target.data)).item()*(100.0 / batch_size)
                 valid_ensemble_acc += (torch.sum(v_ensemble_pred == valid_target.data)).item()*(100.0 / batch_size)
-                
+
                 t5_valid_acc += correct_v_t5.item()
                 t5_valid_boundary_acc += correct_v_boundary_t5.item()
                 t5_valid_ensemble_acc += correct_v_ensemble_t5.item()
 
 
-        train_acc = train_acc*(100.)
-        valid_acc = valid_acc*(100.)
-        boundary_acc = boundary_acc*(100.)
-        valid_boundary_acc = valid_boundary_acc*(100.)
-        ensemble_acc = ensemble_acc*(100.)
-        valid_ensemble_acc = valid_ensemble_acc*(100.)
+        # train_acc = train_acc*(100.)
+        # valid_acc = valid_acc*(100.)
+        # boundary_acc = boundary_acc*(100.)
+        # valid_boundary_acc = valid_boundary_acc*(100.)
+        # ensemble_acc = ensemble_acc*(100.)
+        # valid_ensemble_acc = valid_ensemble_acc*(100.)
 
         curr_lr = model.optimizer.param_groups[0]['lr']
         model.scheduler.step()
