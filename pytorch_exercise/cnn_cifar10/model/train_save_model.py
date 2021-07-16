@@ -164,9 +164,9 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             correct_ensemble_t5 = correct_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
 
             train_loss += t_loss.item()
-            train_acc += torch.sum(pred == train_target.data).mul_(100.0 / batch_size).item()
-            boundary_acc += torch.sum(boundary_pred == train_target.data).mul_(100.0 / batch_size).item()
-            ensemble_acc += torch.sum(ensemble_pred == train_target.data).mul_(100.0 / batch_size).item()
+            train_acc += torch.sum(pred == train_target.data).mul_(100.0 / batch_size)
+            boundary_acc += torch.sum(boundary_pred == train_target.data).mul_(100.0 / batch_size)
+            ensemble_acc += torch.sum(ensemble_pred == train_target.data).mul_(100.0 / batch_size)
             print('-----------------------------------')
             print(torch.sum(pred == train_target.data).mul_(100.0 / batch_size))
             print(torch.sum(boundary_pred == train_target.data).mul_(100.0 / batch_size))
