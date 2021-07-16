@@ -164,14 +164,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             correct_ensemble_t5 = correct_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
 
             train_loss += t_loss.item()
-            train_acc += (torch.sum(pred == train_target.data)*(100.0 / batch_size))
-            boundary_acc += (torch.sum(boundary_pred == train_target.data)*(100.0 / batch_size))
-            ensemble_acc += (torch.sum(ensemble_pred == train_target.data)*(100.0 / batch_size))
-            print('-----------------------------------')
-            print(torch.sum(pred == train_target.data).item())
-            print(torch.sum(boundary_pred == train_target.data).item())
-            print(torch.sum(ensemble_pred == train_target.data).item())
-            print('-----------------------------------')
+            train_acc += (torch.sum(pred == train_target.data).item()*(100.0 / batch_size))
+            boundary_acc += (torch.sum(boundary_pred == train_target.data).item()*(100.0 / batch_size))
+            ensemble_acc += (torch.sum(ensemble_pred == train_target.data).item()*(100.0 / batch_size))
+
             t5_train_acc += correct_t5.item()
             t5_boundary_acc += correct_boundary_t5.item()
             t5_ensemble_acc += correct_ensemble_t5.item()
@@ -219,9 +215,10 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                 correct_v_ensemble_t5 = correct_v_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
 
                 valid_loss += v_loss.item()
-                valid_acc += torch.sum(v_pred == valid_target.data)
-                valid_boundary_acc += torch.sum(v_boundary_pred == valid_target.data)
-                valid_ensemble_acc += torch.sum(v_ensemble_pred == valid_target.data)
+                valid_acc += (torch.sum(v_pred == valid_target.data)).item()*(100.0 / batch_size)
+                valid_boundary_acc += (torch.sum(v_boundary_pred == valid_target.data)).item()*(100.0 / batch_size)
+                valid_ensemble_acc += (torch.sum(v_ensemble_pred == valid_target.data)).item()*(100.0 / batch_size)
+                
                 t5_valid_acc += correct_v_t5.item()
                 t5_valid_boundary_acc += correct_v_boundary_t5.item()
                 t5_valid_ensemble_acc += correct_v_ensemble_t5.item()
@@ -243,17 +240,17 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_valid_loss = valid_loss/len(test_loader)
         valid_loss_history.append(float(avg_valid_loss))
 
-        avg_train_acc = train_acc/n_train
-        avg_boundary_train_acc = boundary_acc/n_train
-        avg_ensemble_train_acc = ensemble_acc/n_train
+        avg_train_acc = train_acc/len(train_loader)
+        avg_boundary_train_acc = boundary_acc/len(train_loader)
+        avg_ensemble_train_acc = ensemble_acc/len(train_loader)
         avg_t5_train_acc = t5_train_acc/len(train_loader)
         avg_t5_boundary_acc = t5_boundary_acc/len(train_loader)
         avg_t5_ensemble_acc = t5_ensemble_acc/len(train_loader)
         train_acc_history.append(float(avg_train_acc))
 
-        avg_valid_acc = valid_acc/n_valid
-        avg_boundary_valid_acc = valid_boundary_acc/n_valid
-        avg_ensemble_valid_acc = valid_ensemble_acc/n_valid
+        avg_valid_acc = valid_acc/len(test_loader)
+        avg_boundary_valid_acc = valid_boundary_acc/len(test_loader)
+        avg_ensemble_valid_acc = valid_ensemble_acc/len(test_loader)
         avg_t5_valid_acc = t5_valid_acc/len(test_loader)
         avg_valid_t5_boundary_acc = t5_valid_boundary_acc/len(test_loader)
         avg_valid_t5_ensemble_acc = t5_valid_ensemble_acc/len(test_loader)
