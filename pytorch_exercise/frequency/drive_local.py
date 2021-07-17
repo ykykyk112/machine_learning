@@ -10,6 +10,7 @@ sys.path.append('/home/sjlee/git_project/machine_learning')
 from cam.grad_cam import grad_cam
 from basicblock import RecoverConv2d
 import torch
+import time
 import torch.nn as nn
 import torchvision
 from torchvision import transforms
@@ -35,8 +36,10 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(3)
+    device = torch.device(4)
 
+    print(time.strftime('%c', time.localtime(time.time())))
+    print('\n')
     print('Total ImageNet, VGG16 based ensemble model')
     #print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     #print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
