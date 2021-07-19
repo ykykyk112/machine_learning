@@ -24,6 +24,8 @@ from parallel import parallel_net
 from frequency.vgg_recover import recovered_net
 from alexnet import AlexNet
 from separated import separated_network
+import torch.utils.model_zoo
+from torchvision import models
 
 def drive():
 
@@ -39,27 +41,31 @@ def drive():
     device = torch.device(4)
 
     print(time.strftime('%c', time.localtime(time.time())))
-    print('\n')
     print('Total ImageNet, VGG16 based ensemble model')
     #print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     #print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     #print('baseline on subset-sum')
+
+    pretrained = True
+
     if not True:
         print('Run baseline model...')
         recover_model = recovered_net(baseline_layers, 'W', True).to(device)
         #recover_model = AlexNet(True, 'W', True).to(device)
     else :
         print('Run target model...')
-        recover_model = separated_network(conv_layers, boundary_layers, device).to(device)
+        recover_model = separated_network(conv_layers, boundary_layers, device)
         #recover_model = parallel_net(conv_layers, 'W', True, device).to(device)
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
-    # f = recover_model.features
-    # for i in f :
-    #     if isinstance(i, nn.BatchNorm2d):
-    #         print(i.running_var.shape)
-    # return
+    if pretrained :
+        
+        pretrained_param, dict_key_conv, dict_key_bn = download_params()
+
+        recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn)
+
+    recover_model = recover_model.to(device)
 
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -79,15 +85,15 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 36, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 36, shuffle = False, num_workers=2)
 
     print('Data load is completed...')
 
-    train_save_model.train_eval_model_gpu(recover_model, 80, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 
@@ -154,6 +160,71 @@ def model_summary():
     recover_model = recovered_net(baseline_layers, 'W', True).to(device)
 
     print(summary(recover_model, (3, 224, 224)))
+
+def download_params():
+
+    state_dict = dict(torch.hub.load_state_dict_from_url('https://download.pytorch.org/models/vgg16_bn-6c64b313.pth'))
+
+    dict_key_conv = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'conv6', 'conv7', 'conv8', 'conv9', 'conv10', 'conv11', 'conv12', 'conv13']
+    dict_key_bn = ['bn1', 'bn2', 'bn3', 'bn4', 'bn5', 'bn6', 'bn7', 'bn8', 'bn9', 'bn10', 'bn11', 'bn12', 'bn13']
+    state_dict_keys = state_dict.keys()
+
+    pretrained_param = {}
+    pretrained_param['conv'] = {}
+    pretrained_param['bn'] = {}
+
+    for idx, k in enumerate(state_dict_keys):
+
+        dict_idx = idx // 6
+        weight_idx = idx % 6
+        
+        if weight_idx == 0 :
+            pretrained_param['conv'][dict_key_conv[dict_idx]] = {}
+            pretrained_param['conv'][dict_key_conv[dict_idx]]['weight'] = state_dict[k]
+        elif weight_idx == 1 :
+            pretrained_param['conv'][dict_key_conv[dict_idx]]['bias'] = state_dict[k]
+        elif weight_idx == 2 :
+            pretrained_param['bn'][dict_key_bn[dict_idx]] = {}
+            pretrained_param['bn'][dict_key_bn[dict_idx]]['weight'] = state_dict[k]
+        elif weight_idx == 3 :
+            pretrained_param['bn'][dict_key_bn[dict_idx]]['bias'] = state_dict[k]
+        elif weight_idx == 4 :
+            pretrained_param['bn'][dict_key_bn[dict_idx]]['running_mean'] = state_dict[k]
+        elif weight_idx == 5 :
+            pretrained_param['bn'][dict_key_bn[dict_idx]]['running_var'] = state_dict[k]
+        else :
+            print('Error is occured!')
+            return
+
+        if idx == 77:
+            break
+    
+    return pretrained_param, dict_key_conv, dict_key_bn
+
+
+def put_parameter(model, param_dict, dict_key_conv, dict_key_bn):
+
+    conv_idx, bn_idx = 0, 0
+
+    for idx, m in enumerate(model.features.modules()):
+
+        if isinstance(m, nn.Conv2d) :
+            with torch.no_grad():
+                m.weight = nn.Parameter(param_dict['conv'][dict_key_conv[conv_idx]]['weight'])
+                m.bias = nn.Parameter(param_dict['conv'][dict_key_conv[conv_idx]]['bias'])
+                print(dict_key_conv[conv_idx], 'is setted.')
+                conv_idx += 1
+        
+        if isinstance(m, nn.BatchNorm2d) :
+            with torch.no_grad():
+                m.weight = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['weight'])
+                m.bias = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['bias'])
+                m.running_mean = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['running_mean'])
+                m.running_var = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['running_var'])
+                print(dict_key_bn[bn_idx], 'is setted.')
+                bn_idx += 1
+
+    return model
 
 
 if __name__ == '__main__':
