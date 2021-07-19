@@ -41,7 +41,7 @@ def drive():
     device = torch.device(3)
 
     print(time.strftime('%c', time.localtime(time.time())))
-    print('Total ImageNet, VGG16 based ensemble model')
+    print('Pretrained ImageNet, VGG16 based ensemble model')
     #print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     #print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
