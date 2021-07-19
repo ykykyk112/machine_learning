@@ -88,8 +88,8 @@ def drive():
     train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
     test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 36, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 36, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
     print('Data load is completed...')
 
@@ -212,7 +212,7 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn):
             with torch.no_grad():
                 m.weight = nn.Parameter(param_dict['conv'][dict_key_conv[conv_idx]]['weight'])
                 m.bias = nn.Parameter(param_dict['conv'][dict_key_conv[conv_idx]]['bias'])
-                print(dict_key_conv[conv_idx], 'is setted.')
+                #print(dict_key_conv[conv_idx], 'is setted.')
                 conv_idx += 1
         
         if isinstance(m, nn.BatchNorm2d) :
@@ -221,9 +221,9 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn):
                 m.bias = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['bias'])
                 m.running_mean = param_dict['bn'][dict_key_bn[bn_idx]]['running_mean']
                 m.running_var = param_dict['bn'][dict_key_bn[bn_idx]]['running_var']
-                print(dict_key_bn[bn_idx], 'is setted.')
+                #print(dict_key_bn[bn_idx], 'is setted.')
                 bn_idx += 1
-
+    print('Putting parameter is completed.')
     return model
 
 
