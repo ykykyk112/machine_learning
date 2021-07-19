@@ -219,8 +219,8 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn):
             with torch.no_grad():
                 m.weight = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['weight'])
                 m.bias = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['bias'])
-                m.running_mean = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['running_mean'])
-                m.running_var = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['running_var'])
+                m.running_mean = param_dict['bn'][dict_key_bn[bn_idx]]['running_mean']
+                m.running_var = param_dict['bn'][dict_key_bn[bn_idx]]['running_var']
                 print(dict_key_bn[bn_idx], 'is setted.')
                 bn_idx += 1
 
