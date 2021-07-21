@@ -65,6 +65,8 @@ def drive():
 
         recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn)
 
+        print('loading pretrained parameter is completed.')
+
     recover_model = recover_model.to(device)
 
     train_transform = transforms.Compose([
