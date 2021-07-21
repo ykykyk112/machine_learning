@@ -29,23 +29,23 @@ class separated_network(nn.Module):
         for m in self.compression_conv : m = m.to(self.device)
 
         width = 7
-        output_size = 55
+        output_size = 1000
 
         self.classifier = nn.Sequential(
-            nn.Linear(width * width * 512, 1024),
+            nn.Linear(width * width * 512, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(1024, 512),
+            nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(512, output_size)
+            nn.Linear(4096, output_size)
         )
         self.boundary_classifier = nn.Sequential(
             #nn.Dropout(0.2),
-            nn.Linear(width * width * 512, 1024),
+            nn.Linear(width * width * 512, 4096),
             nn.ReLU(inplace=True),
             #nn.Dropout(0.2),
-            nn.Linear(1024, 512),
+            nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(512, output_size)
+            nn.Linear(4096, output_size)
         )
 
         # self.ensemble_classifier = nn.Sequential(
@@ -57,11 +57,11 @@ class separated_network(nn.Module):
         # )
 
         self.ensemble_classifier = nn.Sequential(
-            nn.Linear(width * width * 1024, 2048),
+            nn.Linear(width * width * 1024, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(2048, 512),
+            nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(512, output_size)
+            nn.Linear(4096, output_size)
         )
 
         self.ensemble_relu = nn.ReLU(inplace=True)
@@ -121,11 +121,12 @@ class separated_network(nn.Module):
 
     def boundary_forward(self):
         x = None
+        self.boundary_maps = self.boundary_maps.to(self.device)
         for idx in range(len(self.boundary_features)):
             if x is None : 
-                x = self.boundary_features[idx](self.boundary_maps[idx].to(self.device))
+                x = self.boundary_features[idx](self.boundary_maps[idx])
             else :
-                x = torch.cat([x, self.boundary_maps[idx].to(self.device)], dim = 1)
+                x = torch.cat([x, self.boundary_maps[idx]], dim = 1)
                 x = self.compression_conv[idx-1](x)
                 x = F.relu(x)
                 x = self.boundary_features[idx](x)
