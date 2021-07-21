@@ -121,12 +121,11 @@ class separated_network(nn.Module):
 
     def boundary_forward(self):
         x = None
-        self.boundary_maps = self.boundary_maps.to(self.device)
         for idx in range(len(self.boundary_features)):
             if x is None : 
-                x = self.boundary_features[idx](self.boundary_maps[idx])
+                x = self.boundary_features[idx](self.boundary_maps[idx].to(self.device))
             else :
-                x = torch.cat([x, self.boundary_maps[idx]], dim = 1)
+                x = torch.cat([x, self.boundary_maps[idx].to(self.device)], dim = 1)
                 x = self.compression_conv[idx-1](x)
                 x = F.relu(x)
                 x = self.boundary_features[idx](x)
@@ -174,7 +173,7 @@ class separated_network(nn.Module):
                 
 
     def _get_boundary_location(self):
-        boundary_maps = nn.ModuleList([])
+        boundary_maps = []
         for m in self.modules():
             if isinstance(m, BoundaryConv2d):
                 boundary_maps.append(m.boundary)
