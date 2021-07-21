@@ -87,11 +87,11 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
     print('Data load is completed...')
 
