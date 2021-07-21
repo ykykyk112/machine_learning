@@ -137,7 +137,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             #t_loss.backward()
             b_loss = model.boundary_loss(boundary_output, train_target)
             e_loss = model.ensemble_loss(ensemble_output, train_target)
-            sum_loss = (t_loss*(0.2) + b_loss*(1.0) + e_loss*(1.0))
+            sum_loss = (t_loss*(1.0) + b_loss*(0.5) + e_loss*(0.5))
             sum_loss.backward()
             
             model.optimizer.step()
@@ -280,28 +280,32 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if i%2==0 or i%2==1:
             #print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}% \t alpha : {10:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc, float(torch.sigmoid(model.alpha.data))))        
             print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
-            print('                top-5 acc          \t train_ac : {0:.4f}% \t                    \t valid_ac : {1:.4f}% \t              \t bdr_train : {2:.4f}% \t bdr_valid : {3:.4f}% \t ens_train : {4:.4f}% \t ens_valid : {5:.4f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))     
-        if valid_boundary_acc > best_boundary_valid_acc : 
-            best_boundary_valid_acc = valid_boundary_acc
+            print('                top-5 acc          \t train_ac : {0:.4f}% \t                    \t valid_ac : {1:.4f}% \t              \t bdr_train : {2:.4f}% \t bdr_valid : {3:.4f}% \t ens_train : {4:.4f}% \t ens_valid : {5:.4f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))
+            print(' ')
+        if avg_boundary_valid_acc > best_boundary_valid_acc : 
+            best_boundary_valid_acc = avg_boundary_valid_acc
             best_boundary_loss_parameter = model.state_dict()
-            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_Pretrained/best_boundary/separated_boundary_full_imagenet.pth')
-        if valid_ensemble_acc > best_ensemble_valid_acc : 
-            best_ensemble_valid_acc = valid_ensemble_acc
+            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_Total/best_boundary/separated_boundary_full_imagenet.pth')
+            print('boundary parameter saved.')
+        if avg_ensemble_valid_acc > best_ensemble_valid_acc : 
+            best_ensemble_valid_acc = avg_ensemble_valid_acc
             best_loss_parameter = model.state_dict()
-            torch.save(best_loss_parameter, './ImageNet/ImageNet_Pretrained/best_ensemble/separated_ensemble_full_imagenet.pth')
-        if valid_acc > best_valid_acc : best_valid_acc = valid_acc
+            torch.save(best_loss_parameter, './ImageNet/ImageNet_Total/best_ensemble/separated_ensemble_full_imagenet.pth')
+            print('ensemble parameter saved.')
+        if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
         if avg_valid_loss < best_valid_loss : 
             best_valid_loss = avg_valid_loss
             best_epoch = i+1
         
     # np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
     # #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
-        #if i % 5 == 0:
-        #    torch.save(model.state_dict(), './ImageNet/ImageNet_Total/separated_boundary_full_imagenet_epoch{}.pth'.format(i))
+        if i % 5 == 0:
+           torch.save(model.state_dict(), './ImageNet/ImageNet_Total/separated_boundary_full_imagenet_epoch_{}.pth'.format(i))
+           print('every five epoch, parameter is saved.')
 
 
     # print('model parameter, grad cam heatmap are saved, best epoch :', best_epoch)
-    print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc/n_valid, best_boundary_valid_acc/n_valid, best_ensemble_valid_acc/n_valid))
+    print('best acc : {0:.4f}%, best boundary acc : {1:.4f}%, best ensemble acc : {2:.4f}%'.format(best_valid_acc, best_boundary_valid_acc, best_ensemble_valid_acc))
 
     return
 

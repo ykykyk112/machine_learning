@@ -47,7 +47,7 @@ def drive():
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     #print('baseline on subset-sum')
 
-    pretrained = True
+    pretrained = False
 
     if not True:
         print('Run baseline model...')
@@ -60,7 +60,7 @@ def drive():
         #recover_model = parallel_net(False, 'W', True, device).to(device)
 
     if pretrained :
-        
+
         pretrained_param, dict_key_conv, dict_key_bn = download_params()
 
         recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn)
@@ -85,15 +85,15 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
+    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
+    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
+    train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
+    test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
 
     print('Data load is completed...')
 
-    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 80, device, train_loader, test_loader, False, None)
 
 
 
