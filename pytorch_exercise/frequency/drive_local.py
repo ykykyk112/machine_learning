@@ -47,7 +47,7 @@ def drive():
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     #print('baseline on subset-sum')
 
-    pretrained = False
+    pretrained = True
 
     if not True:
         print('Run baseline model...')
@@ -93,7 +93,7 @@ def drive():
 
     print('Data load is completed...')
 
-    train_save_model.train_eval_model_gpu(recover_model, 80, device, train_loader, test_loader, False, None)
+    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 
