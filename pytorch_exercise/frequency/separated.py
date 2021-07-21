@@ -174,7 +174,7 @@ class separated_network(nn.Module):
                 
 
     def _get_boundary_location(self):
-        boundary_maps = []
+        boundary_maps = nn.ModuleList([])
         for m in self.modules():
             if isinstance(m, BoundaryConv2d):
                 boundary_maps.append(m.boundary)
