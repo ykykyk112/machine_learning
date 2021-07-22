@@ -227,7 +227,7 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
             with torch.no_grad():
                 m.weight = nn.Parameter(param_dict['conv'][dict_key_conv[conv_idx]]['weight'])
                 m.bias = nn.Parameter(param_dict['conv'][dict_key_conv[conv_idx]]['bias'])
-                print(dict_key_conv[conv_idx], 'is setted.')
+                #print(dict_key_conv[conv_idx], 'is setted.')
                 conv_idx += 1
         
         elif isinstance(m, nn.BatchNorm2d) :
@@ -236,17 +236,16 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                 m.bias = nn.Parameter(param_dict['bn'][dict_key_bn[bn_idx]]['bias'])
                 m.running_mean = param_dict['bn'][dict_key_bn[bn_idx]]['running_mean']
                 m.running_var = param_dict['bn'][dict_key_bn[bn_idx]]['running_var']
-                print(dict_key_bn[bn_idx], 'is setted.')
+                #print(dict_key_bn[bn_idx], 'is setted.')
                 bn_idx += 1
 
     for m in model.classifier.modules():
 
         if isinstance(m, nn.Linear) :
             with torch.no_grad():
-                print(param_dict['linear'][dict_key_linear[fc_idx]])
                 m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
                 m.bias = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['bias'])
-                print(dict_key_linear[fc_idx], 'is setted.')
+                #print(dict_key_linear[fc_idx], 'is setted.')
                 fc_idx += 1
 
     print('Putting parameter is completed.')
