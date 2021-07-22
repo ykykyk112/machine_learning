@@ -102,8 +102,8 @@ def drive():
 
     else :
         print('Run subset of ImageNet dataset')
-        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sub', transform=train_transform)
-        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sub', transform=test_transform)
+        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
+        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
         train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
         test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
