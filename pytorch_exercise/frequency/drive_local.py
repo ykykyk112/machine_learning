@@ -242,7 +242,7 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
 
     for m in model.classifier.modules():
 
-        print(dict_key_linear)
+        print(m)
 
         if isinstance(m, nn.Linear) :
             with torch.no_grad():
