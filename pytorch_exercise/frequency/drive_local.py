@@ -209,7 +209,6 @@ def download_params():
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]] = {}
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]]['weight'] = state_dict[k]
             elif fc_weight_idx == 1 :
-                pretrained_param['linear'][dict_key_linear[fc_dict_idx]] = {}
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]]['bias'] = state_dict[k]
             else :
                 print('Error is occured!')
