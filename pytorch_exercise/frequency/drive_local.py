@@ -38,9 +38,10 @@ def drive():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(4)
+    n_device = 4
+    device = torch.device(n_device)
 
-    print(time.strftime('%c', time.localtime(time.time())))
+    print(time.strftime('%c', time.localtime(time.time())), ' device :', n_device)
     #print('Pretrained ImageNet, VGG16 based ensemble model')
     #print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     #print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
@@ -48,7 +49,7 @@ def drive():
     #print('baseline on subset-sum')
 
     pretrained = True
-    subset = False
+    subset = True
 
     if not True:
         print('Run baseline model...')
@@ -90,11 +91,11 @@ def drive():
 
     if not subset :
         print('Run total ImageNet dataset')
-        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
-        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
+        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
+        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
 
-        train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
-        test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
+        train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
+        test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
 
         print('Data load is completed...')
 
@@ -134,7 +135,7 @@ def test():
     #conv_layers = [63, 'R', 129, 'R', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
     baseline_layers = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
     #baseline_layers = [63, 63, 'M', 129, 129, 'M', 255, 255, 255, 'M', 513, 513, 513, 'M', 513, 513, 513, 'M']
-    device = torch.device(0)
+    device = torch.device(1)
 
     if not True:
         print('Run baseline model...')
@@ -255,7 +256,10 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                 bn_idx += 1
 
     for m in model.classifier.modules():
-
+        print(m.weight.shape)
+        print(m.bias.shape)
+        print(param_dict['linear'][dict_key_linear[fc_idx]]['weight'].shape)
+        print(param_dict['linear'][dict_key_linear[fc_idx]]['bias'].shape)
         if isinstance(m, nn.Linear) :
             with torch.no_grad():
                 m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
