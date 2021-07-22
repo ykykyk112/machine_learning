@@ -61,9 +61,9 @@ def drive():
 
     if pretrained :
 
-        pretrained_param, dict_key_conv, dict_key_bn = download_params()
+        pretrained_param, dict_key_conv, dict_key_bn, dict_key_linear = download_params()
 
-        recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn)
+        recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn, dict_key_linear)
 
         print('loading pretrained parameter is completed.')
 
@@ -208,11 +208,9 @@ def download_params():
             if fc_weight_idx == 0 :
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]] = {}
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]]['weight'] = state_dict[k]
-                print('fc1')
             elif fc_weight_idx == 1 :
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]] = {}
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]]['bias'] = state_dict[k]
-                print('fc2')
             else :
                 print('Error is occured!')
                 return
