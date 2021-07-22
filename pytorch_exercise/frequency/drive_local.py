@@ -65,7 +65,7 @@ def drive():
 
         pretrained_param, dict_key_conv, dict_key_bn, dict_key_linear = download_params()
 
-        recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn, dict_key_linear)
+        recover_model = put_parameter(recover_model, pretrained_param, dict_key_conv, dict_key_bn, dict_key_linear, subset)
 
         print('loading pretrained parameter is completed.')
 
@@ -233,7 +233,7 @@ def download_params():
     return pretrained_param, dict_key_conv, dict_key_bn, dict_key_linear
 
 
-def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear):
+def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear, is_subset):
 
     conv_idx, bn_idx, fc_idx = 0, 0, 0
 
@@ -255,17 +255,19 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                 #print(dict_key_bn[bn_idx], 'is setted.')
                 bn_idx += 1
 
-    for m in model.classifier.modules():
-        if isinstance(m, nn.Linear) :
-            with torch.no_grad():
-                print(m.weight.shape)
-                print(m.bias.shape)
-                print(param_dict['linear'][dict_key_linear[fc_idx]]['weight'].shape)
-                print(param_dict['linear'][dict_key_linear[fc_idx]]['bias'].shape)
-                m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
-                m.bias = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['bias'])
-                #print(dict_key_linear[fc_idx], 'is setted.')
-                fc_idx += 1
+    if not is_subset :
+
+        for m in model.classifier.modules():
+            if isinstance(m, nn.Linear) :
+                with torch.no_grad():
+                    print(m.weight.shape)
+                    print(m.bias.shape)
+                    print(param_dict['linear'][dict_key_linear[fc_idx]]['weight'].shape)
+                    print(param_dict['linear'][dict_key_linear[fc_idx]]['bias'].shape)
+                    m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
+                    m.bias = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['bias'])
+                    #print(dict_key_linear[fc_idx], 'is setted.')
+                    fc_idx += 1
 
     return model
 
