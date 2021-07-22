@@ -28,7 +28,7 @@ class separated_network(nn.Module):
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
 
-        subset = True
+        subset = False
 
         width = 7
         
@@ -39,6 +39,7 @@ class separated_network(nn.Module):
 
 
         if subset :
+            print('Make subset model')
             self.classifier = nn.Sequential(
                 nn.Linear(width * width * 512, 1024),
                 nn.ReLU(inplace=True),
@@ -64,6 +65,7 @@ class separated_network(nn.Module):
             )
 
         else :
+            print('Make total model')
             self.classifier = nn.Sequential(
                 nn.Linear(width * width * 512, 4096),
                 nn.ReLU(inplace=True),
