@@ -41,13 +41,14 @@ def drive():
     device = torch.device(4)
 
     print(time.strftime('%c', time.localtime(time.time())))
-    print('Pretrained ImageNet, VGG16 based ensemble model')
+    #print('Pretrained ImageNet, VGG16 based ensemble model')
     #print('target model, ensemble-fc-layer : 2048, 1.0-weight on backbone, 0.25-weight on boundary & ensemble, concat on feature-map, relu on concat')
     #print('VGG19 based model / ImageNet subset (55 classes, train image : 71159, test_image : 2750)')
     #print('saved as separated_ensemble_relu_vgg19_2048_1_5.pth')
     #print('baseline on subset-sum')
 
     pretrained = True
+    subset = False
 
     if not True:
         print('Run baseline model...')
@@ -87,15 +88,29 @@ def drive():
         transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     ])
 
-    train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
-    test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
+    if not subset :
+        print('Run total ImageNet dataset')
+        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
+        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
 
-    train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
-    test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
+        train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
+        test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
 
-    print('Data load is completed...')
+        print('Data load is completed...')
 
-    train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
+        train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
+
+    else :
+        print('Run subset of ImageNet dataset')
+        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sub', transform=train_transform)
+        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sub', transform=test_transform)
+
+        train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
+        test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
+
+        print('Data load is completed...')
+
+        train_save_model.train_eval_model_gpu(recover_model, 48, device, train_loader, test_loader, False, None)
 
 
 

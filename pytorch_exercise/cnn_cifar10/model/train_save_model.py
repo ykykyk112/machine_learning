@@ -106,6 +106,8 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
 
     #n_train, n_valid = 1281167., 50000.
     #n_train, n_valid = 71159., 2750.
+
+    subset = False
     
     for i in range(epoch) :
         
@@ -146,31 +148,33 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
             _, boundary_pred = torch.max(boundary_output, dim = 1)
             _, ensemble_pred = torch.max(ensemble_output, dim = 1)
 
-            _, t5 = train_output.topk(5, 1, True, True)
-            t5 = t5.t()
-            _, boundary_t5 = boundary_output.topk(5, 1, True, True)
-            boundary_t5 = boundary_t5.t()
-            _, ensemble_t5 = ensemble_output.topk(5, 1, True, True)
-            ensemble_t5 = ensemble_t5.t()
-
             batch_size = train_target.size(0)
+            
+            if not subset :
+                _, t5 = train_output.topk(5, 1, True, True)
+                t5 = t5.t()
+                _, boundary_t5 = boundary_output.topk(5, 1, True, True)
+                boundary_t5 = boundary_t5.t()
+                _, ensemble_t5 = ensemble_output.topk(5, 1, True, True)
+                ensemble_t5 = ensemble_t5.t()
 
-            correct_t5 = (t5 == train_target.unsqueeze(dim=0)).expand_as(t5)
-            correct_boundary_t5 = (boundary_t5 == train_target.unsqueeze(dim=0)).expand_as(boundary_t5)
-            correct_ensemble_t5 = (ensemble_t5 == train_target.unsqueeze(dim=0)).expand_as(ensemble_t5)
 
-            correct_t5 = correct_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
-            correct_boundary_t5 = correct_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
-            correct_ensemble_t5 = correct_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                correct_t5 = (t5 == train_target.unsqueeze(dim=0)).expand_as(t5)
+                correct_boundary_t5 = (boundary_t5 == train_target.unsqueeze(dim=0)).expand_as(boundary_t5)
+                correct_ensemble_t5 = (ensemble_t5 == train_target.unsqueeze(dim=0)).expand_as(ensemble_t5)
+
+                correct_t5 = correct_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                correct_boundary_t5 = correct_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                correct_ensemble_t5 = correct_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+
+                t5_train_acc += correct_t5.item()
+                t5_boundary_acc += correct_boundary_t5.item()
+                t5_ensemble_acc += correct_ensemble_t5.item()
 
             train_loss += t_loss.item()
             train_acc += (torch.sum(pred == train_target.data).item()*(100.0 / batch_size))
             boundary_acc += (torch.sum(boundary_pred == train_target.data).item()*(100.0 / batch_size))
             ensemble_acc += (torch.sum(ensemble_pred == train_target.data).item()*(100.0 / batch_size))
-
-            t5_train_acc += correct_t5.item()
-            t5_boundary_acc += correct_boundary_t5.item()
-            t5_ensemble_acc += correct_ensemble_t5.item()
             
 
         with torch.no_grad():
@@ -190,38 +194,40 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
                     valid_output, valid_boundary_output, valid_ensemble_output = model(valid_data)
                     #valid_output = model(valid_data, valid_target, idx, True)
 
+                batch_size = valid_target.size(0)
 
                 v_loss = model.loss(valid_output, valid_target)
                 #print(v_loss.item())
                 _, v_pred = torch.max(valid_output, dim = 1)
                 _, v_boundary_pred = torch.max(valid_boundary_output, dim = 1)
                 _, v_ensemble_pred = torch.max(valid_ensemble_output, dim = 1)
+                
+                if not subset :
 
-                _, v_t5 = valid_output.topk(5, 1, True, True)
-                v_t5 = v_t5.t()
-                _, v_boundary_t5 = valid_boundary_output.topk(5, 1, True, True)
-                v_boundary_t5 = v_boundary_t5.t()
-                _, v_ensemble_t5 = valid_ensemble_output.topk(5, 1, True, True)
-                v_ensemble_t5 = v_ensemble_t5.t()
+                    _, v_t5 = valid_output.topk(5, 1, True, True)
+                    v_t5 = v_t5.t()
+                    _, v_boundary_t5 = valid_boundary_output.topk(5, 1, True, True)
+                    v_boundary_t5 = v_boundary_t5.t()
+                    _, v_ensemble_t5 = valid_ensemble_output.topk(5, 1, True, True)
+                    v_ensemble_t5 = v_ensemble_t5.t()
 
-                batch_size = valid_target.size(0)
 
-                correct_v_t5 = (v_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_t5)
-                correct_v_boundary_t5 = (v_boundary_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_boundary_t5)
-                correct_v_ensemble_t5 = (v_ensemble_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_ensemble_t5)
+                    correct_v_t5 = (v_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_t5)
+                    correct_v_boundary_t5 = (v_boundary_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_boundary_t5)
+                    correct_v_ensemble_t5 = (v_ensemble_t5 == valid_target.unsqueeze(dim=0)).expand_as(v_ensemble_t5)
 
-                correct_v_t5 = correct_v_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
-                correct_v_boundary_t5 = correct_v_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
-                correct_v_ensemble_t5 = correct_v_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                    correct_v_t5 = correct_v_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                    correct_v_boundary_t5 = correct_v_boundary_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+                    correct_v_ensemble_t5 = correct_v_ensemble_t5.reshape(-1).float().sum(0, keepdim=True).mul_(100.0 / batch_size)
+
+                    t5_valid_acc += correct_v_t5.item()
+                    t5_valid_boundary_acc += correct_v_boundary_t5.item()
+                    t5_valid_ensemble_acc += correct_v_ensemble_t5.item()
 
                 valid_loss += v_loss.item()
                 valid_acc += (torch.sum(v_pred == valid_target.data)).item()*(100.0 / batch_size)
                 valid_boundary_acc += (torch.sum(v_boundary_pred == valid_target.data)).item()*(100.0 / batch_size)
                 valid_ensemble_acc += (torch.sum(v_ensemble_pred == valid_target.data)).item()*(100.0 / batch_size)
-
-                t5_valid_acc += correct_v_t5.item()
-                t5_valid_boundary_acc += correct_v_boundary_t5.item()
-                t5_valid_ensemble_acc += correct_v_ensemble_t5.item()
 
 
         # train_acc = train_acc*(100.)
@@ -243,18 +249,19 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         avg_train_acc = train_acc/len(train_loader)
         avg_boundary_train_acc = boundary_acc/len(train_loader)
         avg_ensemble_train_acc = ensemble_acc/len(train_loader)
-        avg_t5_train_acc = t5_train_acc/len(train_loader)
-        avg_t5_boundary_acc = t5_boundary_acc/len(train_loader)
-        avg_t5_ensemble_acc = t5_ensemble_acc/len(train_loader)
-        train_acc_history.append(float(avg_train_acc))
-
         avg_valid_acc = valid_acc/len(test_loader)
         avg_boundary_valid_acc = valid_boundary_acc/len(test_loader)
         avg_ensemble_valid_acc = valid_ensemble_acc/len(test_loader)
-        avg_t5_valid_acc = t5_valid_acc/len(test_loader)
-        avg_valid_t5_boundary_acc = t5_valid_boundary_acc/len(test_loader)
-        avg_valid_t5_ensemble_acc = t5_valid_ensemble_acc/len(test_loader)
-        valid_acc_history.append(float(avg_valid_acc))
+        #train_acc_history.append(float(avg_train_acc))
+
+        if not subset :
+            avg_t5_train_acc = t5_train_acc/len(train_loader)
+            avg_t5_boundary_acc = t5_boundary_acc/len(train_loader)
+            avg_t5_ensemble_acc = t5_ensemble_acc/len(train_loader)
+            avg_t5_valid_acc = t5_valid_acc/len(test_loader)
+            avg_valid_t5_boundary_acc = t5_valid_boundary_acc/len(test_loader)
+            avg_valid_t5_ensemble_acc = t5_valid_ensemble_acc/len(test_loader)
+        #valid_acc_history.append(float(avg_valid_acc))
 
         # Code about early_stopping
 
@@ -278,10 +285,13 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         second_weight = 0.
 
         if i%2==0 or i%2==1:
-            #print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}% \t alpha : {10:.4f}'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc, float(torch.sigmoid(model.alpha.data))))        
-            print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
-            print('                top-5 acc          \t train_ac : {0:.4f}% \t                    \t valid_ac : {1:.4f}% \t              \t bdr_train : {2:.4f}% \t bdr_valid : {3:.4f}% \t ens_train : {4:.4f}% \t ens_valid : {5:.4f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))
-            print(' ')
+            if not subset :
+                print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
+            else :
+                print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
+                print('                top-5 acc          \t train_ac : {0:.4f}% \t                    \t valid_ac : {1:.4f}% \t              \t bdr_train : {2:.4f}% \t bdr_valid : {3:.4f}% \t ens_train : {4:.4f}% \t ens_valid : {5:.4f}%'.format(avg_t5_train_acc, avg_t5_valid_acc, avg_t5_boundary_acc, avg_valid_t5_boundary_acc, avg_t5_ensemble_acc, avg_valid_t5_ensemble_acc))
+                print(' ')
+                
         if avg_boundary_valid_acc > best_boundary_valid_acc : 
             best_boundary_valid_acc = avg_boundary_valid_acc
             best_boundary_loss_parameter = model.state_dict()
