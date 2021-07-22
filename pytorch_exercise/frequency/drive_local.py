@@ -256,12 +256,12 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                 bn_idx += 1
 
     for m in model.classifier.modules():
-        print(m.weight.shape)
-        print(m.bias.shape)
-        print(param_dict['linear'][dict_key_linear[fc_idx]]['weight'].shape)
-        print(param_dict['linear'][dict_key_linear[fc_idx]]['bias'].shape)
         if isinstance(m, nn.Linear) :
             with torch.no_grad():
+                print(m.weight.shape)
+                print(m.bias.shape)
+                print(param_dict['linear'][dict_key_linear[fc_idx]]['weight'].shape)
+                print(param_dict['linear'][dict_key_linear[fc_idx]]['bias'].shape)
                 m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
                 m.bias = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['bias'])
                 #print(dict_key_linear[fc_idx], 'is setted.')
