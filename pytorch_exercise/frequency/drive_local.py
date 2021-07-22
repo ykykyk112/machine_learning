@@ -49,7 +49,7 @@ def drive():
     #print('baseline on subset-sum')
 
     pretrained = True
-    subset = True
+    subset = False
 
     if not True:
         print('Run baseline model...')
@@ -91,11 +91,11 @@ def drive():
 
     if not subset :
         print('Run total ImageNet dataset')
-        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train_subset_sum', transform=train_transform)
-        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val_subset_sum', transform=test_transform)
+        train_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/train', transform=train_transform)
+        test_set = torchvision.datasets.ImageFolder(root = '/home/NAS_mount/sjlee/ILSVRC/Data/CLS-LOC/val', transform=test_transform)
 
-        train_loader = DataLoader(train_set, batch_size = 32, shuffle = True, num_workers=2)
-        test_loader = DataLoader(test_set, batch_size = 32, shuffle = False, num_workers=2)
+        train_loader = DataLoader(train_set, batch_size = 48, shuffle = True, num_workers=2)
+        test_loader = DataLoader(test_set, batch_size = 48, shuffle = False, num_workers=2)
 
         print('Data load is completed...')
 
@@ -268,6 +268,7 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                     m.bias = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['bias'])
                     #print(dict_key_linear[fc_idx], 'is setted.')
                     fc_idx += 1
+        print('Load fully-connected-weight and bias')
 
     return model
 
