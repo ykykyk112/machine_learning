@@ -107,7 +107,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     #n_train, n_valid = 1281167., 50000.
     #n_train, n_valid = 71159., 2750.
 
-    subset = False
+    subset = True
     
     for i in range(epoch) :
         
@@ -285,7 +285,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         second_weight = 0.
 
         if i%2==0 or i%2==1:
-            if not subset :
+            if subset :
                 print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
             else :
                 print('epoch.{0:3d} \t train_ls : {1:.6f} \t train_ac : {2:.4f}% \t valid_ls : {3:.6f} \t valid_ac : {4:.4f}% \t lr : {5:.5f} \t bdr_train : {6:.4f}% \t bdr_valid : {7:.4f}% \t ens_train : {8:.4f}% \t ens_valid : {9:.4f}%'.format(i+1, avg_train_loss, avg_train_acc, avg_valid_loss, avg_valid_acc, curr_lr, avg_boundary_train_acc, avg_boundary_valid_acc, avg_ensemble_train_acc, avg_ensemble_valid_acc))     
@@ -295,12 +295,12 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
         if avg_boundary_valid_acc > best_boundary_valid_acc : 
             best_boundary_valid_acc = avg_boundary_valid_acc
             best_boundary_loss_parameter = model.state_dict()
-            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_Total/best_boundary/separated_boundary_full_imagenet.pth')
+            torch.save(best_boundary_loss_parameter, './ImageNet/ImageNet_Pretrained/best_boundary/separated_boundary_full_imagenet.pth')
             print('boundary parameter saved.')
         if avg_ensemble_valid_acc > best_ensemble_valid_acc : 
             best_ensemble_valid_acc = avg_ensemble_valid_acc
             best_loss_parameter = model.state_dict()
-            torch.save(best_loss_parameter, './ImageNet/ImageNet_Total/best_ensemble/separated_ensemble_full_imagenet.pth')
+            torch.save(best_loss_parameter, './ImageNet/ImageNet_Pretrained/best_ensemble/separated_ensemble_full_imagenet.pth')
             print('ensemble parameter saved.')
         if avg_valid_acc > best_valid_acc : best_valid_acc = avg_valid_acc
         if avg_valid_loss < best_valid_loss : 
@@ -310,7 +310,7 @@ def train_eval_model_gpu(model, epoch, device, train_loader, test_loader, cam_mo
     # np.save('./ImageNet/cam_ret_imagenet_subset_color.npy', best_latest_valid_cam.cpu())
     # #torch.save(best_loss_parameter, './ImageNet/target_imagenet_subset_48.pth')
         if i % 5 == 0:
-           torch.save(model.state_dict(), './ImageNet/ImageNet_Total/separated_boundary_full_imagenet_epoch_{}.pth'.format(i))
+           torch.save(model.state_dict(), './ImageNet/ImageNet_Pretrained/separated_boundary_full_imagenet_epoch_{}.pth'.format(i))
            print('every five epoch, parameter is saved.')
 
 

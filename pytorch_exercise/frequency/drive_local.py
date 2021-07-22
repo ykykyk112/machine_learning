@@ -48,7 +48,7 @@ def drive():
     #print('baseline on subset-sum')
 
     pretrained = True
-    subset = False
+    subset = True
 
     if not True:
         print('Run baseline model...')
