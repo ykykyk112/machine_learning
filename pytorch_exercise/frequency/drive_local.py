@@ -239,8 +239,9 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                 m.running_var = param_dict['bn'][dict_key_bn[bn_idx]]['running_var']
                 print(dict_key_bn[bn_idx], 'is setted.')
                 bn_idx += 1
-
-        elif isinstance(m, nn.Linear) :
+    for m in model.classifier.modules():
+        
+        if isinstance(m, nn.Linear) :
             with torch.no_grad():
                 m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
                 m.bias = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['bias'])
