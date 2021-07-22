@@ -28,7 +28,7 @@ class separated_network(nn.Module):
         for m in self.boundary_features : m = m.to(self.device)
         for m in self.compression_conv : m = m.to(self.device)
 
-        subset = False
+        subset = True
 
         width = 7
         
