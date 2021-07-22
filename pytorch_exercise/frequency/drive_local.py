@@ -206,9 +206,11 @@ def download_params():
 
         else :
             if fc_weight_idx == 0 :
+                print(fc_dict_idx)
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]] = {}
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]]['weight'] = state_dict[k]
             elif fc_weight_idx == 1 :
+                print(fc_dict_idx)
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]] = {}
                 pretrained_param['linear'][dict_key_linear[fc_dict_idx]]['bias'] = state_dict[k]
             else :
@@ -239,8 +241,9 @@ def put_parameter(model, param_dict, dict_key_conv, dict_key_bn, dict_key_linear
                 m.running_var = param_dict['bn'][dict_key_bn[bn_idx]]['running_var']
                 print(dict_key_bn[bn_idx], 'is setted.')
                 bn_idx += 1
+
     for m in model.classifier.modules():
-        
+
         if isinstance(m, nn.Linear) :
             with torch.no_grad():
                 m.weight = nn.Parameter(param_dict['linear'][dict_key_linear[fc_idx]]['weight'])
